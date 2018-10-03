@@ -1,0 +1,4 @@
+CREATE TABLE Users(
+	email text PRIMARY_KEY,
+	name text
+);
