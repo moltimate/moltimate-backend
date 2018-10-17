@@ -1,8 +1,8 @@
 package com.moltimate.moltimatebackend.service;
 
 import com.google.common.collect.ImmutableMap;
-import com.moltimate.moltimatebackend.dao.UserDao;
 import com.moltimate.moltimatebackend.model.User;
+import com.moltimate.moltimatebackend.repository.UserRepository;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,35 +23,39 @@ public class UserServiceTest {
     private UserService userService;
 
     @Mock
-    private UserDao mockUserDao;
+    private UserRepository mockUserRepository;
 
     @Before
     public void setup() {
-        List<User> mockGetUsersResponse =  ImmutableMap.<String, String>builder()
-                .put("Paul", "Craig")
-                .put("Herbert", "Bernstein")
-                .put("Larry", "Kiser")
-                .put("Josh", "Miller")
-                .put("Steve", "Teplica")
-                .put("Shannon", "McIntosh")
-                .put("George", "Herde")
+        List<User> mockGetUsersResponse = ImmutableMap.<String, String>builder()
+                .put("Paul_Craig@rit.edu", "password")
+                .put("Herbert_Bernstein@rit.edu", "password")
+                .put("Larry_Kiser@rit.edu", "password")
+                .put("Josh_Miller@rit.edu", "password")
+                .put("Steve_Teplica@rit.edu", "password")
+                .put("Shannon_McIntosh@rit.edu", "password")
+                .put("George_Herde@rit.edu", "password")
+                .put("Michael_Teplica@rit.edu", "password")
                 .build()
                 .entrySet()
                 .stream()
-                .map((user) -> new User(user.getKey(), user.getValue()))
+                .map((user) -> User.builder()
+                                   .email(user.getKey())
+                                   .password(user.getValue())
+                                   .build())
                 .collect(Collectors.toList());
-        when(mockUserDao.getUsers()).thenReturn(mockGetUsersResponse);
+        when(mockUserRepository.findAll()).thenReturn(mockGetUsersResponse);
     }
 
     @Test
     public void getUsers_DoesUserExist() {
         List<User> users = userService.getUsers();
-        Assert.assertTrue(users.stream().anyMatch((user) -> "Paul".equals(user.getFirstName()) && "Craig".equals(user.getLastName())));
+        Assert.assertTrue(users.stream().anyMatch((user) -> "Paul_Craig@rit.edu".equals(user.getEmail())));
     }
 
     @Test
     public void getUsers_DoesFakeUserExist() {
         List<User> users = userService.getUsers();
-        Assert.assertFalse(users.stream().anyMatch((user) -> "Pauline".equals(user.getFirstName()) && "Craig".equals(user.getLastName())));
+        Assert.assertFalse(users.stream().anyMatch((user) -> "Paulina_Craig@rit.edu".equals(user.getEmail())));
     }
 }
