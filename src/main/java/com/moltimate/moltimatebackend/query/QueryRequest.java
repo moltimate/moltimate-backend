@@ -1,20 +1,18 @@
-package com.moltimate.moltimatebackend.model;
+package com.moltimate.moltimatebackend.query;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Collections;
 import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PdbQuery {
+public class QueryRequest {
 
     private List<String> pdbIds;
-
-    public PdbQuery(String pdbId) {
-        pdbIds = Collections.singletonList(pdbId);
-    }
+    private String ecNumber;
+    private List<String> options;
+    private List<String> filters;
 }

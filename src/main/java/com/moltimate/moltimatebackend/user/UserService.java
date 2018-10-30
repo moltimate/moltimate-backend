@@ -1,7 +1,5 @@
-package com.moltimate.moltimatebackend.service;
+package com.moltimate.moltimatebackend.user;
 
-import com.moltimate.moltimatebackend.model.User;
-import com.moltimate.moltimatebackend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
