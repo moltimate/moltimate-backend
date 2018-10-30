@@ -1,4 +1,4 @@
-package com.moltimate.moltimatebackend.helper;
+package com.moltimate.moltimatebackend.query;
 
 import org.apache.commons.io.IOUtils;
 

@@ -1,8 +1,9 @@
 package com.moltimate.moltimatebackend.service;
 
 import com.google.common.collect.ImmutableMap;
-import com.moltimate.moltimatebackend.model.User;
-import com.moltimate.moltimatebackend.repository.UserRepository;
+import com.moltimate.moltimatebackend.user.User;
+import com.moltimate.moltimatebackend.user.UserRepository;
+import com.moltimate.moltimatebackend.user.UserService;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

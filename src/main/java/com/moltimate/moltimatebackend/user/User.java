@@ -1,4 +1,4 @@
-package com.moltimate.moltimatebackend.model;
+package com.moltimate.moltimatebackend.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -1,8 +1,6 @@
-package com.moltimate.moltimatebackend.controller;
+package com.moltimate.moltimatebackend.user;
 
 import com.google.common.collect.ImmutableMap;
-import com.moltimate.moltimatebackend.model.User;
-import com.moltimate.moltimatebackend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

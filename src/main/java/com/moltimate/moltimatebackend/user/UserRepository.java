@@ -1,6 +1,5 @@
-package com.moltimate.moltimatebackend.repository;
+package com.moltimate.moltimatebackend.user;
 
-import com.moltimate.moltimatebackend.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
