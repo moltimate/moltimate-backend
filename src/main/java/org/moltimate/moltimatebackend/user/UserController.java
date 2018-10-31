@@ -1,4 +1,4 @@
-package com.moltimate.moltimatebackend.user;
+package org.moltimate.moltimatebackend.user;
 
 import com.google.common.collect.ImmutableMap;
 import org.springframework.beans.factory.annotation.Autowired;
