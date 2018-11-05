@@ -1,4 +1,4 @@
-package com.moltimate.moltimatebackend.user;
+package org.moltimate.moltimatebackend.user;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

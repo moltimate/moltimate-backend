@@ -1,4 +1,4 @@
-package com.moltimate.moltimatebackend;
+package org.moltimate.moltimatebackend;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
