@@ -6,6 +6,7 @@ import org.biojava.nbio.structure.Structure;
 import org.moltimate.moltimatebackend.Structure.StructureUtils;
 import org.moltimate.moltimatebackend.alignment.requests.ActiveSiteAlignmentRequest;
 import org.moltimate.moltimatebackend.alignment.requests.BackboneAlignmentRequest;
+import org.moltimate.moltimatebackend.model.Residue;
 import org.moltimate.moltimatebackend.motif.Motif;
 import org.moltimate.moltimatebackend.motif.MotifService;
 import org.moltimate.moltimatebackend.protein.ProteinService;
@@ -48,7 +49,6 @@ public class AlignmentService {
     }
 
     public AlignmentResponse alignActiveSites(List<Structure> sourceStructures, List<Motif> motifStructures) {
-        // ... for each sourceStructure, call alignActiveSites() against all motifStructures
         HashMap<String, List<Alignment>> results = new HashMap<>();
         sourceStructures.forEach(structure ->
                                          results.put(structure.getPDBCode(), motifStructures.stream().parallel()
@@ -62,26 +62,25 @@ public class AlignmentService {
     }
 
     private Alignment alignActiveSites(Structure structure1, Motif motif) {
-        // ... logic to perform one active site alignment between two structures
-
         Map<String, List<Group>> residueMap = motif.runQueries(structure1, 1);
         List<Integer> distances = new ArrayList<>();
 
         residueMap.values().forEach(residueList -> {
             String alignmentString = AlignmentUtils.groupListToResString(residueList);
-            String motifResString = AlignmentUtils.residueListToResString(motif.getResidues());
+            String motifResString = AlignmentUtils.residueListToResString(motif.getActiveSiteResidues());
             distances.add(AlignmentUtils.levensteinDistance(alignmentString, motifResString));
         });
 
-        if (!distances.isEmpty() && (motif.getResidues().size()) > Collections.min(distances)) {
+        if (!distances.isEmpty() && (motif.getActiveSiteResidues().size()) > Collections.min(distances)) {
             HashSet<Group> residues = new HashSet<>();
             residueMap.values().forEach(residues::addAll);
             Alignment alignment = new Alignment();
-            alignment.setActiveSite(motif.getActiveSite());
-            alignment.setProteinName(structure1.getPDBCode());
-            alignment.setMotifName(motif.getName());
-            alignment.setResidues(residues.stream()
-                                          .map(StructureUtils::residueName)
+            alignment.setActiveSiteResidues(motif.getActiveSiteResidues());
+            alignment.setMotifPdbId(motif.getPdbId());
+            alignment.setMinDistance(Collections.min(distances));
+            alignment.setMaxDistance(Collections.max(distances));
+            alignment.setAlignedResidues(residues.stream()
+                                          .map(residue -> Residue.fromGroup(residue))
                                           .collect(Collectors.toList()));
             return alignment;
         }

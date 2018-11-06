@@ -1,12 +1,12 @@
 package org.moltimate.moltimatebackend.motif;
 
 import lombok.extern.slf4j.Slf4j;
+import org.moltimate.moltimatebackend.repository.MotifRepository;
+import org.moltimate.moltimatebackend.repository.ResidueQuerySetRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * MotifService provides a way to query for and create motifs which represent the active sites of proteins.
@@ -15,15 +15,21 @@ import java.util.stream.Collectors;
 @Slf4j
 public class MotifService {
 
+    @Autowired
+    private MotifRepository motifRepository;
+
+    @Autowired
+    private ResidueQuerySetRepository residueQuerySetRepository;
+
     /**
      * Creates a new Motif from the CreateMotifRequest.
      *
-     * @param createMotifRequest
+     * @param motif
      * @return A newly generated Motif
      */
-    public Motif createMotif(CreateMotifRequest createMotifRequest) {
-        //TODO: something else
-        return null;//new Motif();
+    public Motif createMotif(Motif motif) {
+        motif.getSelectionQueries().values().forEach(collectionSet -> residueQuerySetRepository.save(collectionSet));
+        return motifRepository.save(motif);
     }
 
     /**
@@ -32,10 +38,6 @@ public class MotifService {
      */
     public List<Motif> queryMotifs(String ecNumber) {
         log.info("Querying for motifs in EC class: " + ecNumber);
-        List<Integer> ecNumbers = Arrays.stream(ecNumber.split(".")).map(Integer::parseInt).collect(Collectors.toList());
-
-        // TODO: implement code to query for motifs based on ecNumber
-
-        return Collections.emptyList();
+        return motifRepository.findAll();
     }
 }
