@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * A list of Alignments and useful data around them.
@@ -13,6 +14,5 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AlignmentResponse {
-
-    List<Alignment> alignments;
+    Map<String, List<Alignment>> alignments;
 }

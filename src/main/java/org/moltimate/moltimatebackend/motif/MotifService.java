@@ -1,7 +1,6 @@
 package org.moltimate.moltimatebackend.motif;
 
 import lombok.extern.slf4j.Slf4j;
-import org.biojava.nbio.structure.Structure;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -23,14 +22,15 @@ public class MotifService {
      * @return A newly generated Motif
      */
     public Motif createMotif(CreateMotifRequest createMotifRequest) {
-        return new Motif();
+        //TODO: something else
+        return null;//new Motif();
     }
 
     /**
      * @param ecNumber Enzyme commission number to filter the set of comparable motifs
      * @return List of BioJava Structure objects representing each motif
      */
-    public List<Structure> queryMotifs(String ecNumber) {
+    public List<Motif> queryMotifs(String ecNumber) {
         log.info("Querying for motifs in EC class: " + ecNumber);
         List<Integer> ecNumbers = Arrays.stream(ecNumber.split(".")).map(Integer::parseInt).collect(Collectors.toList());
 
