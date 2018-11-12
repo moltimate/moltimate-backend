@@ -34,7 +34,7 @@ public class MotifService {
         log.info("Querying for motifs in EC class: " + ecNumber);
         List<Integer> ecNumbers = Arrays.stream(ecNumber.split(".")).map(Integer::parseInt).collect(Collectors.toList());
 
-        // TODO: implement code to pdb for motifs based on ecNumber
+        // TODO: implement code to query for motifs based on ecNumber
 
         return Collections.emptyList();
     }

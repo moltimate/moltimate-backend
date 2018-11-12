@@ -5,7 +5,7 @@ import org.biojava.nbio.structure.Structure;
 import org.moltimate.moltimatebackend.alignment.requests.ActiveSiteAlignmentRequest;
 import org.moltimate.moltimatebackend.alignment.requests.BackboneAlignmentRequest;
 import org.moltimate.moltimatebackend.motif.MotifService;
-import org.moltimate.moltimatebackend.pdb.PdbService;
+import org.moltimate.moltimatebackend.protein.ProteinService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,10 +19,10 @@ import java.util.List;
 public class AlignmentService {
 
     @Autowired
-    private MotifService motifService;
+    private ProteinService proteinService;
 
     @Autowired
-    private PdbService pdbService;
+    private MotifService motifService;
 
     /**
      * Executes the ActiveSiteAlignmentRequest on protein active sites.
@@ -32,7 +32,7 @@ public class AlignmentService {
      */
     public AlignmentResponse alignActiveSites(ActiveSiteAlignmentRequest alignmentRequest) {
         return alignActiveSites(
-                pdbService.queryPdb(alignmentRequest.getPdbIds()),
+                proteinService.queryPdb(alignmentRequest.getPdbIds()),
                 motifService.queryMotifs(alignmentRequest.getEcNumber())
         );
     }
@@ -57,8 +57,8 @@ public class AlignmentService {
      */
     public AlignmentResponse alignBackbones(BackboneAlignmentRequest alignmentRequest) {
         return alignBackbones(
-                pdbService.queryPdb(alignmentRequest.getSourcePdbIds()),
-                pdbService.queryPdb(alignmentRequest.getCompareToPdbIds())
+                proteinService.queryPdb(alignmentRequest.getSourcePdbIds()),
+                proteinService.queryPdb(alignmentRequest.getCompareToPdbIds())
         );
     }
 
