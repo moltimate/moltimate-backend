@@ -1,6 +1,9 @@
 package org.moltimate.moltimatebackend.motif;
 
 import lombok.extern.slf4j.Slf4j;
+import org.moltimate.moltimatebackend.repository.MotifRepository;
+import org.moltimate.moltimatebackend.repository.ResidueQueryRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -15,15 +18,21 @@ import java.util.stream.Collectors;
 @Slf4j
 public class MotifService {
 
+    @Autowired
+    private MotifRepository motifRepository;
+
+    @Autowired
+    private ResidueQueryRepository residueQueryRepository;
+
     /**
      * Creates a new Motif from the CreateMotifRequest.
      *
-     * @param createMotifRequest
+     * @param motif
      * @return A newly generated Motif
      */
-    public Motif createMotif(CreateMotifRequest createMotifRequest) {
-        //TODO: something else
-        return null;//new Motif();
+    public Motif createMotif(Motif motif) {
+        motif.selectionQueries.values().forEach(collectionset -> residueQueryRepository.save(collectionset));
+        return motifRepository.save(motif);
     }
 
     /**

@@ -12,6 +12,7 @@ import org.moltimate.moltimatebackend.alignment.AlignmentService;
 import org.moltimate.moltimatebackend.motif.Motif;
 import org.moltimate.moltimatebackend.motif.MotifSelection;
 import org.moltimate.moltimatebackend.motif.MotifService;
+import org.moltimate.moltimatebackend.motif.ResidueQuerySet;
 import org.moltimate.moltimatebackend.protein.ProteinService;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -51,7 +52,7 @@ public class AlignmentTest {
     }
 
     private Motif make1a0j(){
-        int[] ecNumber = {3, 4, 21, 4};
+        List<Integer> ecNumber = Arrays.asList(3, 4, 21, 4);
         ArrayList<String> residues = new ArrayList<String>() {{
             add("HIS");
             add("ASP");
@@ -64,7 +65,7 @@ public class AlignmentTest {
             add("SER 95");
         }};
 
-        HashMap<String, List<MotifSelection>> selections = new HashMap<>();
+        HashMap<String, ResidueQuerySet> selections = new HashMap<>();
 
         ArrayList<MotifSelection> asp = new ArrayList<MotifSelection>() {{
             add(MotifSelection.builder()
@@ -790,12 +791,12 @@ public class AlignmentTest {
                     .build());
         }};
 
-        selections.put("HIS 57", his);
-        selections.put("ASP 102", asp);
-        selections.put("SER 95", ser);
+        selections.put("HIS 57", new ResidueQuerySet(his));
+        selections.put("ASP 102", new ResidueQuerySet(asp));
+        selections.put("SER 95", new ResidueQuerySet(ser));
 
         return Motif.builder()
-                .name("1a0j")
+                .pdbId("1a0j")
                 .ecClass(ecNumber)
                 .residues(residues)
                 .activeSite(activeSite)
@@ -804,7 +805,7 @@ public class AlignmentTest {
     }
 
     private Motif make1rtf() {
-        int[] ecNumber = {3, 4, 21, 68};
+        List<Integer> ecNumber = Arrays.asList(3, 4, 21, 68);
         ArrayList<String> residues = new ArrayList<String>() {{
             add("HIS");
             add("ASP");
@@ -819,7 +820,7 @@ public class AlignmentTest {
             add("SER 195");
         }};
 
-        HashMap<String, List<MotifSelection>> selections = new HashMap<>();
+        HashMap<String, ResidueQuerySet> selections = new HashMap<>();
 
         ArrayList<MotifSelection> asp = new ArrayList<MotifSelection>() {{
             add(MotifSelection.builder()
@@ -4806,13 +4807,13 @@ public class AlignmentTest {
                     .build());
         }};
 
-        selections.put("HIS 57", his);
-        selections.put("ASP 102", asp);
-        selections.put("GLY 193", gly);
-        selections.put("SER 195", ser);
+        selections.put("HIS 57", new ResidueQuerySet(his));
+        selections.put("ASP 102", new ResidueQuerySet(asp));
+        selections.put("GLY 193", new ResidueQuerySet(gly));
+        selections.put("SER 195", new ResidueQuerySet(ser));
 
         return Motif.builder()
-                .name("1rtf")
+                .pdbId("1rtf")
                 .ecClass(ecNumber)
                 .residues(residues)
                 .activeSite(activeSite)
@@ -4821,7 +4822,7 @@ public class AlignmentTest {
     }
 
     private Motif make2apr() {
-        int[] ecNumber = {3, 4, 23, 21};
+        List<Integer> ecNumber = Arrays.asList(3, 4, 23, 21);
         ArrayList<String> residues = new ArrayList<String>() {{
             add("ASP");
             add("SER");
@@ -4836,7 +4837,7 @@ public class AlignmentTest {
             add("THR 221");
         }};
 
-        HashMap<String, List<MotifSelection>> selections = new HashMap<>();
+        HashMap<String, ResidueQuerySet> selections = new HashMap<>();
 
         ArrayList<MotifSelection> asp1 = new ArrayList<MotifSelection>() {{
             add(MotifSelection.builder()
@@ -9244,13 +9245,13 @@ public class AlignmentTest {
                     .build());
         }};
 
-        selections.put("ASP 35", asp1);
-        selections.put("SER 38", ser);
-        selections.put("ASP 218", asp2);
-        selections.put("THR 221", thr);
+        selections.put("ASP 35", new ResidueQuerySet(asp1));
+        selections.put("SER 38", new ResidueQuerySet(ser));
+        selections.put("ASP 218", new ResidueQuerySet(asp2));
+        selections.put("THR 221", new ResidueQuerySet(thr));
 
         return Motif.builder()
-                .name("2apr")
+                .pdbId("2apr")
                 .ecClass(ecNumber)
                 .residues(residues)
                 .activeSite(activeSite)
@@ -9259,7 +9260,7 @@ public class AlignmentTest {
     }
 
     private Motif make1o2u() {
-        int[] ecNumber = {3, 4, 21, 4};
+        List<Integer> ecNumber = Arrays.asList(3, 4, 21, 4);
         ArrayList<String> residues = new ArrayList<String>() {{
             add("HIS");
             add("ASP");
@@ -9270,7 +9271,7 @@ public class AlignmentTest {
             add("ASP 102");
         }};
 
-        HashMap<String, List<MotifSelection>> selections = new HashMap<>();
+        HashMap<String, ResidueQuerySet> selections = new HashMap<>();
 
         ArrayList<MotifSelection> asp = new ArrayList<MotifSelection>() {{
             add(MotifSelection.builder()
@@ -9613,11 +9614,11 @@ public class AlignmentTest {
                     .build());
         }};
 
-        selections.put("HIS 57", his);
-        selections.put("ASP 102", asp);
+        selections.put("HIS 57", new ResidueQuerySet(his));
+        selections.put("ASP 102", new ResidueQuerySet(asp));
 
         return Motif.builder()
-                .name("1o2u")
+                .pdbId("1o2u")
                 .ecClass(ecNumber)
                 .residues(residues)
                 .activeSite(activeSite)

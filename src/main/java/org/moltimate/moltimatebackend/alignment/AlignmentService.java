@@ -79,7 +79,7 @@ public class AlignmentService {
             Alignment alignment = new Alignment();
             alignment.setActiveSite(motif.getActiveSite());
             alignment.setProteinName(structure1.getPDBCode());
-            alignment.setMotifName(motif.getName());
+            alignment.setMotifName(motif.getPdbId());
             alignment.setResidues(residues.stream()
                                           .map(StructureUtils::residueName)
                                           .collect(Collectors.toList()));

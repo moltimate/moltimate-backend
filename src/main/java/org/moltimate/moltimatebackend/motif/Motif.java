@@ -1,12 +1,19 @@
 package org.moltimate.moltimatebackend.motif;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.biojava.nbio.structure.Atom;
 import org.biojava.nbio.structure.Group;
 import org.biojava.nbio.structure.Structure;
 import org.moltimate.moltimatebackend.Structure.StructureUtils;
 
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -14,13 +21,30 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Entity
 @Data
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Motif {
-    Map<String, List<MotifSelection>> selectionQueries;
+    @Id
+    @NotNull
+    String pdbId;
+
+    @NotNull
+    @ElementCollection
+    Map<String, ResidueQuerySet> selectionQueries;
+
+    @NotNull
+    @ElementCollection
     List<String> residues;
-    int[] ecClass;
-    String name;
+
+    @NotNull
+    @ElementCollection
+    List<Integer> ecClass;
+
+    @NotNull
+    @ElementCollection
     List<String> activeSite;
 
     public Map<String, List<Group>> runQueries(Structure pdb) {
@@ -40,7 +64,7 @@ public class Motif {
         selectionQueries.keySet().forEach(residueName -> {
             HashSet<Atom> atoms = new HashSet<>();
             HashMap<Group, Integer> groupCount = new HashMap<>();
-            selectionQueries.get(residueName).forEach(query -> {
+            selectionQueries.get(residueName).getSelections().forEach(query -> {
                 List<Atom> atomsFound = StructureUtils.runQuery(
                         pdb,
                         query.atom1Name,
@@ -63,7 +87,7 @@ public class Motif {
             });
             List<Group> candidateGroups = groupCount.keySet().stream()
                                                     .filter(group -> groupCount.get(group) == selectionQueries.get(
-                                                            residueName).size())
+                                                            residueName).getSelections().size())
                                                     .collect(Collectors.toList());
             candidateGroups.forEach(candidate -> {
                 String chainName = candidate.getChainId();
