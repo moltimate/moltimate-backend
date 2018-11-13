@@ -9,6 +9,13 @@ import org.biojava.nbio.structure.Group;
 import org.biojava.nbio.structure.Structure;
 import org.moltimate.moltimatebackend.Structure.StructureUtils;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -45,6 +52,7 @@ public class Motif {
 
     @NotNull
     @ElementCollection
+
     List<String> activeSite;
 
     public Map<String, List<Group>> runQueries(Structure pdb) {
@@ -65,6 +73,7 @@ public class Motif {
             HashSet<Atom> atoms = new HashSet<>();
             HashMap<Group, Integer> groupCount = new HashMap<>();
             selectionQueries.get(residueName).getSelections().forEach(query -> {
+
                 List<Atom> atomsFound = StructureUtils.runQuery(
                         pdb,
                         query.atom1Name,
@@ -88,6 +97,7 @@ public class Motif {
             List<Group> candidateGroups = groupCount.keySet().stream()
                                                     .filter(group -> groupCount.get(group) == selectionQueries.get(
                                                             residueName).getSelections().size())
+
                                                     .collect(Collectors.toList());
             candidateGroups.forEach(candidate -> {
                 String chainName = candidate.getChainId();

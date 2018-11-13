@@ -35,5 +35,4 @@ public class MotifSelection {
     @NotNull
     double distance;
 
-
 }
