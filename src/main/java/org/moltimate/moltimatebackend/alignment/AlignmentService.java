@@ -80,6 +80,8 @@ public class AlignmentService {
             alignment.setActiveSite(motif.getActiveSite());
             alignment.setProteinName(structure1.getPDBCode());
             alignment.setMotifName(motif.getName());
+            alignment.setMinDistance(Collections.min(distances));
+            alignment.setMaxDistance(Collections.max(distances));
             alignment.setResidues(residues.stream()
                                           .map(StructureUtils::residueName)
                                           .collect(Collectors.toList()));
