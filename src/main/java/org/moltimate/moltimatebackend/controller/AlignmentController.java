@@ -12,12 +12,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+
+import org.springframework.web.bind.annotation.CrossOrigin;
+
 /**
  * Alignment REST API
  */
 @RestController
 @RequestMapping(value = "/align")
 @Slf4j
+// TODO remove this for production. Need to disable CORS when running locally
+@CrossOrigin(origins = "http://localhost:3000")
 public class AlignmentController {
 
     @Autowired
