@@ -1,9 +1,12 @@
-package org.moltimate.moltimatebackend.alignment;
+package org.moltimate.moltimatebackend.controller;
 
 import lombok.extern.slf4j.Slf4j;
-import org.moltimate.moltimatebackend.alignment.requests.ActiveSiteAlignmentRequest;
-import org.moltimate.moltimatebackend.alignment.requests.BackboneAlignmentRequest;
+import org.moltimate.moltimatebackend.request.ActiveSiteAlignmentRequest;
+import org.moltimate.moltimatebackend.request.BackboneAlignmentRequest;
+import org.moltimate.moltimatebackend.response.AlignmentResponse;
+import org.moltimate.moltimatebackend.service.AlignmentService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -21,14 +24,14 @@ public class AlignmentController {
     private AlignmentService alignmentService;
 
     @RequestMapping(value = "/activesite", method = RequestMethod.POST)
-    public AlignmentResponse activeSiteAlignment(@RequestBody ActiveSiteAlignmentRequest alignmentRequest) {
+    public ResponseEntity<AlignmentResponse> activeSiteAlignment(@RequestBody ActiveSiteAlignmentRequest alignmentRequest) {
         log.info("Received request to align active sites: " + alignmentRequest);
-        return alignmentService.alignActiveSites(alignmentRequest);
+        return ResponseEntity.ok(alignmentService.alignActiveSites(alignmentRequest));
     }
 
     @RequestMapping(value = "/backbone", method = RequestMethod.POST)
-    public AlignmentResponse backboneAlignment(@RequestBody BackboneAlignmentRequest alignmentRequest) {
+    public ResponseEntity<AlignmentResponse> backboneAlignment(@RequestBody BackboneAlignmentRequest alignmentRequest) {
         log.info("Received request to align active sites: " + alignmentRequest);
-        return alignmentService.alignBackbones(alignmentRequest);
+        return ResponseEntity.ok(alignmentService.alignBackbones(alignmentRequest));
     }
 }

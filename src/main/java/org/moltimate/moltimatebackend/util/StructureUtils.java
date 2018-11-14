@@ -1,4 +1,4 @@
-package org.moltimate.moltimatebackend.Structure;
+package org.moltimate.moltimatebackend.util;
 
 import org.biojava.nbio.structure.Atom;
 import org.biojava.nbio.structure.Chain;
@@ -25,8 +25,12 @@ public class StructureUtils {
     public static Group getResidue(Structure structure, String residueName, int residueNumber) {
         for (Chain chain : structure.getChains()) {
             for (Group group : chain.getAtomGroups(GroupType.AMINOACID)) {
-                if (group.getChemComp().getThree_letter_code().equals(residueName)
-                        && group.getResidueNumber().toString().equals(String.valueOf(residueNumber))) {
+                if (group.getChemComp()
+                        .getThree_letter_code()
+                        .equals(residueName)
+                        && group.getResidueNumber()
+                        .toString()
+                        .equals(String.valueOf(residueNumber))) {
                     return group;
                 }
             }
@@ -69,7 +73,9 @@ public class StructureUtils {
         ArrayList<Group> results = new ArrayList<>();
         for (Chain chain : structure.getChains()) {
             for (Group residue : chain.getAtomGroups(GroupType.AMINOACID)) {
-                if (residue.getChemComp().getThree_letter_code().equals(residueName)) {
+                if (residue.getChemComp()
+                        .getThree_letter_code()
+                        .equals(residueName)) {
                     results.add(residue);
                 }
             }
@@ -86,17 +92,19 @@ public class StructureUtils {
      */
     public static List<Atom> getAtomByType(Structure structure, String atomType) {
         ArrayList<Atom> atoms = new ArrayList<>();
-        structure.getChains().forEach(chain ->
-                                              chain.getAtomGroups(GroupType.AMINOACID).forEach(group ->
-                                                                                                       atoms.addAll(
-                                                                                                               group.getAtoms()
-                                                                                                                    .stream()
-                                                                                                                    .filter(atom -> atom
-                                                                                                                            .getName()
-                                                                                                                            .equals(atomType))
-                                                                                                                    .collect(
-                                                                                                                            Collectors
-                                                                                                                                    .toList()))));
+        structure.getChains()
+                .forEach(chain ->
+                                 chain.getAtomGroups(GroupType.AMINOACID)
+                                         .forEach(group ->
+                                                          atoms.addAll(
+                                                                  group.getAtoms()
+                                                                          .stream()
+                                                                          .filter(atom -> atom
+                                                                                  .getName()
+                                                                                  .equals(atomType))
+                                                                          .collect(
+                                                                                  Collectors
+                                                                                          .toList()))));
         return atoms;
     }
 
@@ -109,9 +117,10 @@ public class StructureUtils {
      */
     public static List<Atom> getAtomByType(Group residue, String atomType) {
         return residue.getAtoms()
-                      .stream()
-                      .filter(atom -> atom.getName().equals(atomType))
-                      .collect(Collectors.toList());
+                .stream()
+                .filter(atom -> atom.getName()
+                        .equals(atomType))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -184,6 +193,8 @@ public class StructureUtils {
     }
 
     public static String residueName(Group group) {
-        return group.getChemComp().getThree_letter_code() + " " + group.getResidueNumber().toString();
+        return group.getChemComp()
+                .getThree_letter_code() + " " + group.getResidueNumber()
+                .toString();
     }
 }

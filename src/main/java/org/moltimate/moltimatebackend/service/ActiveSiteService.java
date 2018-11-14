@@ -4,8 +4,8 @@ import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.map.MultiKeyMap;
-import org.moltimate.moltimatebackend.helper.HttpHelper;
 import org.moltimate.moltimatebackend.model.Residue;
+import org.moltimate.moltimatebackend.util.HttpUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
@@ -29,14 +29,15 @@ public class ActiveSiteService {
     private static final String CSA_CSV_URL = "https://www.ebi.ac.uk/thornton-srv/m-csa/media/flat_files/curated_data.csv";
 
     /**
-     * Updates database with current active site information from the Catalytic Site Atlas.
+     * Retrieve all active sites from the Catalytic Site Atlas.
+     *
+     * @return A Map where the String key is a protein's PDB ID and the List<Residue> is each residue in the active site
      */
     public Map<String, List<Residue>> getActiveSites() {
-        try (Reader catalyticSiteAtlasCsvData = new StringReader(HttpHelper.readStringFromURL(CSA_CSV_URL));
+        try (Reader catalyticSiteAtlasCsvData = new StringReader(HttpUtils.readStringFromURL(CSA_CSV_URL));
              CSVReader csvReader = new CSVReaderBuilder(catalyticSiteAtlasCsvData).withSkipLines(1)
                      .build()
         ) {
-
             Map<String, List<Residue>> activeSites = new HashMap<>();
             List<Residue> nextSite;
             while ((nextSite = readNextActiveSite(csvReader)) != null) {
@@ -63,18 +64,16 @@ public class ActiveSiteService {
         MultiKeyMap<String, Residue> proteinResidues = new MultiKeyMap<>();
         while ((residueEntry = csvReader.readNext()) != null) {
             // If this row is a residue (instead of reactant, product, ...), store it in a MultiKeyMap.
-            // A MultikeyMap is used to dedupe residue rows by 1) residueName, 2) chainId, and 3) residueId.
+            // A MultikeyMap is used to dedupe residue rows by 1) residueName and 2) residueId.
             boolean isResidue = "residue".equals(residueEntry[4]);
             if (isResidue) {
                 String residueName = residueEntry[5];
-                String chainId = residueEntry[6];
                 String residueId = residueEntry[7];
                 Residue residue = Residue.builder()
                         .residueName(residueName)
-                        .chainId(chainId)
                         .residueId(residueId)
                         .build();
-                proteinResidues.put(residueName, chainId, residueId, residue);
+                proteinResidues.put(residueName, residueId, residue);
             }
 
             // If the next row is for a different protein, return the current active site Residues
