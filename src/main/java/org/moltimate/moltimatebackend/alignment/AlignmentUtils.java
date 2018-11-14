@@ -2,6 +2,7 @@ package org.moltimate.moltimatebackend.alignment;
 
 import org.biojava.nbio.structure.Group;
 import org.moltimate.moltimatebackend.constant.AminoAcidType;
+import org.moltimate.moltimatebackend.model.Residue;
 
 import java.util.Arrays;
 import java.util.List;
@@ -16,9 +17,9 @@ public class AlignmentUtils {
         return stringBuilder.toString();
     }
 
-    public static String residueListToResString(List<String> resList) {
+    public static String residueListToResString(List<Residue> resList) {
         StringBuilder stringBuilder = new StringBuilder();
-        resList.forEach(residue -> stringBuilder.append(AminoAcidType.fromCodeName(residue)
+        resList.forEach(residue -> stringBuilder.append(AminoAcidType.fromCodeName(residue.getResidueName())
                                                                      .getLevenshteinValue()));
         return stringBuilder.toString();
     }

@@ -1,11 +1,14 @@
 package org.moltimate.moltimatebackend.motif;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.biojava.nbio.structure.Atom;
 import org.biojava.nbio.structure.Group;
 import org.biojava.nbio.structure.Structure;
 import org.moltimate.moltimatebackend.Structure.StructureUtils;
+import org.moltimate.moltimatebackend.model.Residue;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,14 +17,33 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+
+@Entity
 @Data
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Motif {
-    Map<String, List<MotifSelection>> selectionQueries;
-    List<String> residues;
-    int[] ecClass;
-    String name;
-    List<String> activeSite;
+    @Id
+    @NotNull
+    private String pdbId;
+
+    @NotNull
+    private String ecNumber;
+
+    @NotNull
+    @ElementCollection
+    private Map<String, ResidueQuerySet> selectionQueries;
+
+    @Valid
+    @NotNull
+    @ElementCollection
+    private List<Residue> activeSiteResidues;
 
     public Map<String, List<Group>> runQueries(Structure pdb) {
         return runQueries(pdb, 1d);
@@ -40,14 +62,15 @@ public class Motif {
         selectionQueries.keySet().forEach(residueName -> {
             HashSet<Atom> atoms = new HashSet<>();
             HashMap<Group, Integer> groupCount = new HashMap<>();
-            selectionQueries.get(residueName).forEach(query -> {
+            selectionQueries.get(residueName).getSelections().forEach(query -> {
+
                 List<Atom> atomsFound = StructureUtils.runQuery(
                         pdb,
-                        query.atom1Name,
-                        query.atom2Name,
-                        query.residue1Name,
-                        query.residue2Name,
-                        query.distance,
+                        query.getAtom1Name(),
+                        query.getAtom2Name(),
+                        query.getResidue1Name(),
+                        query.getResidue2Name(),
+                        query.getDistance(),
                         precisionFactor
                 );
                 atoms.addAll(atomsFound);
@@ -62,9 +85,10 @@ public class Motif {
                 groupsMatchingQuery.forEach(residue -> groupCount.merge(residue, 1, (a, b) -> a + b));
             });
             List<Group> candidateGroups = groupCount.keySet().stream()
-                                                    .filter(group -> groupCount.get(group) == selectionQueries.get(
-                                                            residueName).size())
-                                                    .collect(Collectors.toList());
+                    .filter(group -> groupCount.get(group) == selectionQueries.get(
+                            residueName).getSelections().size())
+
+                    .collect(Collectors.toList());
             candidateGroups.forEach(candidate -> {
                 String chainName = candidate.getChainId();
                 residues.computeIfAbsent(chainName, k -> new ArrayList<>());
