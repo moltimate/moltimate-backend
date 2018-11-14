@@ -1,4 +1,4 @@
-package org.moltimate.moltimatebackend.alignment;
+package org.moltimate.moltimatebackend.util;
 
 import org.biojava.nbio.structure.Group;
 import org.moltimate.moltimatebackend.constant.AminoAcidType;
@@ -11,16 +11,14 @@ public class AlignmentUtils {
 
     public static String groupListToResString(List<Group> residues) {
         StringBuilder stringBuilder = new StringBuilder();
-        residues.forEach(residue -> stringBuilder.append(AminoAcidType.fromCodeName(residue.getChemComp()
-                                                                                           .getThree_letter_code())
-                                                                      .getLevenshteinValue()));
+        residues.forEach(residue -> stringBuilder.append(AminoAcidType.getCharMapping(residue.getChemComp()
+                                                                                                   .getThree_letter_code())));
         return stringBuilder.toString();
     }
 
     public static String residueListToResString(List<Residue> resList) {
         StringBuilder stringBuilder = new StringBuilder();
-        resList.forEach(residue -> stringBuilder.append(AminoAcidType.fromCodeName(residue.getResidueName())
-                                                                     .getLevenshteinValue()));
+        resList.forEach(residue -> stringBuilder.append(AminoAcidType.getCharMapping(residue.getResidueName())));
         return stringBuilder.toString();
     }
 
@@ -53,7 +51,7 @@ public class AlignmentUtils {
 
     private static int min(int... numbers) {
         return Arrays.stream(numbers)
-                     .min()
-                     .orElse(Integer.MAX_VALUE);
+                .min()
+                .orElse(Integer.MAX_VALUE);
     }
 }

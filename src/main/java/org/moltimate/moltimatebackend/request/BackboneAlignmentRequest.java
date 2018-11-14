@@ -1,4 +1,4 @@
-package org.moltimate.moltimatebackend.alignment.requests;
+package org.moltimate.moltimatebackend.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

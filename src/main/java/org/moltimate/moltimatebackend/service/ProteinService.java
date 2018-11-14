@@ -1,18 +1,12 @@
-package org.moltimate.moltimatebackend.protein;
+package org.moltimate.moltimatebackend.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
 import org.biojava.nbio.structure.Structure;
 import org.biojava.nbio.structure.io.PDBFileReader;
-import org.moltimate.moltimatebackend.alignment.AlignmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -43,8 +37,8 @@ public class ProteinService {
      */
     public List<Structure> queryPdb(List<String> pdbIds) {
         return pdbIds.stream()
-                     .map(this::queryPdb)
-                     .collect(Collectors.toList());
+                .map(this::queryPdb)
+                .collect(Collectors.toList());
     }
 
     /**

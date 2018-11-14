@@ -1,10 +1,9 @@
-package org.moltimate.moltimatebackend.motif;
+package org.moltimate.moltimatebackend.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.CascadeType;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;

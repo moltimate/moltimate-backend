@@ -1,49 +1,64 @@
-package org.moltimate.moltimatebackend.service;
+package org.moltimate.moltimatebackend.controller;
 
-import org.biojava.nbio.structure.Structure;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.moltimate.moltimatebackend.model.Alignment;
+import lombok.extern.slf4j.Slf4j;
 import org.moltimate.moltimatebackend.model.Motif;
 import org.moltimate.moltimatebackend.model.MotifSelection;
 import org.moltimate.moltimatebackend.model.Residue;
 import org.moltimate.moltimatebackend.model.ResidueQuerySet;
-import org.moltimate.moltimatebackend.response.AlignmentResponse;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.moltimate.moltimatebackend.service.MotifService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 
-import static org.junit.Assert.assertTrue;
+/**
+ * Motif REST API
+ */
+@RestController
+@RequestMapping(value = "/motifs")
+@Slf4j
+public class MotifController {
 
-@RunWith(SpringRunner.class)
-public class AlignmentTest {
-
-    @InjectMocks
-    private AlignmentService alignmentService;
-
-    @InjectMocks
-    private ProteinService proteinService;
-
-    @Mock
+    @Autowired
     private MotifService motifService;
 
-    private List<Motif> motifs = new ArrayList<>();
-    private List<Structure> structures = new ArrayList<>();
+    /**
+     * Return all Motifs, optionally filtered by EC number
+     */
+    @RequestMapping(method = RequestMethod.GET)
+    public ResponseEntity<List<Motif>> findMotifs(@RequestParam("ecnumber") Optional<String> ecNumber) {
+        if (ecNumber.isPresent()) {
+            return ResponseEntity.ok(motifService.queryByEcNumber(ecNumber.get()));
+        }
+        return ResponseEntity.ok(motifService.findAll());
+    }
 
-    @Before
-    public void setup() {
-        motifs.add(make1a0j());
-        motifs.add(make1rtf());
-        motifs.add(make2apr());
-        motifs.add(make1o2u());
+    /**
+     * Return the Motif with the given PDB ID
+     */
+    @RequestMapping(value = "/{pdbId}", method = RequestMethod.GET)
+    public ResponseEntity<Motif> findMotifByPdbId(@PathVariable String pdbId) {
+        return ResponseEntity.ok(motifService.queryByPdbId(pdbId));
+    }
 
-        structures.add(proteinService.queryPdb("8gch"));
+    /**
+     * Generate a hard-coded set of motifs and save them to the database
+     */
+    @RequestMapping(value = "/debug", method = RequestMethod.GET)
+    public void createMotifs() {
+        motifService.saveMotif(make1a0j());
+        motifService.saveMotif(make1o2u());
+        motifService.saveMotif(make1rtf());
+        motifService.saveMotif(make2apr());
     }
 
     private Motif make1a0j() {
@@ -9637,75 +9652,5 @@ public class AlignmentTest {
                 .activeSiteResidues(activeSite)
                 .selectionQueries(selections)
                 .build();
-    }
-
-    @Test
-    public void alignment8ghTest() {
-        AlignmentResponse response = alignmentService.alignActiveSites(structures, motifs);
-        Alignment align1a0j = response.getAlignments()
-                .get("8GCH")
-                .get(0);
-        assertTrue(align1a0j.getMotifPdbId()
-                           .equals("1a0j"));
-        List<Residue> activeSite = Arrays.asList(
-                Residue.builder()
-                        .residueId("57")
-                        .residueName("HIS")
-                        .build(),
-                Residue.builder()
-                        .residueId("102")
-                        .residueName("ASP")
-                        .build(),
-                Residue.builder()
-                        .residueId("195")
-                        .residueName("SER")
-                        .build()
-
-        );
-        assertTrue(align1a0j.getAlignedResidues()
-                           .containsAll(activeSite));
-        Alignment align1rtf = response.getAlignments()
-                .get("8GCH")
-                .get(1);
-        assertTrue(align1rtf.getMotifPdbId()
-                           .equals("1rtf"));
-        activeSite = Arrays.asList(
-                Residue.builder()
-                        .residueId("57")
-                        .residueName("HIS")
-                        .build(),
-                Residue.builder()
-                        .residueId("102")
-                        .residueName("ASP")
-                        .build(),
-                Residue.builder()
-                        .residueId("193")
-                        .residueName("GLY")
-                        .build(),
-                Residue.builder()
-                        .residueId("195")
-                        .residueName("SER")
-                        .build()
-
-        );
-        assertTrue(align1rtf.getAlignedResidues()
-                           .containsAll(activeSite));
-        Alignment align1o2u = response.getAlignments()
-                .get("8GCH")
-                .get(2);
-        activeSite = Arrays.asList(
-                Residue.builder()
-                        .residueId("57")
-                        .residueName("HIS")
-                        .build(),
-                Residue.builder()
-                        .residueId("102")
-                        .residueName("ASP")
-                        .build()
-        );
-        assertTrue(align1o2u.getMotifPdbId()
-                           .equals("1o2u"));
-        assertTrue(align1o2u.getAlignedResidues()
-                           .containsAll(activeSite));
     }
 }

@@ -1,9 +1,8 @@
-package org.moltimate.moltimatebackend.alignment;
+package org.moltimate.moltimatebackend.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.moltimate.moltimatebackend.model.Residue;
 
 import java.util.List;
 
@@ -14,10 +13,11 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Alignment {
-    String motifPdbId;
-    List<Residue> activeSiteResidues;
-    List<Residue> alignedResidues;
-    int minDistance;
-    int maxDistance;
-    double rmsd;
+
+    private String motifPdbId;
+    private List<Residue> activeSiteResidues;
+    private List<Residue> alignedResidues;
+    private int minDistance;
+    private int maxDistance;
+    private double rmsd;
 }

@@ -1,11 +1,11 @@
-package org.moltimate.moltimatebackend.helper;
+package org.moltimate.moltimatebackend.util;
 
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
-public class HttpHelper {
+public class HttpUtils {
 
     /**
      * Returns the page content at the given URL as a String.
@@ -18,7 +18,8 @@ public class HttpHelper {
         try (Scanner scanner = new Scanner(
                 new URL(url).openStream(),
                 StandardCharsets.UTF_8.toString()
-        )) {
+        )
+        ) {
             scanner.useDelimiter("\\A");
             return scanner.hasNext() ? scanner.next() : "";
         }
