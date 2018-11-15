@@ -9664,13 +9664,16 @@ public class AlignmentTest {
                 Residue.builder()
                        .residueId("57")
                        .residueName("HIS")
+                       .chainName("F")
                        .build(),
                 Residue.builder()
                        .residueId("102")
                        .residueName("ASP")
+                       .chainName("F")
                        .build(),
                 Residue.builder()
                        .residueId("195")
+                       .chainName("G")
                        .residueName("SER")
                        .build()
 
@@ -9686,18 +9689,22 @@ public class AlignmentTest {
                 Residue.builder()
                        .residueId("57")
                        .residueName("HIS")
+                       .chainName("F")
                        .build(),
                 Residue.builder()
                        .residueId("102")
                        .residueName("ASP")
+                       .chainName("F")
                        .build(),
                 Residue.builder()
                        .residueId("193")
                        .residueName("GLY")
+                       .chainName("G")
                        .build(),
                 Residue.builder()
                        .residueId("195")
                        .residueName("SER")
+                       .chainName("G")
                        .build()
 
         );
@@ -9710,10 +9717,12 @@ public class AlignmentTest {
                 Residue.builder()
                        .residueId("57")
                        .residueName("HIS")
+                       .chainName("F")
                        .build(),
                 Residue.builder()
                        .residueId("102")
                        .residueName("ASP")
+                       .chainName("F")
                        .build()
         );
         assertTrue(align1o2u.getMotifPdbId()
