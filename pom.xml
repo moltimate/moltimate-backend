@@ -9,7 +9,7 @@
     <packaging>jar</packaging>
 
     <name>moltimate-backend</name>
-    <description>Demo project for Spring Boot</description>
+    <description>A protein active site alignment application</description>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -117,5 +117,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>
