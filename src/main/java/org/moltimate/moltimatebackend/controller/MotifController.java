@@ -36,10 +36,7 @@ public class MotifController {
      */
     @RequestMapping(method = RequestMethod.GET)
     public ResponseEntity<List<Motif>> findMotifs(@RequestParam("ecnumber") Optional<String> ecNumber) {
-        if (ecNumber.isPresent()) {
-            return ResponseEntity.ok(motifService.queryByEcNumber(ecNumber.get()));
-        }
-        return ResponseEntity.ok(motifService.findAll());
+        return ResponseEntity.ok(motifService.queryByEcNumber(ecNumber.orElse(null)));
     }
 
     /**

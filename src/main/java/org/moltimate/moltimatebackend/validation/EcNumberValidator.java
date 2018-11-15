@@ -4,7 +4,7 @@ import org.moltimate.moltimatebackend.validation.exceptions.InvalidEcNumberExcep
 
 public class EcNumberValidator {
 
-    public static final String VALIDATION_REGEX = "\\d+(\\.\\d+)+";
+    public static final String VALIDATION_REGEX = "\\d+(\\.\\d+)*";
 
     /**
      * Validates an EC number.

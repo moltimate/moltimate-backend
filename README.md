@@ -59,6 +59,7 @@ This outlines every API's endpoints, request types, and expected request paramet
 ###### Aligns protein active sites with motifs
 
 Request body parameters
+
 | Parameter | Type | Function |
 |:----------|:-----|:---------|
 | pdbIds | String Array | The PDB IDs of the proteins that will be aligned with each motif |
@@ -95,6 +96,7 @@ NOT IMPLEMENTED
 ###### Get a list of motifs
 
 Query string parameters
+
 | Parameter | Type | Function |
 |:----------|:-----|:---------|
 | ecnumber | String | An optional EC number to filter the list of motifs by |
@@ -104,6 +106,7 @@ Query string parameters
 ###### Get a specific motif
 
 Path parameters
+
 | Parameter | Type | Function |
 |:----------|:-----|:---------|
 | pdbid | String | The unqiue PDB ID of the motif |
