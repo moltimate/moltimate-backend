@@ -58,6 +58,9 @@ public class MotifService {
      * @return List of Motifs in this enzyme commission class
      */
     public List<Motif> queryByEcNumber(String ecNumber) {
+        if (ecNumber == null) {
+            return findAll();
+        }
         log.info("Querying for motifs in EC class: " + ecNumber);
         EcNumberValidator.validate(ecNumber);
         return motifRepository.findByEcNumberStartingWith(ecNumber);
