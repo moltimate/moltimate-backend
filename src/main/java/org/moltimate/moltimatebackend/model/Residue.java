@@ -25,12 +25,16 @@ public class Residue {
     @NotNull
     private String residueId; // "7", "70", ...
 
+    @NotNull
+    private String chainName; // "A", "B", ...
+
     public static Residue fromGroup(Group residue) {
         return Residue.builder()
                 .residueName(residue.getChemComp()
                                      .getThree_letter_code())
                 .residueId(residue.getResidueNumber()
                                    .toString())
+                .chainName(residue.getChain().getName())
                 .build();
     }
 }

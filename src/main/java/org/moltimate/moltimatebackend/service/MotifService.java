@@ -62,7 +62,10 @@ public class MotifService {
             return findAll();
         }
         log.info("Querying for motifs in EC class: " + ecNumber);
-        EcNumberValidator.validate(ecNumber);
-        return motifRepository.findByEcNumberStartingWith(ecNumber);
+        if(ecNumber != null){
+            EcNumberValidator.validate(ecNumber);
+            return motifRepository.findByEcNumberStartingWith(ecNumber);
+        }
+        return motifRepository.findAll();
     }
 }
