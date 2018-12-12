@@ -72,7 +72,7 @@ public class MotifController {
                        .chainName("A")
                        .build(),
                 Residue.builder()
-                       .residueId("95")
+                       .residueId("195")
                        .residueName("SER")
                        .chainName("A")
                        .build()
