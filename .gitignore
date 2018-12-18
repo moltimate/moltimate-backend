@@ -3,3 +3,5 @@
 target
 *.iml
 *.db
+credentials.tar.gz
+client-secret.json
