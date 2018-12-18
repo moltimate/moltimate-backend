@@ -1,3 +1,22 @@
+sudo: false
 language: java
 notifications:
   email: false
+env:
+  global:
+  - GCP_HOSTNAME=us.gcr.io
+  - GCP_PROJECT_ID=moltimate
+  - GCP_IMAGE_NAME=moltimate-backend
+  - GCP_CREDENTIALS_FILE=client-secret.json
+  - GIT_ORGANIZATION_NAME=moltimate
+  - GIT_REPO_NAME=moltimate-backend
+  - CLOUDSDK_CORE_DISABLE_PROMPTS=1
+cache:
+  directories:
+  - $HOME/google-cloud-sdk
+before_install:
+- bash -x bin/deploy/travis/before_install.sh
+install:
+- bash -x bin/deploy/travis/install.sh
+after_success:
+- bash -x bin/deploy/travis/after_success.sh

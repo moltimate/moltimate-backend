@@ -2,7 +2,7 @@ version: '3.4'
 
 services:
   backend:
-    image: moltimate-backend
+    image: us.gcr.io/moltimate/moltimate-backend
     container_name: moltimate-backend
     build:
       context: .
