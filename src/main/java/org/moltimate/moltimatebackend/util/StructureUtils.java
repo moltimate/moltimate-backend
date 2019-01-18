@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class StructureUtils {
@@ -22,12 +23,12 @@ public class StructureUtils {
      * @param residueNumber: residue number
      * @return residue if found, null otherwise
      */
-    public static Group getResidue(Structure structure, String residueName, int residueNumber) {
+    public static Group getResidue(Structure structure, String residueName, String residueNumber) {
         for (Chain chain : structure.getChains()) {
             for (Group group : chain.getAtomGroups(GroupType.AMINOACID)) {
                 if (group.getChemComp()
                         .getThree_letter_code()
-                        .equals(residueName)
+                        .equalsIgnoreCase(residueName)
                         && group.getResidueNumber()
                         .toString()
                         .equals(String.valueOf(residueNumber))) {
@@ -136,6 +137,10 @@ public class StructureUtils {
         return locationMap;
     }
 
+    public static double rmsd(Atom atom1, Atom atom2) {
+        return rmsd(atom1.getCoords(), atom2.getCoords());
+    }
+
     /**
      * Root mean squared distance between two points
      *
@@ -196,5 +201,18 @@ public class StructureUtils {
         return group.getChemComp()
                 .getThree_letter_code() + " " + group.getResidueNumber()
                 .toString();
+    }
+
+    public static String ecNumber(Structure structure) {
+        return structure.getEntityInfos()
+                .stream()
+                .filter(Objects::nonNull)
+                .findFirst()
+                .get()
+                .getEcNums()
+                .stream()
+                .filter(Objects::nonNull)
+                .findFirst()
+                .get();
     }
 }

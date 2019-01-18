@@ -23,10 +23,14 @@ public class Residue {
     private String residueName; // "Asp", "Glu", ...
 
     @NotNull
-    private String residueId; // "7", "70", ...
+    private String residueChainName; // "A", "B", ...
 
     @NotNull
-    private String chainName; // "A", "B", ...
+    private String residueId; // "7", "70", ...
+
+    public String getIdentifier() {
+        return residueName + " " + residueChainName + " " + residueId;
+    }
 
     public static Residue fromGroup(Group residue) {
         return Residue.builder()
@@ -34,7 +38,7 @@ public class Residue {
                                      .getThree_letter_code())
                 .residueId(residue.getResidueNumber()
                                    .toString())
-                .chainName(residue.getChain().getName())
+                .residueChainName(residue.getChain().getName())
                 .build();
     }
 }

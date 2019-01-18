@@ -78,15 +78,17 @@ public class AlignmentService {
             HashSet<Group> residues = new HashSet<>();
             residueMap.values()
                     .forEach(residues::addAll);
-            Alignment alignment = new Alignment();
-            alignment.setActiveSiteResidues(motif.getActiveSiteResidues());
-            alignment.setMotifPdbId(motif.getPdbId());
-            alignment.setMinDistance(Collections.min(distances));
-            alignment.setMaxDistance(Collections.max(distances));
-            alignment.setAlignedResidues(residues.stream()
-                                                 .map(Residue::fromGroup)
-                                                 .collect(Collectors.toList()));
-            return alignment;
+            if(residues.size() >2 && residues.size() <= motif.getActiveSiteResidues().size()) {
+                Alignment alignment = new Alignment();
+                alignment.setActiveSiteResidues(motif.getActiveSiteResidues());
+                alignment.setMotifPdbId(motif.getPdbId());
+                alignment.setMinDistance(Collections.min(distances));
+                alignment.setMaxDistance(Collections.max(distances));
+                alignment.setAlignedResidues(residues.stream()
+                                                     .map(Residue::fromGroup)
+                                                     .collect(Collectors.toList()));
+                return alignment;
+            }
         }
 
         return null;

@@ -68,10 +68,10 @@ public class Motif {
 
                                 List<Atom> atomsFound = StructureUtils.runQuery(
                                         pdb,
-                                        query.getAtom1Name(),
-                                        query.getAtom2Name(),
-                                        query.getResidue1Name(),
-                                        query.getResidue2Name(),
+                                        query.getAtomType1(),
+                                        query.getAtomType2(),
+                                        query.getResidueName1(),
+                                        query.getResidueName2(),
                                         query.getDistance(),
                                         precisionFactor
                                 );
