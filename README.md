@@ -5,7 +5,7 @@ ProMol successor's backend application.
 
 * [Setup & Run](#setup-run)
 * [Wiping Local Database](#wiping-local-database)
-* [API Summary](#api-summry)
+* [API Summary](#api-summary)
 * [API Details](#api-details)
 
 

@@ -6,6 +6,11 @@ notifications:
 before_install:
   # Decrypt credentials file to authorize with GCP
   - openssl aes-256-cbc -K $encrypted_a6a69c5b1756_key -iv $encrypted_a6a69c5b1756_iv -in client-secret.json.enc -out client-secret.json -d
+install:
+  # Use the maven 'prod' profile which installs specific dependencies and sets spring profile to 'prod'
+  - mvn -P prod install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+script:
+  - mvn -P prod test -B
 deploy:
   provider: gae
   project: moltimate
