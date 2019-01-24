@@ -2,9 +2,6 @@ package org.moltimate.moltimatebackend.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.moltimate.moltimatebackend.model.Motif;
-import org.moltimate.moltimatebackend.model.MotifSelection;
-import org.moltimate.moltimatebackend.model.Residue;
-import org.moltimate.moltimatebackend.model.ResidueQuerySet;
 import org.moltimate.moltimatebackend.service.MotifService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -15,10 +12,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Optional;
 
 /**

@@ -3,6 +3,7 @@ package org.moltimate.moltimatebackend.request;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -13,8 +14,11 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ActiveSiteAlignmentRequest extends AlignmentRequest {
+public class ActiveSiteAlignmentRequest {
 
     private List<String> pdbIds;
-    private String ecNumber;
+    private List<String> options;
+    private List<String> filters;
+    private List<MultipartFile> files; // TODO: Rename to customMotifs
+    private String ecNumber; // TODO: Make this into a filter
 }

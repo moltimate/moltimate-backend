@@ -2,6 +2,8 @@ package org.moltimate.moltimatebackend.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.biojava.nbio.structure.Structure;
+import org.biojava.nbio.structure.io.MMCIFFileReader;
+import org.biojava.nbio.structure.io.MMTFFileReader;
 import org.biojava.nbio.structure.io.PDBFileReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,17 +21,11 @@ import java.util.stream.Collectors;
 public class ProteinService {
 
     private static final PDBFileReader PDB_FILE_READER = new PDBFileReader();
+    private static final MMCIFFileReader MMCIF_FILE_READER = new MMCIFFileReader();
+    private static final MMTFFileReader MMTF_FILE_READER = new MMTFFileReader();
 
     @Autowired
     private AlignmentService alignmentService;
-
-    /**
-     * @param pdbIds Varargs array of PDB ID strings
-     * @return List of BioJava Structure objects representing each PDB ID
-     */
-    public List<Structure> queryPdb(String... pdbIds) {
-        return queryPdb(Arrays.asList(pdbIds));
-    }
 
     /**
      * @param pdbIds List of PDB ID strings
@@ -48,9 +44,13 @@ public class ProteinService {
     public Structure queryPdb(String pdbId) {
         try {
             return PDB_FILE_READER.getStructureById(pdbId);
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Cannot find structure with PDB id " + pdbId);
+        } catch (IOException e1) {
+            try {
+                return MMCIF_FILE_READER.getStructureById(pdbId);
+            } catch (IOException e2) {
+                e2.printStackTrace();
+                throw new RuntimeException("Cannot find structure with PDB id " + pdbId);
+            }
         }
     }
 }

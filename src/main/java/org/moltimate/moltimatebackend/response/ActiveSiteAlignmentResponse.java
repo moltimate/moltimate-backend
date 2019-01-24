@@ -14,6 +14,6 @@ import java.util.Map;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AlignmentResponse {
+public class ActiveSiteAlignmentResponse {
     Map<String, List<Alignment>> alignments;
 }
