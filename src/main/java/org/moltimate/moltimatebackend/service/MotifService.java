@@ -99,9 +99,6 @@ public class MotifService {
                 .forEach(activeSite -> {
                     String pdbId = activeSite.getPdbId();
                     //log.info("Generating motif for " + pdbId);
-                    if(pdbId.equalsIgnoreCase("1a0j") || pdbId.equalsIgnoreCase("1rtf")){
-                        System.out.println("yeet");
-                    }
                     try {
                         List<Residue> residues = activeSite.getResidues();
                         Structure structure = proteinService.queryPdb(pdbId);
@@ -114,7 +111,7 @@ public class MotifService {
                                 .build();
                         saveMotif(motif);
                     } catch (Exception e) {
-                        System.out.println(e);
+                        e.printStackTrace();
                         failedPdbIds.add(pdbId);
                     }
                 });
@@ -142,7 +139,7 @@ public class MotifService {
                     .filter(atom -> atom.getName()
                             .equals("CB"))
                     .findFirst()
-                    .get();
+                    .orElse(groupAtoms.get(0));
             List<Atom> filteredAtoms = groupAtoms.subList(groupAtoms.indexOf(firstCbAtom), groupAtoms.size());
             filteredResidueAtoms.put(residue, filteredAtoms);
         });

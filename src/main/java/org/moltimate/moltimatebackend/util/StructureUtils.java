@@ -204,6 +204,7 @@ public class StructureUtils {
     }
 
     public static String ecNumber(Structure structure) {
+        try{
         return structure.getEntityInfos()
                 .stream()
                 .filter(Objects::nonNull)
@@ -214,5 +215,8 @@ public class StructureUtils {
                 .filter(Objects::nonNull)
                 .findFirst()
                 .get();
+        } catch (Exception e){
+            return "-1.-1.-1.-1";
+        }
     }
 }

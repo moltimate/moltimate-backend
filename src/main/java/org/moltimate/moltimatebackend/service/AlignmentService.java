@@ -76,6 +76,7 @@ public class AlignmentService {
         if (!distances.isEmpty() && (motif.getActiveSiteResidues()
                 .size()) > Collections.min(distances)) {
             HashSet<Group> residues = new HashSet<>();
+
             residueMap.values()
                     .forEach(residues::addAll);
             if(residues.size() >2 && residues.size() <= motif.getActiveSiteResidues().size()) {
