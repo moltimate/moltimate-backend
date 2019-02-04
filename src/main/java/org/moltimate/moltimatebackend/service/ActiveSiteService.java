@@ -3,6 +3,7 @@ package org.moltimate.moltimatebackend.service;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.ListUtils;
 import org.moltimate.moltimatebackend.model.ActiveSite;
 import org.moltimate.moltimatebackend.model.Residue;
 import org.moltimate.moltimatebackend.util.HttpUtils;
@@ -14,7 +15,10 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Service used to query for or create active site Residues. Also provides the functionality to update our database's
@@ -25,16 +29,24 @@ import java.util.List;
 @Slf4j
 public class ActiveSiteService {
 
-    private static final String CSA_CSV_URL = "https://www.ebi.ac.uk/thornton-srv/m-csa/media/flat_files/curated_data.csv";
+    private static final String PROMOL_CSV_PATH = "src/main/resources/motifdata/promol_active_sites.csv";
+    private static final String CSA_CSV_PATH = "src/main/resources/motifdata/csa_curated_data.csv";
+//    private static final String CSA_CSV_URL = "https://www.ebi.ac.uk/thornton-srv/m-csa/media/flat_files/csa_curated_data.csv";
+
+    public List<ActiveSite> getActiveSites() {
+        List<ActiveSite> activeSites = new ArrayList<>(getPromolActiveSites());
+        activeSites.addAll(getCsaActiveSites());
+        return activeSites;
+    }
 
     /**
-     * Retrieve all active sites from the Catalytic Site Atlas.
+     * Retrieve all active sites from the scraped Promol motifs.
      *
      * @return A list of ActiveSites
      */
-    public List<ActiveSite> getActiveSites() {
+    private List<ActiveSite> getPromolActiveSites() {
         try {
-            CSVReader reader = new CSVReader(new FileReader("tmp/active_sites.csv"), ',');
+            CSVReader reader = new CSVReader(new FileReader(PROMOL_CSV_PATH), ',');
             String[] residueEntry;
             List<ActiveSite> activeSites = new ArrayList<>();
             while ((residueEntry = reader.readNext()) != null) {
@@ -43,39 +55,55 @@ public class ActiveSiteService {
                 for (int i = 1; i < residueEntry.length; i++) {
                     String[] res = residueEntry[i].split(" ");
                     Residue residue = Residue.builder()
-                                             .residueName(res[0])
-                                             .residueId(res[1])
-                                             .residueChainName(res[2])
-                                             .build();
+                            .residueName(res[0])
+                            .residueId(res[1])
+                            .residueChainName(res[2])
+                            .build();
                     activeSiteResidues.add(residue);
                 }
 
                 activeSites.add(ActiveSite.builder()
-                                          .pdbId(pdbId)
-                                          .residues(activeSiteResidues)
-                                          .build());
+                                        .pdbId(pdbId)
+                                        .residues(activeSiteResidues)
+                                        .build());
             }
-            Reader catalyticSiteAtlasCsvData = new StringReader(HttpUtils.readStringFromURL(CSA_CSV_URL));
-            CSVReader csvReader = new CSVReaderBuilder(catalyticSiteAtlasCsvData).withSkipLines(1)
-                                                                                 .build();
 
+            return activeSites;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return Collections.emptyList();
+    }
+
+    /**
+     * Retrieve all active sites from the Catalytic Site Atlas.
+     *
+     * @return A list of ActiveSites
+     */
+    private List<ActiveSite> getCsaActiveSites() {
+        try {
+            CSVReader csvReader = new CSVReaderBuilder(new FileReader(CSA_CSV_PATH)).withSkipLines(1)
+                    .build();
+
+            List<ActiveSite> activeSites = new ArrayList<>();
             ActiveSite nextSite;
-            while ((nextSite = readNextActiveSite(csvReader)) != null) {
+            while ((nextSite = readNextCsaActiveSite(csvReader)) != null) {
                 activeSites.add(nextSite);
             }
 
             return activeSites;
         } catch (IOException e) {
-            System.out.println(e);
+            e.printStackTrace();
         }
 
-        return null;
+        return Collections.emptyList();
     }
 
     /**
      * Reads the next protein's active site residues from the Catalytic Site Atlas curated data file.
      */
-    private ActiveSite readNextActiveSite(CSVReader csvReader) throws IOException {
+    private ActiveSite readNextCsaActiveSite(CSVReader csvReader) throws IOException {
         List<Residue> activeSiteResidues = new ArrayList<>();
 
         String[] residueEntry;
@@ -88,10 +116,10 @@ public class ActiveSiteService {
             }
             if (isResidue) {
                 Residue residue = Residue.builder()
-                                         .residueName(residueEntry[5])
-                                         .residueChainName(residueEntry[6])
-                                         .residueId(residueEntry[7])
-                                         .build();
+                        .residueName(residueEntry[5])
+                        .residueChainName(residueEntry[6])
+                        .residueId(residueEntry[7])
+                        .build();
                 if (!activeSiteResidues.contains(residue)) {
                     activeSiteResidues.add(residue);
                 }
@@ -101,9 +129,9 @@ public class ActiveSiteService {
             String[] nextEntry = csvReader.peek();
             if (nextEntry == null || !nextEntry[2].equals(pdbId)) {
                 return ActiveSite.builder()
-                                 .pdbId(pdbId)
-                                 .residues(activeSiteResidues)
-                                 .build();
+                        .pdbId(pdbId)
+                        .residues(activeSiteResidues)
+                        .build();
             }
         }
 

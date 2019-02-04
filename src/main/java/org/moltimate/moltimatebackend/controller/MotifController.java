@@ -7,6 +7,7 @@ import org.moltimate.moltimatebackend.model.Residue;
 import org.moltimate.moltimatebackend.model.ResidueQuerySet;
 import org.moltimate.moltimatebackend.service.MotifService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,8 +36,8 @@ public class MotifController {
      * Return all Motifs, optionally filtered by EC number
      */
     @RequestMapping(method = RequestMethod.GET)
-    public ResponseEntity<List<Motif>> findMotifs(@RequestParam("ecnumber") Optional<String> ecNumber) {
-        return ResponseEntity.ok(motifService.queryByEcNumber(ecNumber.orElse(null)));
+    public ResponseEntity<Page<Motif>> findMotifs(@RequestParam("ecnumber") Optional<String> ecNumber) {
+        return ResponseEntity.ok(motifService.queryByEcNumber(ecNumber.orElse(null), 0));
     }
 
     /**
