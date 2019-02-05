@@ -1,18 +1,14 @@
 package org.moltimate.moltimatebackend.service;
 
 import com.opencsv.CSVReader;
-import com.opencsv.CSVReaderBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.moltimate.moltimatebackend.model.ActiveSite;
 import org.moltimate.moltimatebackend.model.Residue;
-import org.moltimate.moltimatebackend.util.HttpUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.Reader;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,14 +51,14 @@ public class ActiveSiteService {
                                           .residues(activeSiteResidues)
                                           .build());
             }
-            Reader catalyticSiteAtlasCsvData = new StringReader(HttpUtils.readStringFromURL(CSA_CSV_URL));
-            CSVReader csvReader = new CSVReaderBuilder(catalyticSiteAtlasCsvData).withSkipLines(1)
-                                                                                 .build();
-
-            ActiveSite nextSite;
-            while ((nextSite = readNextActiveSite(csvReader)) != null) {
-                activeSites.add(nextSite);
-            }
+//            Reader catalyticSiteAtlasCsvData = new StringReader(HttpUtils.readStringFromURL(CSA_CSV_URL));
+//            CSVReader csvReader = new CSVReaderBuilder(catalyticSiteAtlasCsvData).withSkipLines(1)
+//                                                                                 .build();
+//
+//            ActiveSite nextSite;
+//            while ((nextSite = readNextActiveSite(csvReader)) != null) {
+//                activeSites.add(nextSite);
+//            }
 
             return activeSites;
         } catch (IOException e) {
@@ -83,9 +79,6 @@ public class ActiveSiteService {
             String pdbId = residueEntry[2];
 
             boolean isResidue = "residue".equals(residueEntry[4]);
-            if (pdbId.equals("1a0j") || pdbId.equals("1rtf")) {
-                System.out.println("yeet");
-            }
             if (isResidue) {
                 Residue residue = Residue.builder()
                                          .residueName(residueEntry[5])
