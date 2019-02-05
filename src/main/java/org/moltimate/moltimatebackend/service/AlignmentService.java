@@ -9,12 +9,11 @@ import org.moltimate.moltimatebackend.model.Residue;
 import org.moltimate.moltimatebackend.request.ActiveSiteAlignmentRequest;
 import org.moltimate.moltimatebackend.request.BackboneAlignmentRequest;
 import org.moltimate.moltimatebackend.response.AlignmentResponse;
-import org.moltimate.moltimatebackend.util.AlignmentUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -23,7 +22,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
- * AlignmentService provides a way to align the active sites and backbones of
+ * AlignmentService provides a way to align the active sites and backbones of proteins
  */
 @Service
 @Slf4j
@@ -44,21 +43,30 @@ public class AlignmentService {
     public AlignmentResponse alignActiveSites(ActiveSiteAlignmentRequest alignmentRequest) {
         return alignActiveSites(
                 proteinService.queryPdb(alignmentRequest.getPdbIds()),
-                motifService.queryByEcNumber(alignmentRequest.getEcNumber())
+                alignmentRequest.getEcNumber()
         );
     }
 
-    public AlignmentResponse alignActiveSites(List<Structure> sourceStructures, List<Motif> motifStructures) {
+    private AlignmentResponse alignActiveSites(List<Structure> sourceStructures, String ecNumber) {
         HashMap<String, List<Alignment>> results = new HashMap<>();
-        sourceStructures.forEach(structure ->
-                                         results.put(structure.getPDBCode(), motifStructures.stream()
-                                                 .parallel()
-                                                 .map(motif -> alignActiveSites(
-                                                         structure,
-                                                         motif
-                                                 ))
-                                                 .filter(Objects::nonNull)
-                                                 .collect(Collectors.toList())));
+        sourceStructures.forEach(structure -> results.put(structure.getPDBCode(), new ArrayList<>()));
+
+        Page<Motif> initialPage = motifService.queryByEcNumber(ecNumber, 0);
+        for (int pageNumber = 0; pageNumber < initialPage.getTotalPages(); pageNumber++) {
+            Page<Motif> motifStructures = motifService.queryByEcNumber(ecNumber, pageNumber);
+            sourceStructures.forEach(structure -> {
+                results.get(structure.getPDBCode())
+                       .addAll(motifStructures.stream()
+                                              .parallel()
+                                              .map(motif -> alignActiveSites(
+                                                      structure,
+                                                      motif
+                                              ))
+                                              .filter(Objects::nonNull)
+                                              .collect(Collectors.toList()));
+            });
+        }
+
         return new AlignmentResponse(results);
     }
 
@@ -104,15 +112,12 @@ public class AlignmentService {
         motif.getActiveSiteResidues().forEach(residue -> {
             seq1.add(residue);
             List<Group> groups = residueMap.get(residue);
-            if(groups != null && !groups.isEmpty()){
+            if (groups != null && !groups.isEmpty()) {
                 seq2.add(groups.get(0));
                 alignmentMapping.put(residue, groups.get(0));
             }
         });
 
-        if(residueMap.size() > 0){
-            System.out.println("yeet");
-        }
         //String alignmentString = AlignmentUtils.groupListToResString(seq2);
         //String motifResString = AlignmentUtils.residueListToResString(motif.getActiveSiteResidues());
         //int distance = AlignmentUtils.levensteinDistance(alignmentString, motifResString);

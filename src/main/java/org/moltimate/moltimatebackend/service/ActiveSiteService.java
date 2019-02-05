@@ -1,6 +1,7 @@
 package org.moltimate.moltimatebackend.service;
 
 import com.opencsv.CSVReader;
+import com.opencsv.CSVReaderBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.moltimate.moltimatebackend.model.ActiveSite;
 import org.moltimate.moltimatebackend.model.Residue;
@@ -10,6 +11,7 @@ import org.springframework.validation.annotation.Validated;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -21,16 +23,24 @@ import java.util.List;
 @Slf4j
 public class ActiveSiteService {
 
-    private static final String CSA_CSV_URL = "https://www.ebi.ac.uk/thornton-srv/m-csa/media/flat_files/curated_data.csv";
+    private static final String PROMOL_CSV_PATH = "src/main/resources/motifdata/promol_active_sites.csv";
+    private static final String CSA_CSV_PATH = "src/main/resources/motifdata/csa_curated_data.csv";
+//    private static final String CSA_CSV_URL = "https://www.ebi.ac.uk/thornton-srv/m-csa/media/flat_files/csa_curated_data.csv";
+
+    public List<ActiveSite> getActiveSites() {
+        List<ActiveSite> activeSites = new ArrayList<>(getPromolActiveSites());
+        activeSites.addAll(getCsaActiveSites());
+        return activeSites;
+    }
 
     /**
-     * Retrieve all active sites from the Catalytic Site Atlas.
+     * Retrieve all active sites from the scraped Promol motifs.
      *
      * @return A list of ActiveSites
      */
-    public List<ActiveSite> getActiveSites() {
+    private List<ActiveSite> getPromolActiveSites() {
         try {
-            CSVReader reader = new CSVReader(new FileReader("tmp/active_sites.csv"), ',');
+            CSVReader reader = new CSVReader(new FileReader(PROMOL_CSV_PATH), ',');
             String[] residueEntry;
             List<ActiveSite> activeSites = new ArrayList<>();
             while ((residueEntry = reader.readNext()) != null) {
@@ -62,16 +72,40 @@ public class ActiveSiteService {
 
             return activeSites;
         } catch (IOException e) {
-            System.out.println(e);
+            e.printStackTrace();
         }
 
-        return null;
+        return Collections.emptyList();
+    }
+
+    /**
+     * Retrieve all active sites from the Catalytic Site Atlas.
+     *
+     * @return A list of ActiveSites
+     */
+    private List<ActiveSite> getCsaActiveSites() {
+        try {
+            CSVReader csvReader = new CSVReaderBuilder(new FileReader(CSA_CSV_PATH)).withSkipLines(1)
+                                                                                    .build();
+
+            List<ActiveSite> activeSites = new ArrayList<>();
+            ActiveSite nextSite;
+            while ((nextSite = readNextCsaActiveSite(csvReader)) != null) {
+                activeSites.add(nextSite);
+            }
+
+            return activeSites;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return Collections.emptyList();
     }
 
     /**
      * Reads the next protein's active site residues from the Catalytic Site Atlas curated data file.
      */
-    private ActiveSite readNextActiveSite(CSVReader csvReader) throws IOException {
+    private ActiveSite readNextCsaActiveSite(CSVReader csvReader) throws IOException {
         List<Residue> activeSiteResidues = new ArrayList<>();
 
         String[] residueEntry;
