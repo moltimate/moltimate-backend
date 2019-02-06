@@ -59,7 +59,6 @@ public class AlignmentService {
                 results.get(structure.getPDBCode())
                        .addAll(motifStructures.stream()
                                               .parallel()
-                                              //.filter(motif -> motif.getPdbId().equalsIgnoreCase("1rtf"))
                                               .map(motif -> alignActiveSites(
                                                       structure,
                                                       motif

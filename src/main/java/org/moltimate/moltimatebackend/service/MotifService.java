@@ -152,6 +152,7 @@ public class MotifService {
                                          .filter(atom -> atom.getName()
                                                              .equals("CB"))
                                          .findFirst()
+                                         //Otherwise get the CA atom
                                          .orElse(groupAtoms.get(1));
             List<Atom> filteredAtoms = groupAtoms.subList(groupAtoms.indexOf(firstCbAtom), groupAtoms.size());
             filteredAtoms = filteredAtoms.stream().filter(atom -> !atom.getName().contains("H")).collect(Collectors.toList());
