@@ -189,7 +189,8 @@ public class StructureUtils {
         residue2List.forEach(residue -> atom2List.addAll(getAtomByType(residue, atom2Name)));
 
         atom1List.forEach(atom1 -> atom2List.forEach(atom2 -> {
-            if (rmsd(atom1.getCoords(), atom2.getCoords()) < distance) {
+
+            if (atom1.getGroup() != atom2.getGroup() && rmsd(atom1.getCoords(), atom2.getCoords()) < distance) {
                 results.add(atom1);
             }
         }));

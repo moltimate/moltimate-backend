@@ -19,6 +19,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -58,6 +59,7 @@ public class AlignmentService {
                 results.get(structure.getPDBCode())
                        .addAll(motifStructures.stream()
                                               .parallel()
+                                              //.filter(motif -> motif.getPdbId().equalsIgnoreCase("1rtf"))
                                               .map(motif -> alignActiveSites(
                                                       structure,
                                                       motif
@@ -66,41 +68,16 @@ public class AlignmentService {
                                               .collect(Collectors.toList()));
             });
         }
+        int resultsCount = 0;
+        for(String key: results.keySet()){
+            resultsCount+= results.get(key).size();
+        }
+        System.out.println("Found " + resultsCount + " results");
 
         return new AlignmentResponse(results);
     }
 
     private Alignment alignActiveSites(Structure structure, Motif motif) {
-//        Map<String, List<Group>> residueMap = motif.runQueries(structure, 1);
-//        List<Integer> distances = new ArrayList<>();
-//
-//        residueMap.values()
-//                .forEach(residueList -> {
-//                    String alignmentString = AlignmentUtils.groupListToResString(residueList);
-//                    String motifResString = AlignmentUtils.residueListToResString(motif.getActiveSiteResidues());
-//                    distances.add(AlignmentUtils.levensteinDistance(alignmentString, motifResString));
-//                });
-//
-//        if (!distances.isEmpty() && (motif.getActiveSiteResidues()
-//                .size()) > Collections.min(distances)) {
-//            HashSet<Group> residues = new HashSet<>();
-//
-//            residueMap.values()
-//                    .forEach(residues::addAll);
-//            if(residues.size() >2 && residues.size() <= motif.getActiveSiteResidues().size()) {
-//                Alignment alignment = new Alignment();
-//                alignment.setActiveSiteResidues(motif.getActiveSiteResidues());
-//                alignment.setMotifPdbId(motif.getPdbId());
-//                alignment.setMinDistance(Collections.min(distances));
-//                alignment.setMaxDistance(Collections.max(distances));
-//                alignment.setAlignedResidues(residues.stream()
-//                                                     .map(Residue::fromGroup)
-//                                                     .collect(Collectors.toList()));
-//                return alignment;
-//            }
-//        }
-//
-//        return null;
         Map<Residue, List<Group>> residueMap = motif.runQueries(structure, 1);
         List<Integer> distances = new ArrayList<>();
 
@@ -109,12 +86,22 @@ public class AlignmentService {
 
         Map<Residue, Group> alignmentMapping = new HashMap<>();
 
+        Set<Group> found = new HashSet<>();
+
         motif.getActiveSiteResidues().forEach(residue -> {
-            seq1.add(residue);
             List<Group> groups = residueMap.get(residue);
             if (groups != null && !groups.isEmpty()) {
-                seq2.add(groups.get(0));
-                alignmentMapping.put(residue, groups.get(0));
+                Group matchingResidue = groups.stream()
+                                      .filter(group -> group.getResidueNumber().toString().equals(residue.getResidueId()))
+                                      .findFirst()
+                                      .orElse(groups.get(0));
+
+                if (!found.contains(matchingResidue)) {
+                    seq1.add(residue);
+                    seq2.add(matchingResidue);
+                    alignmentMapping.put(residue, matchingResidue);
+                    found.add(matchingResidue);
+                }
             }
         });
 
@@ -122,18 +109,34 @@ public class AlignmentService {
         //String motifResString = AlignmentUtils.residueListToResString(motif.getActiveSiteResidues());
         //int distance = AlignmentUtils.levensteinDistance(alignmentString, motifResString);
 
-        if (motif.getActiveSiteResidues().size() > 0 && residueMap.size() > 1) {
+        ArrayList<Residue> activeSiteOutput = new ArrayList<>();
+        Set<Residue> used = new HashSet<>();
+
+        for(int i = 0; i < seq1.size(); i++){
+            activeSiteOutput.add(seq1.get(i));
+            used.add(seq1.get(i));
+        }
+
+        int dist = 0;
+        for(Residue residue: motif.getActiveSiteResidues()){
+            if (!used.contains(residue)){
+                activeSiteOutput.add(residue);
+                dist++;
+            }
+        }
+
+        if (seq2.size() > 1 && ( dist==0 || (dist<=activeSiteOutput.size()/3 && activeSiteOutput.size()>2) )) {
             HashSet<Group> residues = new HashSet<>();
             residueMap.values()
                       .forEach(residues::addAll);
             Alignment alignment = new Alignment();
-            alignment.setActiveSiteResidues(new ArrayList<>(alignmentMapping.keySet()));
+            alignment.setActiveSiteResidues(activeSiteOutput);
             alignment.setMotifPdbId(motif.getPdbId());
-            alignment.setMinDistance(0);//Collections.min(distances));
-            alignment.setMaxDistance(0);//Collections.max(distances));
-            alignment.setAlignedResidues(alignmentMapping.values().stream()
-                                                         .map(Residue::fromGroup)
-                                                         .collect(Collectors.toList()));
+            alignment.setMinDistance(dist);
+            alignment.setMaxDistance(dist);
+            alignment.setAlignedResidues(seq2.stream()
+                                             .map(Residue::fromGroup)
+                                             .collect(Collectors.toList()));
             return alignment;
         }
 

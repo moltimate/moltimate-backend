@@ -61,14 +61,6 @@ public class ActiveSiteService {
                                           .residues(activeSiteResidues)
                                           .build());
             }
-//            Reader catalyticSiteAtlasCsvData = new StringReader(HttpUtils.readStringFromURL(CSA_CSV_URL));
-//            CSVReader csvReader = new CSVReaderBuilder(catalyticSiteAtlasCsvData).withSkipLines(1)
-//                                                                                 .build();
-//
-//            ActiveSite nextSite;
-//            while ((nextSite = readNextActiveSite(csvReader)) != null) {
-//                activeSites.add(nextSite);
-//            }
 
             return activeSites;
         } catch (IOException e) {

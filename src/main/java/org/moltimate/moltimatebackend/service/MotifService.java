@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class MotifService {
 
-    private static final int MOTIF_BATCH_SIZE = 32;
+    private static final int MOTIF_BATCH_SIZE = 512;
 
     @Autowired
     private ActiveSiteService activeSiteService;
@@ -152,8 +152,9 @@ public class MotifService {
                                          .filter(atom -> atom.getName()
                                                              .equals("CB"))
                                          .findFirst()
-                                         .orElse(groupAtoms.get(0));
+                                         .orElse(groupAtoms.get(1));
             List<Atom> filteredAtoms = groupAtoms.subList(groupAtoms.indexOf(firstCbAtom), groupAtoms.size());
+            filteredAtoms = filteredAtoms.stream().filter(atom -> !atom.getName().contains("H")).collect(Collectors.toList());
             filteredResidueAtoms.put(residue, filteredAtoms);
         });
 
