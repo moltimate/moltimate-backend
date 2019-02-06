@@ -53,8 +53,9 @@ public class AlignmentService {
         sourceStructures.forEach(structure -> results.put(structure.getPDBCode(), new ArrayList<>()));
 
         int pageNumber = 0;
-        Page<Motif> motifs;
-        while ((motifs = motifService.queryByEcNumber(motifEcNumberFilter, pageNumber)).hasContent()) {
+        Page<Motif> motifs = motifService.queryByEcNumber(motifEcNumberFilter, pageNumber);
+        log.info("Aligning active sites of " + sourceStructures.size() + " PDB entries with " + motifs.getTotalElements() + " motifs.");
+        while (motifs.hasContent()) {
             for (Structure structure : sourceStructures) {
                 results.get(structure.getPDBCode())
                         .addAll(motifs.stream()
@@ -67,6 +68,7 @@ public class AlignmentService {
                                         .collect(Collectors.toList()));
             }
             pageNumber++;
+            motifs = motifService.queryByEcNumber(motifEcNumberFilter, pageNumber);
         }
 
         int resultsCount = 0;

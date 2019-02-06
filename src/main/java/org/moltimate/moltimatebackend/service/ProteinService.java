@@ -46,7 +46,6 @@ public class ProteinService {
      * @return BioJava Structure object representing the PDB ID
      */
     public Structure queryPdb(String pdbId) {
-        log.info("Querying for structure with id: " + pdbId);
         try {
             return PDB_FILE_READER.getStructureById(pdbId);
         } catch (IOException e) {

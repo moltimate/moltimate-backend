@@ -33,7 +33,7 @@ public class AlignmentController {
 
     @RequestMapping(value = "/backbone", method = RequestMethod.POST)
     public ResponseEntity<AlignmentResponse> backboneAlignment(@RequestBody BackboneAlignmentRequest alignmentRequest) {
-        log.info("Received request to align active sites: " + alignmentRequest);
+        log.info("Received request to align backbones: " + alignmentRequest);
         return ResponseEntity.ok(alignmentService.alignBackbones(alignmentRequest));
     }
 }
