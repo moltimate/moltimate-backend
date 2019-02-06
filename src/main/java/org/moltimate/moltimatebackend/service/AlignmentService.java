@@ -48,25 +48,27 @@ public class AlignmentService {
         );
     }
 
-    private AlignmentResponse alignActiveSites(List<Structure> sourceStructures, String ecNumber) {
+    private AlignmentResponse alignActiveSites(List<Structure> sourceStructures, String motifEcNumberFilter) {
         HashMap<String, List<Alignment>> results = new HashMap<>();
         sourceStructures.forEach(structure -> results.put(structure.getPDBCode(), new ArrayList<>()));
 
-        Page<Motif> initialPage = motifService.queryByEcNumber(ecNumber, 0);
-        for (int pageNumber = 0; pageNumber < initialPage.getTotalPages(); pageNumber++) {
-            Page<Motif> motifStructures = motifService.queryByEcNumber(ecNumber, pageNumber);
-            sourceStructures.forEach(structure -> {
+        int pageNumber = 0;
+        Page<Motif> motifs;
+        while ((motifs = motifService.queryByEcNumber(motifEcNumberFilter, pageNumber)).hasContent()) {
+            for (Structure structure : sourceStructures) {
                 results.get(structure.getPDBCode())
-                       .addAll(motifStructures.stream()
-                                              .parallel()
-                                              .map(motif -> alignActiveSites(
-                                                      structure,
-                                                      motif
-                                              ))
-                                              .filter(Objects::nonNull)
-                                              .collect(Collectors.toList()));
-            });
+                        .addAll(motifs.stream()
+                                        .parallel()
+                                        .map(motif -> alignActiveSites(
+                                                structure,
+                                                motif
+                                        ))
+                                        .filter(Objects::nonNull)
+                                        .collect(Collectors.toList()));
+            }
+            pageNumber++;
         }
+
         int resultsCount = 0;
         for(String key: results.keySet()){
             resultsCount+= results.get(key).size();

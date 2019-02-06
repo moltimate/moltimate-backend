@@ -60,20 +60,18 @@ public class MotifService {
     }
 
     /**
-     * @return List of all Motifs in the database
-     */
-    public Page<Motif> findAll(int pageNumber) {
-        log.info("Getting motifs (page " + pageNumber + ", batch size " + MOTIF_BATCH_SIZE + ")");
-        return motifRepository.findAll(new PageRequest(pageNumber, MOTIF_BATCH_SIZE));
-    }
-
-    /**
      * @param pdbId PDB ID for this Motif
      * @return The matching motif
      */
     public Motif queryByPdbId(String pdbId) {
-        log.info("Querying for motif with pdbId: " + pdbId);
         return motifRepository.findByPdbId(pdbId);
+    }
+
+    /**
+     * @return List of all Motifs in the database
+     */
+    public Page<Motif> findAll(int pageNumber) {
+        return motifRepository.findAll(PageRequest.of(pageNumber, MOTIF_BATCH_SIZE));
     }
 
     /**
@@ -84,10 +82,8 @@ public class MotifService {
         if (ecNumber == null) {
             return findAll(pageNumber);
         }
-
-        log.info("Querying for motifs in EC class: " + ecNumber);
         EcNumberValidator.validate(ecNumber);
-        return motifRepository.findByEcNumberStartingWith(ecNumber, new PageRequest(pageNumber, MOTIF_BATCH_SIZE));
+        return motifRepository.findByEcNumberStartingWith(ecNumber, PageRequest.of(pageNumber, MOTIF_BATCH_SIZE));
     }
 
     // TODO: Change to running periodically (once per week?), or create an endpoint to force-update
@@ -124,13 +120,10 @@ public class MotifService {
                              }
                          });
 
-        System.out.println(failedPdbIds.stream()
-                                       .filter(pdbId -> !"".equals(pdbId))
-                                       .collect(Collectors.toList()));
-        System.out.println(failedPdbIds.stream()
-                                       .filter(pdbId -> !"".equals(pdbId))
-                                       .collect(Collectors.toList())
-                                       .size() + " PDB entries failed (no nulls)");
+        List<String> failedPdbIdsNoNulls = failedPdbIds.stream()
+                .filter(pdbId -> !"".equals(pdbId))
+                .collect(Collectors.toList());
+        log.info(failedPdbIdsNoNulls.size() + " CSA entries failed to update: " + failedPdbIdsNoNulls.toString());
 
         log.info("Finished updating Motif database");
     }
