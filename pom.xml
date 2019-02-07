@@ -92,6 +92,21 @@
             <version>4.3.2</version>
         </dependency>
 
+        <!-- Swagger Documentation -->
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger2</artifactId>
+            <version>2.9.2</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger-ui</artifactId>
+            <version>2.9.2</version>
+            <scope>compile</scope>
+        </dependency>
+
         <!-- Protein Function Analysis -->
         <dependency>
             <groupId>org.biojava</groupId>
