@@ -21,7 +21,7 @@ public class TaskController {
     /**
      * Updates the motif database using the CSA and RCSB PDB
      */
-    @RequestMapping(value = "/updateMotifs", method = RequestMethod.GET)
+    @RequestMapping(value = "/updatemotifs", method = RequestMethod.GET)
     public void updateMotifs() {
         generateMotifService.updateMotifs();
     }
