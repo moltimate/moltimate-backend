@@ -51,8 +51,8 @@ public class GenerateMotifService {
                         for (Residue res : residues) {
                             Group group = StructureUtils.getResidue(
                                     structure, res.getResidueName(), res.getResidueId());
-                            res.setResidueChainName(group.getChain()
-                                                            .getName());
+                            res.setResidueChainName(group.getResidueNumber()
+                                                            .getChainName());
                         }
                         Motif motif = Motif.builder()
                                 .pdbId(pdbId)
