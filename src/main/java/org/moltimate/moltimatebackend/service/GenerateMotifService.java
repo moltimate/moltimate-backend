@@ -48,9 +48,11 @@ public class GenerateMotifService {
                     try {
                         List<Residue> residues = activeSite.getResidues();
                         Structure structure = proteinService.queryPdb(pdbId);
-                        for(Residue res: residues){
-                            Group group = StructureUtils.getResidue(structure, res.getResidueName(), res.getResidueId());
-                            res.setResidueChainName(group.getChain().getName());
+                        for (Residue res : residues) {
+                            Group group = StructureUtils.getResidue(
+                                    structure, res.getResidueName(), res.getResidueId());
+                            res.setResidueChainName(group.getChain()
+                                                            .getName());
                         }
                         Motif motif = Motif.builder()
                                 .pdbId(pdbId)
@@ -68,7 +70,8 @@ public class GenerateMotifService {
         List<String> failedPdbIdsNoNulls = failedPdbIds.stream()
                 .filter(pdbId -> !"".equals(pdbId))
                 .collect(Collectors.toList());
-        log.info("Failed to save " + failedPdbIdsNoNulls.size() + " motifs to the database: " + failedPdbIdsNoNulls.toString());
+        log.info(
+                "Failed to save " + failedPdbIdsNoNulls.size() + " motifs to the database: " + failedPdbIdsNoNulls.toString());
 
         log.info("Finished updating Motif database");
     }
@@ -90,8 +93,12 @@ public class GenerateMotifService {
                     .filter(atom -> atom.getName()
                             .equals("CB"))
                     .findFirst()
-                    .orElse(groupAtoms.get(0));
+                    .orElse(groupAtoms.get(1));
             List<Atom> filteredAtoms = groupAtoms.subList(groupAtoms.indexOf(firstCbAtom), groupAtoms.size());
+            filteredAtoms = filteredAtoms.stream()
+                    .filter(atom -> !atom.getName()
+                            .contains("H"))
+                    .collect(Collectors.toList());
             filteredResidueAtoms.put(residue, filteredAtoms);
         });
 

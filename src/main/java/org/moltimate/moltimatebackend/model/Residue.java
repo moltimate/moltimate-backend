@@ -38,7 +38,7 @@ public class Residue {
                                      .getThree_letter_code())
                 .residueId(residue.getResidueNumber()
                                    .toString())
-                .residueChainName(residue.getChain().getName())
+                .residueChainName(residue.getResidueNumber().getChainName())
                 .build();
     }
 }

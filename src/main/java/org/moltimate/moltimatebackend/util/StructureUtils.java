@@ -190,7 +190,9 @@ public class StructureUtils {
 
         atom1List.forEach(atom1 -> atom2List.forEach(atom2 -> {
 
-            if (atom1.getGroup() != atom2.getGroup() && rmsd(atom1.getCoords(), atom2.getCoords()) < distance) {
+            if (atom1.getGroup() != atom2.getGroup() &&
+                    rmsd(atom1.getCoords(), atom2.getCoords()) < distance &&
+                    Math.abs(rmsd(atom1.getCoords(), atom2.getCoords()) - distance) < 4) {
                 results.add(atom1);
             }
         }));
@@ -205,18 +207,18 @@ public class StructureUtils {
     }
 
     public static String ecNumber(Structure structure) {
-        try{
-        return structure.getEntityInfos()
-                .stream()
-                .filter(Objects::nonNull)
-                .findFirst()
-                .get()
-                .getEcNums()
-                .stream()
-                .filter(Objects::nonNull)
-                .findFirst()
-                .get();
-        } catch (Exception e){
+        try {
+            return structure.getEntityInfos()
+                    .stream()
+                    .filter(Objects::nonNull)
+                    .findFirst()
+                    .get()
+                    .getEcNums()
+                    .stream()
+                    .filter(Objects::nonNull)
+                    .findFirst()
+                    .get();
+        } catch (Exception e) {
             return "-1.-1.-1.-1";
         }
     }

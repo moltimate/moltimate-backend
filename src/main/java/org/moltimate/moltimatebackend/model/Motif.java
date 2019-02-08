@@ -114,7 +114,6 @@ public class Motif {
 
                                                                     .collect(Collectors.toList());
                             candidateGroups.forEach(candidate -> {
-                                String chainName = candidate.getChainId();
                                 residues.computeIfAbsent(residueValue, k -> new ArrayList<>());
                                 residues.get(residueValue)
                                         .add(candidate);
