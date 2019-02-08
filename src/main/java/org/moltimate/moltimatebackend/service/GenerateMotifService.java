@@ -48,7 +48,10 @@ public class GenerateMotifService {
                     try {
                         List<Residue> residues = activeSite.getResidues();
                         Structure structure = proteinService.queryPdb(pdbId);
-
+                        for(Residue res: residues){
+                            Group group = StructureUtils.getResidue(structure, res.getResidueName(), res.getResidueId());
+                            res.setResidueChainName(group.getChain().getName());
+                        }
                         Motif motif = Motif.builder()
                                 .pdbId(pdbId)
                                 .activeSiteResidues(residues)

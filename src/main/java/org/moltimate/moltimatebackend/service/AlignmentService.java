@@ -9,11 +9,14 @@ import org.moltimate.moltimatebackend.model.Residue;
 import org.moltimate.moltimatebackend.request.ActiveSiteAlignmentRequest;
 import org.moltimate.moltimatebackend.request.BackboneAlignmentRequest;
 import org.moltimate.moltimatebackend.response.AlignmentResponse;
+import org.moltimate.moltimatebackend.util.AlignmentUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -72,9 +75,10 @@ public class AlignmentService {
         }
 
         int resultsCount = 0;
-        for(String key: results.keySet()){
-            resultsCount+= results.get(key).size();
+        for (String key : results.keySet()) {
+            resultsCount += results.get(key).size();
         }
+
         System.out.println("Found " + resultsCount + " results");
 
         return new AlignmentResponse(results);
@@ -82,7 +86,6 @@ public class AlignmentService {
 
     private Alignment alignActiveSites(Structure structure, Motif motif) {
         Map<Residue, List<Group>> residueMap = motif.runQueries(structure, 1);
-        List<Integer> distances = new ArrayList<>();
 
         List<Residue> seq1 = new ArrayList<>();
         List<Group> seq2 = new ArrayList<>();
@@ -95,9 +98,11 @@ public class AlignmentService {
             List<Group> groups = residueMap.get(residue);
             if (groups != null && !groups.isEmpty()) {
                 Group matchingResidue = groups.stream()
-                                      .filter(group -> group.getResidueNumber().toString().equals(residue.getResidueId()))
-                                      .findFirst()
-                                      .orElse(groups.get(0));
+                                              .filter(group -> group.getResidueNumber()
+                                                                    .toString()
+                                                                    .equals(residue.getResidueId()))
+                                              .findFirst()
+                                              .orElse(groups.get(0));
 
                 if (!found.contains(matchingResidue)) {
                     seq1.add(residue);
@@ -108,35 +113,39 @@ public class AlignmentService {
             }
         });
 
-        //String alignmentString = AlignmentUtils.groupListToResString(seq2);
-        //String motifResString = AlignmentUtils.residueListToResString(motif.getActiveSiteResidues());
-        //int distance = AlignmentUtils.levensteinDistance(alignmentString, motifResString);
-
         ArrayList<Residue> activeSiteOutput = new ArrayList<>();
         Set<Residue> used = new HashSet<>();
 
-        for(int i = 0; i < seq1.size(); i++){
+        for (int i = 0; i < seq1.size(); i++) {
             activeSiteOutput.add(seq1.get(i));
             used.add(seq1.get(i));
         }
 
-        int dist = 0;
-        for(Residue residue: motif.getActiveSiteResidues()){
-            if (!used.contains(residue)){
+        int missingResidues = 0;
+        for (Residue residue : motif.getActiveSiteResidues()) {
+            if (!used.contains(residue)) {
                 activeSiteOutput.add(residue);
-                dist++;
+                missingResidues++;
             }
         }
 
-        if (seq2.size() > 1 && ( dist==0 || (dist<=activeSiteOutput.size()/3 && activeSiteOutput.size()>2) )) {
+        List<Group> seq2Sorted = new ArrayList<>();
+        seq2Sorted.addAll(seq2);
+        Collections.sort(seq2Sorted, Comparator.comparingInt(o -> o.getResidueNumber().getSeqNum()));
+
+        String alignmentString = AlignmentUtils.groupListToResString(seq2Sorted);
+        String motifResString = AlignmentUtils.residueListToResString(motif.getActiveSiteResidues());
+        int distance = AlignmentUtils.levensteinDistance(alignmentString, motifResString);
+
+        if (seq2.size() > 1 && acceptableDistance(activeSiteOutput.size(), distance)) {
             HashSet<Group> residues = new HashSet<>();
             residueMap.values()
                       .forEach(residues::addAll);
             Alignment alignment = new Alignment();
             alignment.setActiveSiteResidues(activeSiteOutput);
             alignment.setMotifPdbId(motif.getPdbId());
-            alignment.setMinDistance(dist);
-            alignment.setMaxDistance(dist);
+            alignment.setMinDistance(distance);
+            alignment.setMaxDistance(distance);
             alignment.setAlignedResidues(seq2.stream()
                                              .map(Residue::fromGroup)
                                              .collect(Collectors.toList()));
@@ -144,6 +153,18 @@ public class AlignmentService {
         }
 
         return null;
+    }
+
+    public boolean acceptableDistance(int activeSiteSize, int distance) {
+        if(activeSiteSize >=3){
+            return distance == 0;
+        }
+        return distance <= 1;
+//        if (activeSiteSize <= 3) {
+//            return distance == 0;
+//        } else {
+//            return distance <= activeSiteSize / 3;
+//        }
     }
 
     /**

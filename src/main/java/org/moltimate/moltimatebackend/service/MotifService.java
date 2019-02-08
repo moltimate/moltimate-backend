@@ -1,14 +1,21 @@
 package org.moltimate.moltimatebackend.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.biojava.nbio.structure.Structure;
 import org.moltimate.moltimatebackend.model.Motif;
+import org.moltimate.moltimatebackend.model.Residue;
 import org.moltimate.moltimatebackend.repository.MotifRepository;
 import org.moltimate.moltimatebackend.repository.ResidueQuerySetRepository;
 import org.moltimate.moltimatebackend.validation.EcNumberValidator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * MotifService provides a way to query for and create motifs which represent the active sites of proteins.
