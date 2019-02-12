@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class MotifService {
 
-    private static final int MOTIF_BATCH_SIZE = 512;
+    private static final int MOTIF_BATCH_SIZE = 32;
 
     @Autowired
     private MotifRepository motifRepository;
