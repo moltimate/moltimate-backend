@@ -1,3 +1,18 @@
+# Used by Travis CI
+sudo: required
 language: java
 notifications:
   email: false
+before_install:
+  # Decrypt credentials file to authorize with GCP
+  - openssl aes-256-cbc -K $encrypted_a6a69c5b1756_key -iv $encrypted_a6a69c5b1756_iv -in client-secret.json.enc -out client-secret.json -d
+install:
+  # Use the maven 'prod' profile which installs specific dependencies and sets spring profile to 'prod'
+  - mvn -P prod install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+script:
+  - mvn -P prod test -B
+deploy:
+  provider: gae # Deploy using Google App Engine
+  project: moltimate
+  keyfile: client-secret.json
+  on: master # Only deploy on successful merges to master branch

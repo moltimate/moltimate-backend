@@ -1,0 +1,16 @@
+spring:
+  cloud:
+    gcp:
+      project-id: moltimate
+      sql:
+        database-name: motifs
+        instance-connection-name: moltimate:us-east4:backend-db-sql
+        credentials:
+          location: file:cloud-sql-secret.json
+  datasource:
+    continue-on-error: true
+    initialization-mode: always
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.MySQL55Dialect
