@@ -35,4 +35,9 @@ public class AlignmentTest {
 
     private List<Motif> motifs = new ArrayList<>();
     private List<Structure> structures = new ArrayList<>();
+    
+    @Test
+    public void skeletonTest(){
+        return;
+    }
 }
