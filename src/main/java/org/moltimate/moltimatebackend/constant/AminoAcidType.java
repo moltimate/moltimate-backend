@@ -26,7 +26,8 @@ public enum AminoAcidType {
     THR("Q", "Threonine"),
     TRP("R", "Tryptophan"),
     TYR("S", "Tyrosine"),
-    VAL("T", "Valine");
+    VAL("T", "Valine"),
+    SEC("U", "Selenocysteine");
 
     private String charMapping;
     private String fullName;

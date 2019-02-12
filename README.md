@@ -109,7 +109,7 @@ Path parameters
 
 | Parameter | Type | Function |
 |:----------|:-----|:---------|
-| pdbid | String | The unqiue PDB ID of the motif |
+| pdbid | String | The unique PDB ID of the motif |
 
 <a name="get-motifs-debug"></a>
 ##### GET /motifs/debug

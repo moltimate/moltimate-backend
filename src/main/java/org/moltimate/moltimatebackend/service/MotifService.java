@@ -6,9 +6,9 @@ import org.moltimate.moltimatebackend.repository.MotifRepository;
 import org.moltimate.moltimatebackend.repository.ResidueQuerySetRepository;
 import org.moltimate.moltimatebackend.validation.EcNumberValidator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 /**
  * MotifService provides a way to query for and create motifs which represent the active sites of proteins.
@@ -16,6 +16,8 @@ import java.util.List;
 @Service
 @Slf4j
 public class MotifService {
+
+    private static final int MOTIF_BATCH_SIZE = 32;
 
     @Autowired
     private MotifRepository motifRepository;
@@ -30,6 +32,7 @@ public class MotifService {
      * @return A newly generated Motif
      */
     public Motif saveMotif(Motif motif) {
+        log.info("Saving motif with ID " + motif.getPdbId());
         motif.getSelectionQueries()
                 .values()
                 .forEach(residueQuerySetRepository::save);
@@ -37,35 +40,39 @@ public class MotifService {
     }
 
     /**
-     * @return List of all Motifs in the database
-     */
-    public List<Motif> findAll() {
-        log.info("Getting all motifs");
-        return motifRepository.findAll();
-    }
-
-    /**
      * @param pdbId PDB ID for this Motif
      * @return The matching motif
      */
     public Motif queryByPdbId(String pdbId) {
-        log.info("Querying for motif with pdbId: " + pdbId);
         return motifRepository.findByPdbId(pdbId);
+    }
+
+    /**
+     * @return List of all Motifs in the database
+     */
+    public Page<Motif> findAll(int pageNumber) {
+        return motifRepository.findAll(PageRequest.of(pageNumber, MOTIF_BATCH_SIZE));
     }
 
     /**
      * @param ecNumber EC number to filter the set of comparable motifs
      * @return List of Motifs in this enzyme commission class
      */
-    public List<Motif> queryByEcNumber(String ecNumber) {
+    public Page<Motif> queryByEcNumber(String ecNumber, int pageNumber) {
         if (ecNumber == null) {
-            return findAll();
+            return findAll(pageNumber);
         }
-        log.info("Querying for motifs in EC class: " + ecNumber);
-        if(ecNumber != null){
-            EcNumberValidator.validate(ecNumber);
-            return motifRepository.findByEcNumberStartingWith(ecNumber);
-        }
-        return motifRepository.findAll();
+        EcNumberValidator.validate(ecNumber);
+        return motifRepository.findByEcNumberStartingWith(ecNumber, PageRequest.of(pageNumber, MOTIF_BATCH_SIZE));
+    }
+
+    /**
+     * Delete all motifs and their residue query sets
+     */
+    public void deleteAllAndFlush() {
+        motifRepository.deleteAll();
+        motifRepository.flush();
+//        residueQuerySetRepository.deleteAll();
+//        residueQuerySetRepository.flush();
     }
 }
