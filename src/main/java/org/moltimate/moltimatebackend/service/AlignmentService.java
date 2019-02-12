@@ -81,7 +81,7 @@ public class AlignmentService {
                     .size();
         }
 
-        System.out.println("Found " + resultsCount + " results");
+        log.info("Found " + resultsCount + " results");
 
         return new AlignmentResponse(results);
     }
@@ -166,11 +166,6 @@ public class AlignmentService {
             return distance == 0;
         }
         return distance <= 1;
-//        if (activeSiteSize <= 3) {
-//            return distance == 0;
-//        } else {
-//            return distance <= activeSiteSize / 3;
-//        }
     }
 
     /**
