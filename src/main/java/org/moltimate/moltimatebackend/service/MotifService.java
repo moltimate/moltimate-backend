@@ -2,6 +2,7 @@ package org.moltimate.moltimatebackend.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.moltimate.moltimatebackend.model.Motif;
+import org.moltimate.moltimatebackend.model.ResidueQuerySet;
 import org.moltimate.moltimatebackend.repository.MotifRepository;
 import org.moltimate.moltimatebackend.repository.ResidueQuerySetRepository;
 import org.moltimate.moltimatebackend.validation.EcNumberValidator;
@@ -9,6 +10,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * MotifService provides a way to query for and create motifs which represent the active sites of proteins.
@@ -32,11 +38,30 @@ public class MotifService {
      * @return A newly generated Motif
      */
     public Motif saveMotif(Motif motif) {
-        log.info("Saving motif with ID " + motif.getPdbId());
         motif.getSelectionQueries()
                 .values()
                 .forEach(residueQuerySetRepository::save);
         return motifRepository.save(motif);
+    }
+
+    /**
+     * Batch saves a list of new Motif to the database.
+     *
+     * @param motifs New Motif to save
+     * @return A newly generated Motif
+     */
+    public void saveMotifs(List<Motif> motifs) {
+        log.info("Saving " + motifs.size() + " motifs with IDs " + motifs.stream()
+                .map(Motif::getPdbId)
+                .collect(Collectors.toList()));
+
+        List<ResidueQuerySet> residueQuerySets = motifs.stream()
+                .map(Motif::getSelectionQueries)
+                .map(Map::values)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
+        residueQuerySetRepository.saveAll(residueQuerySets);
+        motifRepository.saveAll(motifs);
     }
 
     /**
@@ -72,7 +97,7 @@ public class MotifService {
     public void deleteAllAndFlush() {
         motifRepository.deleteAll();
         motifRepository.flush();
-//        residueQuerySetRepository.deleteAll();
-//        residueQuerySetRepository.flush();
+        residueQuerySetRepository.deleteAll();
+        residueQuerySetRepository.flush();
     }
 }
