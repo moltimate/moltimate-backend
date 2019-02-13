@@ -28,6 +28,8 @@ public class Residue {
     @NotNull
     private String residueId; // "7", "70", ...
 
+    private String residueAltLoc;
+
     public String getIdentifier() {
         return residueName + " " + residueChainName + " " + residueId;
     }
@@ -39,6 +41,14 @@ public class Residue {
                 .residueId(residue.getResidueNumber()
                                    .toString())
                 .residueChainName(residue.getResidueNumber().getChainName())
+                .residueAltLoc(getAltLocFromGroup(residue))
                 .build();
+    }
+
+    public static String getAltLocFromGroup(Group residue){
+        if(residue.hasAltLoc()){
+            return residue.getAtoms().get(1).getAltLoc().toString();
+        }
+        return "";
     }
 }

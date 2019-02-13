@@ -139,7 +139,7 @@ public class AlignmentService {
 
         String alignmentString = AlignmentUtils.groupListToResString(seq2Sorted);
         String motifResString = AlignmentUtils.residueListToResString(motif.getActiveSiteResidues());
-        int distance = AlignmentUtils.levensteinDistance(alignmentString, motifResString);
+        int distance = AlignmentUtils.levensteinDistance(motifResString, alignmentString);
 
         if (seq2.size() > 1 && acceptableDistance(activeSiteOutput.size(), distance)) {
             HashSet<Group> residues = new HashSet<>();

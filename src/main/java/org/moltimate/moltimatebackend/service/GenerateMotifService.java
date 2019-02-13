@@ -53,6 +53,7 @@ public class GenerateMotifService {
                                     structure, res.getResidueName(), res.getResidueId());
                             res.setResidueChainName(group.getResidueNumber()
                                                             .getChainName());
+                            res.setResidueAltLoc(Residue.getAltLocFromGroup(group));
                         }
                         Motif motif = Motif.builder()
                                 .pdbId(pdbId)
