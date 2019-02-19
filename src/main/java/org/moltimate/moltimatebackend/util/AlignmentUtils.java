@@ -1,6 +1,7 @@
 package org.moltimate.moltimatebackend.util;
 
 import org.biojava.nbio.structure.Group;
+import org.biojava.nbio.structure.geometry.SuperPositionSVD;
 import org.moltimate.moltimatebackend.constant.AminoAcidType;
 import org.moltimate.moltimatebackend.model.Residue;
 
@@ -54,4 +55,6 @@ public class AlignmentUtils {
                 .min()
                 .orElse(Integer.MAX_VALUE);
     }
+
+
 }

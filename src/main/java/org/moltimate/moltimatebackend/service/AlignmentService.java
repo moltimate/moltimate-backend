@@ -1,8 +1,10 @@
 package org.moltimate.moltimatebackend.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.biojava.nbio.structure.Atom;
 import org.biojava.nbio.structure.Group;
 import org.biojava.nbio.structure.Structure;
+import org.biojava.nbio.structure.geometry.SuperPositionSVD;
 import org.moltimate.moltimatebackend.model.Alignment;
 import org.moltimate.moltimatebackend.model.Motif;
 import org.moltimate.moltimatebackend.model.Residue;
@@ -10,10 +12,12 @@ import org.moltimate.moltimatebackend.request.ActiveSiteAlignmentRequest;
 import org.moltimate.moltimatebackend.request.BackboneAlignmentRequest;
 import org.moltimate.moltimatebackend.response.AlignmentResponse;
 import org.moltimate.moltimatebackend.util.AlignmentUtils;
+import org.moltimate.moltimatebackend.util.StructureUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
+import javax.vecmath.Point3d;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -153,6 +157,7 @@ public class AlignmentService {
             alignment.setAlignedResidues(seq2.stream()
                                                  .map(Residue::fromGroup)
                                                  .collect(Collectors.toList()));
+            alignment.setRmsd(rmsd(motif.getPdbId(), motif.getActiveSiteResidues(), seq2));
             return alignment;
         }
 
@@ -191,5 +196,38 @@ public class AlignmentService {
         // ... logic to perform one backbone alignment between two structures
 
         return new Alignment();
+    }
+
+    private double rmsd(String motifId, List<Residue> activeSiteResidues, List<Group> alignedResidues){
+        Structure motifStruct = proteinService.queryPdb(motifId);
+
+        List<Group> activeSite = new ArrayList<>();
+        for(Residue residue: activeSiteResidues) {
+            activeSite.add(StructureUtils.getResidue(motifStruct, residue.getResidueName(), residue.getResidueId()));
+        }
+
+        Point3d[] activeSitePoints = atomListFromResidueSet(activeSite);
+        Point3d[] alignedResiduePoints = atomListFromResidueSet(alignedResidues);
+        SuperPositionSVD superPositionSVD = new SuperPositionSVD(false);
+        if(activeSitePoints.length != alignedResiduePoints.length){
+            return -1;
+        }
+        return superPositionSVD.getRmsd(activeSitePoints, alignedResiduePoints);
+    }
+
+    private List<Atom> getAtomsFromGroup(Group group){
+        List<Atom> atoms = group.getAtoms();
+        atoms = atoms.stream().filter(atom -> !atom.getName().contains("H") && !atom.getName().equals("CA") && !atom.getName().equals("N")).collect(Collectors.toList());
+        return atoms;
+    }
+
+    private Point3d[] atomListFromResidueSet(List<Group> residues){
+        List<Atom> atoms = new ArrayList<>();
+        for(Group residue: residues){
+            atoms.addAll(getAtomsFromGroup(residue));
+        }
+        List<Point3d> points = atoms.stream().map(Atom::getCoordsAsPoint3d).collect(Collectors.toList());
+        Point3d[] point3ds = new Point3d[points.size()];
+        return points.toArray(point3ds);
     }
 }
