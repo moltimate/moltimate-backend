@@ -4,4 +4,4 @@ target
 *secret.json
 *.iml
 *.db
-*.tar.gz
+*.tar
