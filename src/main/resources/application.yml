@@ -2,3 +2,6 @@
 spring:
   profiles:
     active: @activatedSpringProfile@
+logging:
+  level:
+    org.biojava: OFF
