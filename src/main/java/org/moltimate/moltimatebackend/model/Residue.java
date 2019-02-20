@@ -28,6 +28,7 @@ public class Residue {
     @NotNull
     private String residueId; // "7", "70", ...
 
+    @NotNull
     private String residueAltLoc;
 
     public String getIdentifier() {
