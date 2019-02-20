@@ -53,6 +53,10 @@ public class ActiveSiteService {
 
         activeSiteLists.forEach(activeSites -> {
             activeSites.forEach(activeSite -> {
+                if (activeSite.getResidues().size() < 3) {
+                    return; // ignore active sites with fewer than 3 residues
+                }
+
                 if (!pdbIdSeen.containsKey(activeSite.getPdbId()) && !"".equals(activeSite.getPdbId())) {
                     distinctActiveSites.add(activeSite);
                     pdbIdSeen.put(activeSite.getPdbId(), true);
