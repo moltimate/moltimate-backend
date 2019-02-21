@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,13 +35,14 @@ public class GenerateMotifService {
 
     // TODO: Pessimistic lock the motifs table until update is finished
     public void updateMotifs() {
-        log.info("Updating Motif database from the Catalytic Site Atlas and the RCSB PDB");
+        log.info("Updating Motif database");
         List<ActiveSite> activeSites = activeSiteService.getActiveSites();
 
         log.info("Deleting and flushing Motif database");
         motifService.deleteAllAndFlush();
 
         log.info("Saving " + activeSites.size() + " new motifs");
+        AtomicInteger motifsSaved = new AtomicInteger(0);
         List<String> failedPdbIds = new ArrayList<>();
         activeSites.parallelStream()
                 .forEach(activeSite -> {
@@ -62,19 +64,15 @@ public class GenerateMotifService {
                                 .selectionQueries(generateSelectionQueries(structure, residues))
                                 .build();
                         motifService.saveMotif(motif);
+                        motifsSaved.incrementAndGet();
                     } catch (Exception e) {
                         e.printStackTrace();
                         failedPdbIds.add(pdbId);
                     }
                 });
 
-        List<String> failedPdbIdsNoNulls = failedPdbIds.stream()
-                .filter(pdbId -> !"".equals(pdbId))
-                .collect(Collectors.toList());
-        log.info(
-                "Failed to save " + failedPdbIdsNoNulls.size() + " motifs to the database: " + failedPdbIdsNoNulls.toString());
-
-        log.info("Finished updating Motif database");
+        log.info("Failed to save " + failedPdbIds.size() + " motifs to the database: " + failedPdbIds.toString());
+        log.info("Finished saving " + motifsSaved.get() + " motifs to the database");
     }
 
     /**
