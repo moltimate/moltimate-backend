@@ -235,7 +235,6 @@ public class AlignmentService {
         for(Group residue: residues){
             atoms.addAll(getAtomsFromGroup(residue));
         }
-        System.out.println(atoms.stream().map(Atom::getName).collect(Collectors.toList()));
         List<Point3d> points = atoms.stream().map(Atom::getCoordsAsPoint3d).collect(Collectors.toList());
         Point3d[] point3ds = new Point3d[points.size()];
         return points.toArray(point3ds);
