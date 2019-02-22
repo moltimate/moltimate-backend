@@ -217,7 +217,16 @@ public class AlignmentService {
 
     private List<Atom> getAtomsFromGroup(Group group){
         List<Atom> atoms = group.getAtoms();
-        atoms = atoms.stream().filter(atom -> !atom.getName().contains("H") && !atom.getName().equals("CA") && !atom.getName().equals("N")).collect(Collectors.toList());
+        atoms = atoms.stream().filter(atom ->
+                //Remove hydrogen atoms
+                !atom.getName().contains("H") &&
+                //These ones also get in the way
+                !atom.getName().startsWith("D") &&
+                //Remove backbone atoms
+                !atom.getName().equals("N") &&
+                !atom.getName().equals("C") &&
+                !atom.getName().equals("O"))
+                .collect(Collectors.toList());
         return atoms;
     }
 
@@ -226,6 +235,7 @@ public class AlignmentService {
         for(Group residue: residues){
             atoms.addAll(getAtomsFromGroup(residue));
         }
+        System.out.println(atoms.stream().map(Atom::getName).collect(Collectors.toList()));
         List<Point3d> points = atoms.stream().map(Atom::getCoordsAsPoint3d).collect(Collectors.toList());
         Point3d[] point3ds = new Point3d[points.size()];
         return points.toArray(point3ds);

@@ -1,7 +1,6 @@
 package org.moltimate.moltimatebackend.util;
 
 import org.biojava.nbio.structure.Group;
-import org.biojava.nbio.structure.geometry.SuperPositionSVD;
 import org.moltimate.moltimatebackend.constant.AminoAcidType;
 import org.moltimate.moltimatebackend.model.Residue;
 
@@ -13,7 +12,7 @@ public class AlignmentUtils {
     public static String groupListToResString(List<Group> residues) {
         StringBuilder stringBuilder = new StringBuilder();
         residues.forEach(residue -> stringBuilder.append(AminoAcidType.getCharMapping(residue.getChemComp()
-                                                                                                   .getThree_letter_code())));
+                                                                                              .getThree_letter_code())));
         return stringBuilder.toString();
     }
 
@@ -55,6 +54,4 @@ public class AlignmentUtils {
                 .min()
                 .orElse(Integer.MAX_VALUE);
     }
-
-
 }
