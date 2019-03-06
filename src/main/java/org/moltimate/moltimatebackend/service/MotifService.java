@@ -180,6 +180,10 @@ public class MotifService {
                             .equals("CB"))
                     .findFirst()
                     .orElse(groupAtoms.get(1));
+            if (residue.getResidueName()
+                    .equalsIgnoreCase("ALA")) {
+                firstCbAtom = groupAtoms.get(1);
+            }
             List<Atom> filteredAtoms = groupAtoms.subList(groupAtoms.indexOf(firstCbAtom), groupAtoms.size());
             filteredAtoms = filteredAtoms.stream()
                     .filter(atom -> !atom.getName()

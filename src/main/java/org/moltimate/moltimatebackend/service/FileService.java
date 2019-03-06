@@ -1,7 +1,6 @@
 package org.moltimate.moltimatebackend.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.biojava.nbio.structure.Structure;
 import org.moltimate.moltimatebackend.model.Residue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
