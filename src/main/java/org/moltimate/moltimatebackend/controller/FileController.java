@@ -1,8 +1,7 @@
 package org.moltimate.moltimatebackend.controller;
 
 import lombok.extern.slf4j.Slf4j;
-import org.moltimate.moltimatebackend.service.FileService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.moltimate.moltimatebackend.util.FileUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -16,9 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(value = "/download")
 @Slf4j
 public class FileController {
-
-    @Autowired
-    private FileService fileService;
 
     private static enum ProteinFileType {
         PDB(".pdb"),
@@ -44,7 +40,7 @@ public class FileController {
     )
     public ResponseEntity<Resource> downloadAsPdb(@PathVariable String pdbId) {
         return createResponseFile(
-                fileService.getAsPdb(pdbId),
+                FileUtils.getPdbFile(pdbId),
                 pdbId + ProteinFileType.PDB
         );
     }
@@ -56,7 +52,7 @@ public class FileController {
     )
     public ResponseEntity<Resource> downloadAsMmcif(@PathVariable String pdbId) {
         return createResponseFile(
-                fileService.getAsMmcif(pdbId),
+                FileUtils.getMmcifFile(pdbId),
                 pdbId + ProteinFileType.MMCIF
         );
     }
@@ -68,7 +64,7 @@ public class FileController {
     )
     public ResponseEntity<Resource> downloadAsMotif(@PathVariable String pdbId) {
         return createResponseFile(
-                fileService.getAsMotif(pdbId, null),
+                FileUtils.getMotifFile(pdbId, null),
                 pdbId + ProteinFileType.MOTIF
         );
     }

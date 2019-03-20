@@ -1,38 +1,25 @@
-package org.moltimate.moltimatebackend.service;
+package org.moltimate.moltimatebackend.util;
 
-import lombok.extern.slf4j.Slf4j;
 import org.biojava.nbio.structure.Structure;
 import org.biojava.nbio.structure.io.MMCIFFileReader;
-import org.biojava.nbio.structure.io.MMTFFileReader;
 import org.biojava.nbio.structure.io.PDBFileReader;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * ProteinService provides a way to query proteins from the PDB and convert them to BioJava Structure objects.
- */
-@Service
-@Slf4j
-public class ProteinService {
+public class ProteinUtils {
 
     private static final PDBFileReader PDB_FILE_READER = new PDBFileReader();
     private static final MMCIFFileReader MMCIF_FILE_READER = new MMCIFFileReader();
-    private static final MMTFFileReader MMTF_FILE_READER = new MMTFFileReader();
-
-    @Autowired
-    private AlignmentService alignmentService;
 
     /**
      * @param pdbIds List of PDB ID strings
      * @return List of BioJava Structure objects representing each PDB ID
      */
-    public List<Structure> queryPdb(List<String> pdbIds) {
+    public static List<Structure> queryPdb(List<String> pdbIds) {
         return pdbIds.stream()
-                .map(this::queryPdb)
+                .map(ProteinUtils::queryPdb)
                 .collect(Collectors.toList());
     }
 
@@ -40,14 +27,14 @@ public class ProteinService {
      * @param pdbId PDB ID string
      * @return BioJava Structure object representing the PDB ID
      */
-    public Structure queryPdb(String pdbId) {
+    public static Structure queryPdb(String pdbId) {
         try {
             return PDB_FILE_READER.getStructureById(pdbId);
-        } catch (IOException e1) {
+        } catch (IOException pdbReaderError) {
             try {
                 return MMCIF_FILE_READER.getStructureById(pdbId);
-            } catch (IOException e2) {
-                e2.printStackTrace();
+            } catch (IOException mmcifReaderError) {
+                mmcifReaderError.printStackTrace();
                 throw new RuntimeException("Cannot find structure with PDB id " + pdbId);
             }
         }
