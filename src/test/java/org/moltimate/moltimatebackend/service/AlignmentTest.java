@@ -19,9 +19,6 @@ public class AlignmentTest {
     @InjectMocks
     private AlignmentService alignmentService;
 
-    @InjectMocks
-    private ProteinService proteinService;
-
     @Mock
     private MotifService motifService;
 

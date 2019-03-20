@@ -11,6 +11,7 @@ import org.moltimate.moltimatebackend.model.Residue;
 import org.moltimate.moltimatebackend.request.ActiveSiteAlignmentRequest;
 import org.moltimate.moltimatebackend.response.ActiveSiteAlignmentResponse;
 import org.moltimate.moltimatebackend.util.AlignmentUtils;
+import org.moltimate.moltimatebackend.util.ProteinUtils;
 import org.moltimate.moltimatebackend.util.StructureUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -36,9 +37,6 @@ import java.util.stream.Collectors;
 public class AlignmentService {
 
     @Autowired
-    private ProteinService proteinService;
-
-    @Autowired
     private MotifService motifService;
 
     /**
@@ -48,20 +46,20 @@ public class AlignmentService {
      * @return ActiveSiteAlignmentResponse which contains all alignments and their relevant data
      */
     public ActiveSiteAlignmentResponse alignActiveSites(ActiveSiteAlignmentRequest alignmentRequest) {
-        return alignActiveSites(
-                proteinService.queryPdb(alignmentRequest.getPdbIds()),
-                alignmentRequest.getEcNumber()
-        );
-    }
+        List<Structure> sourceStructures = alignmentRequest.getPdbIdsAsStructures();
+        List<Motif> customMotifs = alignmentRequest.getCustomMotifs();
+        String motifEcNumberFilter = alignmentRequest.getEcNumber();
 
-    private ActiveSiteAlignmentResponse alignActiveSites(List<Structure> sourceStructures, String motifEcNumberFilter) {
         HashMap<String, List<Alignment>> results = new HashMap<>();
         sourceStructures.forEach(structure -> results.put(structure.getPDBCode(), new ArrayList<>()));
 
         int pageNumber = 0;
         Page<Motif> motifs = motifService.queryByEcNumber(motifEcNumberFilter, pageNumber);
-        log.info(
-                "Aligning active sites of " + sourceStructures.size() + " PDB entries with " + motifs.getTotalElements() + " motifs.");
+
+        log.info("Aligning active sites of " + sourceStructures.size() + " PDB entries with "
+                         + (motifs.getTotalElements() + customMotifs.size()) + " motifs.");
+
+        // Align structures with motifs from the database
         while (motifs.hasContent()) {
             for (Structure structure : sourceStructures) {
                 results.get(structure.getPDBCode())
@@ -76,6 +74,19 @@ public class AlignmentService {
             }
             pageNumber++;
             motifs = motifService.queryByEcNumber(motifEcNumberFilter, pageNumber);
+        }
+
+        // Align structures with custom uploaded motifs
+        for (Structure structure : sourceStructures) {
+            results.get(structure.getPDBCode())
+                    .addAll(customMotifs.stream()
+                                    .parallel()
+                                    .map(motif -> alignActiveSites(
+                                            structure,
+                                            motif
+                                    ))
+                                    .filter(Objects::nonNull)
+                                    .collect(Collectors.toList()));
         }
 
         int resultsCount = 0;
@@ -170,44 +181,52 @@ public class AlignmentService {
         return distance <= 1;
     }
 
-    private double rmsd(String motifId, List<Residue> activeSiteResidues, List<Group> alignedResidues){
-        Structure motifStruct = proteinService.queryPdb(motifId);
+    private double rmsd(String motifId, List<Residue> activeSiteResidues, List<Group> alignedResidues) {
+        Structure motifStruct = ProteinUtils.queryPdb(motifId);
 
         List<Group> activeSite = new ArrayList<>();
-        for(Residue residue: activeSiteResidues) {
+        for (Residue residue : activeSiteResidues) {
             activeSite.add(StructureUtils.getResidue(motifStruct, residue.getResidueName(), residue.getResidueId()));
         }
 
         Point3d[] activeSitePoints = atomListFromResidueSet(activeSite);
         Point3d[] alignedResiduePoints = atomListFromResidueSet(alignedResidues);
         SuperPositionSVD superPositionSVD = new SuperPositionSVD(false);
-        if(activeSitePoints.length != alignedResiduePoints.length){
+        if (activeSitePoints.length != alignedResiduePoints.length) {
             return -1;
         }
         return superPositionSVD.getRmsd(activeSitePoints, alignedResiduePoints);
     }
 
-    private List<Atom> getAtomsFromGroup(Group group){
+    private List<Atom> getAtomsFromGroup(Group group) {
         List<Atom> atoms = group.getAtoms();
-        atoms = atoms.stream().filter(atom ->
-                //Remove hydrogen atoms
-                !atom.getName().contains("H") &&
-                //These ones also get in the way
-                !atom.getName().startsWith("D") &&
-                //Remove backbone atoms
-                !atom.getName().equals("N") &&
-                !atom.getName().equals("C") &&
-                !atom.getName().equals("O"))
+        atoms = atoms.stream()
+                .filter(atom ->
+                                //Remove hydrogen atoms
+                                !atom.getName()
+                                        .contains("H") &&
+                                        //These ones also get in the way
+                                        !atom.getName()
+                                                .startsWith("D") &&
+                                        //Remove backbone atoms
+                                        !atom.getName()
+                                                .equals("N") &&
+                                        !atom.getName()
+                                                .equals("C") &&
+                                        !atom.getName()
+                                                .equals("O"))
                 .collect(Collectors.toList());
         return atoms;
     }
 
-    private Point3d[] atomListFromResidueSet(List<Group> residues){
+    private Point3d[] atomListFromResidueSet(List<Group> residues) {
         List<Atom> atoms = new ArrayList<>();
-        for(Group residue: residues){
+        for (Group residue : residues) {
             atoms.addAll(getAtomsFromGroup(residue));
         }
-        List<Point3d> points = atoms.stream().map(Atom::getCoordsAsPoint3d).collect(Collectors.toList());
+        List<Point3d> points = atoms.stream()
+                .map(Atom::getCoordsAsPoint3d)
+                .collect(Collectors.toList());
         Point3d[] point3ds = new Point3d[points.size()];
         return points.toArray(point3ds);
     }
