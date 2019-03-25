@@ -95,6 +95,7 @@ public class AlignmentService {
         return new AlignmentResponse(results);
     }
 
+    @Cacheable
     private Alignment alignActiveSites(Structure structure, Motif motif) {
         Map<Residue, List<Group>> residueMap = motif.runQueries(structure, 1);
 
