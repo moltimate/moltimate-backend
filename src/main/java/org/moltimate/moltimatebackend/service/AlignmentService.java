@@ -5,6 +5,7 @@ import org.biojava.nbio.structure.Atom;
 import org.biojava.nbio.structure.Group;
 import org.biojava.nbio.structure.Structure;
 import org.biojava.nbio.structure.geometry.SuperPositionSVD;
+import org.hibernate.annotations.Cache;
 import org.moltimate.moltimatebackend.model.Alignment;
 import org.moltimate.moltimatebackend.model.Motif;
 import org.moltimate.moltimatebackend.model.Residue;
@@ -14,6 +15,8 @@ import org.moltimate.moltimatebackend.response.AlignmentResponse;
 import org.moltimate.moltimatebackend.util.AlignmentUtils;
 import org.moltimate.moltimatebackend.util.StructureUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
@@ -34,6 +37,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @Slf4j
+@CacheConfig(cacheNames={"Alignments"})
 public class AlignmentService {
 
     @Autowired
@@ -48,6 +52,7 @@ public class AlignmentService {
      * @param alignmentRequest The alignment request JSON mapped to an object
      * @return AlignmentResponse which contains all alignments and their relevant data
      */
+    @Cacheable
     public AlignmentResponse alignActiveSites(ActiveSiteAlignmentRequest alignmentRequest) {
         return alignActiveSites(
                 proteinService.queryPdb(alignmentRequest.getPdbIds()),
