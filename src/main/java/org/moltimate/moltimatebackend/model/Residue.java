@@ -23,10 +23,17 @@ public class Residue {
     private String residueName; // "Asp", "Glu", ...
 
     @NotNull
+    private String residueChainName; // "A", "B", ...
+
+    @NotNull
     private String residueId; // "7", "70", ...
 
     @NotNull
-    private String chainName; // "A", "B", ...
+    private String residueAltLoc;
+
+    public String getIdentifier() {
+        return residueName + " " + residueChainName + " " + residueId;
+    }
 
     public static Residue fromGroup(Group residue) {
         return Residue.builder()
@@ -34,7 +41,15 @@ public class Residue {
                                      .getThree_letter_code())
                 .residueId(residue.getResidueNumber()
                                    .toString())
-                .chainName(residue.getChain().getName())
+                .residueChainName(residue.getResidueNumber().getChainName())
+                .residueAltLoc(getAltLocFromGroup(residue))
                 .build();
+    }
+
+    public static String getAltLocFromGroup(Group residue){
+        if(residue.hasAltLoc()){
+            return residue.getAtoms().get(1).getAltLoc().toString();
+        }
+        return "";
     }
 }

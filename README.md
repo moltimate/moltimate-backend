@@ -37,7 +37,6 @@ This briefly summarizes all API endpoints.
 | HTTP Method | Endpoint | Function |
 |:------------|:---------|:---------|
 | POST | [/align/activesite](#post-align-activesite) | Aligns protein active sites with motifs |
-| POST | [/align/backbone](#post-align-backbone) | NOT IMPLEMENTED. Aligns protein backbones with motifs |
 
 #### Motifs
 
@@ -79,14 +78,6 @@ Example JSON request
 ```
 
 
-<a name="post-align-backbone"></a>
-##### POST /align/backbone
-###### Aligns protein backbones with motifs
-
-NOT IMPLEMENTED
-
-
-
 
 
 #### Motifs
@@ -109,7 +100,7 @@ Path parameters
 
 | Parameter | Type | Function |
 |:----------|:-----|:---------|
-| pdbid | String | The unqiue PDB ID of the motif |
+| pdbid | String | The unique PDB ID of the motif |
 
 <a name="get-motifs-debug"></a>
 ##### GET /motifs/debug

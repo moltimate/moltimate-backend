@@ -16,16 +16,16 @@ import javax.validation.constraints.NotNull;
 public class MotifSelection {
 
     @NotNull
-    private String atom1Name;
+    private String atomType1;
 
     @NotNull
-    private String atom2Name;
+    private String atomType2;
 
     @NotNull
-    private String residue1Name;
+    private String residueName1;
 
     @NotNull
-    private String residue2Name;
+    private String residueName2;
 
     @NotNull
     private double distance;

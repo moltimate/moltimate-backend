@@ -12,7 +12,7 @@ public class AlignmentUtils {
     public static String groupListToResString(List<Group> residues) {
         StringBuilder stringBuilder = new StringBuilder();
         residues.forEach(residue -> stringBuilder.append(AminoAcidType.getCharMapping(residue.getChemComp()
-                                                                                                   .getThree_letter_code())));
+                                                                                              .getThree_letter_code())));
         return stringBuilder.toString();
     }
 
