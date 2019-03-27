@@ -9,9 +9,9 @@ import org.moltimate.moltimatebackend.model.Alignment;
 import org.moltimate.moltimatebackend.model.Motif;
 import org.moltimate.moltimatebackend.model.Residue;
 import org.moltimate.moltimatebackend.request.ActiveSiteAlignmentRequest;
-import org.moltimate.moltimatebackend.request.BackboneAlignmentRequest;
-import org.moltimate.moltimatebackend.response.AlignmentResponse;
+import org.moltimate.moltimatebackend.response.ActiveSiteAlignmentResponse;
 import org.moltimate.moltimatebackend.util.AlignmentUtils;
+import org.moltimate.moltimatebackend.util.ProteinUtils;
 import org.moltimate.moltimatebackend.util.StructureUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -30,14 +30,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * AlignmentService provides a way to align the active sites and backbones of proteins
+ * AlignmentService provides a way to align the active sites of proteins
  */
 @Service
 @Slf4j
 public class AlignmentService {
-
-    @Autowired
-    private ProteinService proteinService;
 
     @Autowired
     private MotifService motifService;
@@ -46,23 +43,23 @@ public class AlignmentService {
      * Executes the ActiveSiteAlignmentRequest on protein active sites.
      *
      * @param alignmentRequest The alignment request JSON mapped to an object
-     * @return AlignmentResponse which contains all alignments and their relevant data
+     * @return ActiveSiteAlignmentResponse which contains all alignments and their relevant data
      */
-    public AlignmentResponse alignActiveSites(ActiveSiteAlignmentRequest alignmentRequest) {
-        return alignActiveSites(
-                proteinService.queryPdb(alignmentRequest.getPdbIds()),
-                alignmentRequest.getEcNumber()
-        );
-    }
+    public ActiveSiteAlignmentResponse alignActiveSites(ActiveSiteAlignmentRequest alignmentRequest) {
+        List<Structure> sourceStructures = alignmentRequest.getPdbIdsAsStructures();
+        List<Motif> customMotifs = alignmentRequest.getCustomMotifs();
+        String motifEcNumberFilter = alignmentRequest.getEcNumber();
 
-    private AlignmentResponse alignActiveSites(List<Structure> sourceStructures, String motifEcNumberFilter) {
         HashMap<String, List<Alignment>> results = new HashMap<>();
         sourceStructures.forEach(structure -> results.put(structure.getPDBCode(), new ArrayList<>()));
 
         int pageNumber = 0;
         Page<Motif> motifs = motifService.queryByEcNumber(motifEcNumberFilter, pageNumber);
-        log.info(
-                "Aligning active sites of " + sourceStructures.size() + " PDB entries with " + motifs.getTotalElements() + " motifs.");
+
+        log.info("Aligning active sites of " + sourceStructures.size() + " PDB entries with "
+                         + (motifs.getTotalElements() + customMotifs.size()) + " motifs.");
+
+        // Align structures with motifs from the database
         while (motifs.hasContent()) {
             for (Structure structure : sourceStructures) {
                 results.get(structure.getPDBCode())
@@ -79,6 +76,19 @@ public class AlignmentService {
             motifs = motifService.queryByEcNumber(motifEcNumberFilter, pageNumber);
         }
 
+        // Align structures with custom uploaded motifs
+        for (Structure structure : sourceStructures) {
+            results.get(structure.getPDBCode())
+                    .addAll(customMotifs.stream()
+                                    .parallel()
+                                    .map(motif -> alignActiveSites(
+                                            structure,
+                                            motif
+                                    ))
+                                    .filter(Objects::nonNull)
+                                    .collect(Collectors.toList()));
+        }
+
         int resultsCount = 0;
         for (String key : results.keySet()) {
             resultsCount += results.get(key)
@@ -86,8 +96,7 @@ public class AlignmentService {
         }
 
         log.info("Found " + resultsCount + " results");
-
-        return new AlignmentResponse(results);
+        return new ActiveSiteAlignmentResponse(results);
     }
 
     private Alignment alignActiveSites(Structure structure, Motif motif) {
@@ -97,7 +106,6 @@ public class AlignmentService {
         List<Group> seq2 = new ArrayList<>();
 
         Map<Residue, Group> alignmentMapping = new HashMap<>();
-
         Set<Group> found = new HashSet<>();
 
         motif.getActiveSiteResidues()
@@ -164,7 +172,7 @@ public class AlignmentService {
         return null;
     }
 
-    public boolean acceptableDistance(int activeSiteSize, int distance) {
+    private boolean acceptableDistance(int activeSiteSize, int distance) {
         if (activeSiteSize == 2) {
             return false;
         } else if (activeSiteSize >= 3) {
@@ -173,69 +181,52 @@ public class AlignmentService {
         return distance <= 1;
     }
 
-    /**
-     * Executes the BackboneAlignmentRequest on protein backbones.
-     *
-     * @param alignmentRequest The alignment request JSON mapped to an object
-     * @return AlignmentResponse which contains all alignments and their relevant data
-     */
-    public AlignmentResponse alignBackbones(BackboneAlignmentRequest alignmentRequest) {
-        return alignBackbones(
-                proteinService.queryPdb(alignmentRequest.getSourcePdbIds()),
-                proteinService.queryPdb(alignmentRequest.getCompareToPdbIds())
-        );
-    }
-
-    private AlignmentResponse alignBackbones(List<Structure> sourceStructures, List<Structure> compareToStructures) {
-        // ... for each sourceStructures, call alignBackbones() against all compareToStructures
-
-        return new AlignmentResponse(/* populate me with a list of Alignments */);
-    }
-
-    private Alignment alignBackbones(Structure structure1, Structure structure2) {
-        // ... logic to perform one backbone alignment between two structures
-
-        return new Alignment();
-    }
-
-    private double rmsd(String motifId, List<Residue> activeSiteResidues, List<Group> alignedResidues){
-        Structure motifStruct = proteinService.queryPdb(motifId);
+    private double rmsd(String motifId, List<Residue> activeSiteResidues, List<Group> alignedResidues) {
+        Structure motifStruct = ProteinUtils.queryPdb(motifId);
 
         List<Group> activeSite = new ArrayList<>();
-        for(Residue residue: activeSiteResidues) {
+        for (Residue residue : activeSiteResidues) {
             activeSite.add(StructureUtils.getResidue(motifStruct, residue.getResidueName(), residue.getResidueId()));
         }
 
         Point3d[] activeSitePoints = atomListFromResidueSet(activeSite);
         Point3d[] alignedResiduePoints = atomListFromResidueSet(alignedResidues);
         SuperPositionSVD superPositionSVD = new SuperPositionSVD(false);
-        if(activeSitePoints.length != alignedResiduePoints.length){
+        if (activeSitePoints.length != alignedResiduePoints.length) {
             return -1;
         }
         return superPositionSVD.getRmsd(activeSitePoints, alignedResiduePoints);
     }
 
-    private List<Atom> getAtomsFromGroup(Group group){
+    private List<Atom> getAtomsFromGroup(Group group) {
         List<Atom> atoms = group.getAtoms();
-        atoms = atoms.stream().filter(atom ->
-                //Remove hydrogen atoms
-                !atom.getName().contains("H") &&
-                //These ones also get in the way
-                !atom.getName().startsWith("D") &&
-                //Remove backbone atoms
-                !atom.getName().equals("N") &&
-                !atom.getName().equals("C") &&
-                !atom.getName().equals("O"))
+        atoms = atoms.stream()
+                .filter(atom ->
+                                //Remove hydrogen atoms
+                                !atom.getName()
+                                        .contains("H") &&
+                                        //These ones also get in the way
+                                        !atom.getName()
+                                                .startsWith("D") &&
+                                        //Remove backbone atoms
+                                        !atom.getName()
+                                                .equals("N") &&
+                                        !atom.getName()
+                                                .equals("C") &&
+                                        !atom.getName()
+                                                .equals("O"))
                 .collect(Collectors.toList());
         return atoms;
     }
 
-    private Point3d[] atomListFromResidueSet(List<Group> residues){
+    private Point3d[] atomListFromResidueSet(List<Group> residues) {
         List<Atom> atoms = new ArrayList<>();
-        for(Group residue: residues){
+        for (Group residue : residues) {
             atoms.addAll(getAtomsFromGroup(residue));
         }
-        List<Point3d> points = atoms.stream().map(Atom::getCoordsAsPoint3d).collect(Collectors.toList());
+        List<Point3d> points = atoms.stream()
+                .map(Atom::getCoordsAsPoint3d)
+                .collect(Collectors.toList());
         Point3d[] point3ds = new Point3d[points.size()];
         return points.toArray(point3ds);
     }

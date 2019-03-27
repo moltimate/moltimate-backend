@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.moltimate.moltimatebackend.model.ActiveSite;
 import org.moltimate.moltimatebackend.model.Residue;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.annotation.Validated;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -22,7 +21,6 @@ import java.util.Map;
  * active site table.
  */
 @Service
-@Validated
 @Slf4j
 public class ActiveSiteService {
 
@@ -53,7 +51,8 @@ public class ActiveSiteService {
 
         activeSiteLists.forEach(activeSites -> {
             activeSites.forEach(activeSite -> {
-                if (activeSite.getResidues().size() < 3) {
+                if (activeSite.getResidues()
+                        .size() < 3) {
                     return; // ignore active sites with fewer than 3 residues
                 }
 
