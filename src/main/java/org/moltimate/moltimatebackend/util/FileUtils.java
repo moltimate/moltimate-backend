@@ -16,22 +16,8 @@ public class FileUtils {
     private static final MMCIFFileReader MMCIF_FILE_READER = new MMCIFFileReader();
 
     public static Motif getMotifFromFile(MultipartFile file) {
-        return null;
-
         // TODO: Read motif metadata from file and process it
-
-//        InputStream fileInputStream;
-//        try {
-//            fileInputStream = new ByteArrayInputStream(file.getBytes());
-//            try {
-//                return PDB_FILE_READER.getStructure(fileInputStream);
-//            } catch (IOException pdbReaderError) {
-//                return MMCIF_FILE_READER.getStructure(fileInputStream);
-//            }
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//            return null;
-//        }
+        return null;
     }
 
     public static Resource getPdbFile(String pdbId) {

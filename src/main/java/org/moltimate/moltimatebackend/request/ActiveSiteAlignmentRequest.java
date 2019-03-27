@@ -26,7 +26,7 @@ public class ActiveSiteAlignmentRequest {
     private List<String> pdbIds = new ArrayList<>();
     private List<String> options = new ArrayList<>();
     private List<String> filters = new ArrayList<>();
-    private List<MultipartFile> files = new ArrayList<>(); // TODO: Rename to customMotifs
+    private List<MultipartFile> customMotifs = new ArrayList<>();
     private String ecNumber; // TODO: Make this into a filter
 
     public List<Structure> getPdbIdsAsStructures() {
@@ -34,7 +34,7 @@ public class ActiveSiteAlignmentRequest {
     }
 
     public List<Motif> getCustomMotifs() {
-        return files.stream()
+        return customMotifs.stream()
                 .map(FileUtils::getMotifFromFile)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
