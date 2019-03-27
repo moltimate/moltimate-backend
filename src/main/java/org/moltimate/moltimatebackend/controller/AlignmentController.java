@@ -8,9 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.moltimate.moltimatebackend.request.ActiveSiteAlignmentRequest;
 import org.moltimate.moltimatebackend.response.ActiveSiteAlignmentResponse;
 import org.moltimate.moltimatebackend.service.AlignmentService;
-import org.moltimate.moltimatebackend.validation.exceptions.InvalidPdbIdException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -40,15 +38,7 @@ public class AlignmentController {
     @RequestMapping(value = "/activesite", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ActiveSiteAlignmentResponse> activeSiteAlignment(ActiveSiteAlignmentRequest alignmentRequest) {
         log.info("Received request to align active sites: " + alignmentRequest);
-        ActiveSiteAlignmentResponse response;
-        try {
-            // TODO: Collect failed ids and return so a toast can trigger
-            response = alignmentService.alignActiveSites(alignmentRequest);
-        } catch (InvalidPdbIdException e) {
-            return new ResponseEntity(
-                    String.format("Could not find structures for the following PDB ids: %s", alignmentRequest.getPdbIds()),
-                    HttpStatus.NOT_FOUND);
-        }
-        return ResponseEntity.ok(response);
+//             TODO: Collect failed ids and return so a toast can trigger
+        return ResponseEntity.ok(alignmentService.alignActiveSites(alignmentRequest));
     }
 }

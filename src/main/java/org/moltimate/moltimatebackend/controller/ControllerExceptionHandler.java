@@ -1,6 +1,7 @@
 package org.moltimate.moltimatebackend.controller;
 
 import org.moltimate.moltimatebackend.validation.exceptions.InvalidEcNumberException;
+import org.moltimate.moltimatebackend.validation.exceptions.InvalidPdbIdException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,11 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(value = {InvalidEcNumberException.class})
     protected ResponseEntity<Object> invalidEcNumber(InvalidEcNumberException ex, WebRequest request) {
+        return handleExceptionInternal(ex, ex.getMessage(), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+    }
+
+    @ExceptionHandler(value = {InvalidPdbIdException.class})
+    protected ResponseEntity<Object> invalidPdbId(InvalidPdbIdException ex, WebRequest request) {
         return handleExceptionInternal(ex, ex.getMessage(), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
 }
