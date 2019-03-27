@@ -5,6 +5,7 @@ import org.moltimate.moltimatebackend.model.Motif;
 import org.moltimate.moltimatebackend.service.MotifService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -38,6 +39,10 @@ public class MotifController {
      */
     @RequestMapping(value = "/{pdbId}", method = RequestMethod.GET)
     public ResponseEntity<Motif> findMotifByPdbId(@PathVariable String pdbId) {
-        return ResponseEntity.ok(motifService.queryByPdbId(pdbId));
+        Motif motif = motifService.queryByPdbId(pdbId.toLowerCase());
+        if (motif != null) {
+            return ResponseEntity.ok(motif);
+        }
+        return new ResponseEntity(String.format("Motif with the id '%s' not found", pdbId), HttpStatus.NOT_FOUND);
     }
 }
