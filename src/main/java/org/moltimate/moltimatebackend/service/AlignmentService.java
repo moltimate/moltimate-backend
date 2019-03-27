@@ -45,8 +45,8 @@ public class AlignmentService {
      * @return ActiveSiteAlignmentResponse which contains all alignments and their relevant data
      */
     public ActiveSiteAlignmentResponse alignActiveSites(ActiveSiteAlignmentRequest alignmentRequest) {
-        List<Structure> sourceStructures = alignmentRequest.getPdbIdsAsStructures();
-        List<Motif> customMotifs = alignmentRequest.getCustomMotifs();
+        List<Structure> sourceStructures = alignmentRequest.callPdbForStructures();
+        List<Motif> customMotifs = alignmentRequest.convertCustomMotifs();
         String motifEcNumberFilter = alignmentRequest.getEcNumber();
 
         HashMap<String, List<Alignment>> results = new HashMap<>();

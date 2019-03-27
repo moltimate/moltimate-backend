@@ -30,7 +30,7 @@ public class ActiveSiteAlignmentRequest {
     private List<MultipartFile> customMotifs = new ArrayList<>();
     private String ecNumber; // TODO: Make this into a filter
 
-    public List<Structure> getPdbIdsAsStructures() {
+    public List<Structure> callPdbForStructures() {
         List<Structure> structures = ProteinUtils.queryPdb(pdbIds);
         if (structures.size() == 0) {
             throw new InvalidPdbIdException(pdbIds);
@@ -38,7 +38,7 @@ public class ActiveSiteAlignmentRequest {
         return structures;
     }
 
-    public List<Motif> getCustomMotifs() {
+    public List<Motif> convertCustomMotifs() {
         return customMotifs.stream()
                 .map(FileUtils::getMotifFromFile)
                 .filter(Objects::nonNull)
