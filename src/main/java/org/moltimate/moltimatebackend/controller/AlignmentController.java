@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping(value = "/align")
-@CrossOrigin(origins = "http://localhost:3000")
 @Slf4j
 public class AlignmentController {
 
