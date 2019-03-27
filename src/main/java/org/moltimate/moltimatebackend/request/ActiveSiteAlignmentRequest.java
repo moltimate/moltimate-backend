@@ -7,6 +7,7 @@ import org.biojava.nbio.structure.Structure;
 import org.moltimate.moltimatebackend.model.Motif;
 import org.moltimate.moltimatebackend.util.FileUtils;
 import org.moltimate.moltimatebackend.util.ProteinUtils;
+import org.moltimate.moltimatebackend.validation.exceptions.InvalidPdbIdException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
@@ -30,7 +31,11 @@ public class ActiveSiteAlignmentRequest {
     private String ecNumber; // TODO: Make this into a filter
 
     public List<Structure> getPdbIdsAsStructures() {
-        return ProteinUtils.queryPdb(pdbIds);
+        List<Structure> structures = ProteinUtils.queryPdb(pdbIds);
+        if (structures.size() == 0) {
+            throw new InvalidPdbIdException(pdbIds);
+        }
+        return structures;
     }
 
     public List<Motif> getCustomMotifs() {

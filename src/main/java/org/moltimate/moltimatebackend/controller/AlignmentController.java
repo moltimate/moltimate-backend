@@ -8,7 +8,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.moltimate.moltimatebackend.request.ActiveSiteAlignmentRequest;
 import org.moltimate.moltimatebackend.response.ActiveSiteAlignmentResponse;
 import org.moltimate.moltimatebackend.service.AlignmentService;
+import org.moltimate.moltimatebackend.validation.exceptions.InvalidPdbIdException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -29,19 +31,24 @@ public class AlignmentController {
     @Autowired
     private AlignmentService alignmentService;
 
-    @ApiOperation(value = "Active Site Alignment", response = AlignmentResponse.class)
+    @ApiOperation(value = "Active Site Alignment", response = ActiveSiteAlignmentResponse.class)
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "List of active site alignments", response = AlignmentResponse.class),
+            @ApiResponse(code = 200, message = "List of active site alignments", response = ActiveSiteAlignmentResponse.class),
             @ApiResponse(code = 500, message = "Internal Server Error"),
-            @ApiResponse(code = 404, message = "Active site not found")
+            @ApiResponse(code = 404, message = "All PDB ids invalid", response = String.class)
     })
     @RequestMapping(value = "/activesite", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ActiveSiteAlignmentResponse> activeSiteAlignment(ActiveSiteAlignmentRequest alignmentRequest) {
-        /* TODO: Test case if a bad PDB id is given
-            Ignore bad PDB ids and continue search
-            Collect failed ids and return so a toast can trigger
-            TODO: Throw 404 if all PDB ids are incorrect */
         log.info("Received request to align active sites: " + alignmentRequest);
-        return ResponseEntity.ok(alignmentService.alignActiveSites(alignmentRequest));
+        ActiveSiteAlignmentResponse response;
+        try {
+            // TODO: Collect failed ids and return so a toast can trigger
+            response = alignmentService.alignActiveSites(alignmentRequest);
+        } catch (InvalidPdbIdException e) {
+            return new ResponseEntity(
+                    String.format("Could not find structures for the following PDB ids: %s", alignmentRequest.getPdbIds()),
+                    HttpStatus.NOT_FOUND);
+        }
+        return ResponseEntity.ok(response);
     }
 }

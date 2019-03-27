@@ -1,13 +1,17 @@
 package org.moltimate.moltimatebackend.util;
 
+import lombok.extern.slf4j.Slf4j;
 import org.biojava.nbio.structure.Structure;
 import org.biojava.nbio.structure.io.MMCIFFileReader;
 import org.biojava.nbio.structure.io.PDBFileReader;
+import org.moltimate.moltimatebackend.validation.exceptions.InvalidPdbIdException;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Slf4j
 public class ProteinUtils {
 
     private static final PDBFileReader PDB_FILE_READER = new PDBFileReader();
@@ -19,7 +23,9 @@ public class ProteinUtils {
      */
     public static List<Structure> queryPdb(List<String> pdbIds) {
         return pdbIds.stream()
-                .map(ProteinUtils::queryPdb)
+                .map(ProteinUtils::queryPdbOptional)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
                 .collect(Collectors.toList());
     }
 
@@ -35,7 +41,25 @@ public class ProteinUtils {
                 return MMCIF_FILE_READER.getStructureById(pdbId);
             } catch (IOException mmcifReaderError) {
                 mmcifReaderError.printStackTrace();
-                throw new RuntimeException("Cannot find structure with PDB id " + pdbId);
+                throw new InvalidPdbIdException(pdbId);
+            }
+        }
+    }
+
+    /**
+     * Use this when processing a list so that an error doesn't interrupt execution
+     * @param pdbId PDB ID string
+     * @return Optional of a BioJava Structure object representing the PDB ID
+     */
+    public static Optional<Structure> queryPdbOptional(String pdbId) {
+        try {
+            return Optional.of(PDB_FILE_READER.getStructureById(pdbId));
+        } catch (IOException pdbReaderError) {
+            try {
+                return Optional.of(MMCIF_FILE_READER.getStructureById(pdbId));
+            } catch (IOException mmcifReaderError) {
+                log.error("Cannot find structure with PDB id " + pdbId);
+                return Optional.empty();
             }
         }
     }

@@ -144,10 +144,8 @@ public class AlignmentService {
             }
         }
 
-        List<Group> seq2Sorted = new ArrayList<>();
-        seq2Sorted.addAll(seq2);
-        Collections.sort(seq2Sorted, Comparator.comparingInt(o -> o.getResidueNumber()
-                .getSeqNum()));
+        List<Group> seq2Sorted = new ArrayList<>(seq2);
+        seq2Sorted.sort(Comparator.comparingInt(o -> o.getResidueNumber().getSeqNum()));
 
         String alignmentString = AlignmentUtils.groupListToResString(seq2Sorted);
         String motifResString = AlignmentUtils.residueListToResString(motif.getActiveSiteResidues());
