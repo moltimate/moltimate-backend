@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.moltimate.moltimatebackend.request.ActiveSiteAlignmentRequest;
 import org.moltimate.moltimatebackend.response.ActiveSiteAlignmentResponse;
 import org.moltimate.moltimatebackend.service.AlignmentService;
+import org.moltimate.moltimatebackend.validation.exceptions.InvalidPdbIdException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -33,7 +34,7 @@ public class AlignmentController {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "List of active site alignments", response = ActiveSiteAlignmentResponse.class),
             @ApiResponse(code = 500, message = "Internal Server Error"),
-            @ApiResponse(code = 404, message = "All PDB ids invalid", response = String.class)
+            @ApiResponse(code = 404, message = "All PDB ids invalid", response = InvalidPdbIdException.class)
     })
     @RequestMapping(value = "/activesite", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ActiveSiteAlignmentResponse> activeSiteAlignment(ActiveSiteAlignmentRequest alignmentRequest) {
