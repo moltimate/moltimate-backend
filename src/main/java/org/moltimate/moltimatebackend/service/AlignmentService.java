@@ -99,29 +99,32 @@ public class AlignmentService {
         return new ActiveSiteAlignmentResponse(results);
     }
 
+    /**
+     * Attempt to align the active site of a motif with a structure
+     *
+     * @param structure: structure to align
+     * @param motif:     motif that we search for in the structure
+     * @return an alignment if one exists
+     */
     private Alignment alignActiveSites(Structure structure, Motif motif) {
         Map<Residue, List<Group>> residueMap = motif.runQueries(structure, 1);
+        List<Map<Residue, Group>> permutations = findAllPermutations(residueMap);
+        Map<Residue, Group> residueMapping = findBestPermutation(permutations, motif);
 
-        List<Residue> seq1 = new ArrayList<>();
-        List<Group> seq2 = new ArrayList<>();
+        Set<Group> found = new HashSet<>();
+        List<Residue> activeSiteResidueList = new ArrayList<>();
+        List<Group> alignedResidueList = new ArrayList<>();
 
         Map<Residue, Group> alignmentMapping = new HashMap<>();
-        Set<Group> found = new HashSet<>();
 
         motif.getActiveSiteResidues()
                 .forEach(residue -> {
-                    List<Group> groups = residueMap.get(residue);
-                    if (groups != null && !groups.isEmpty()) {
-                        Group matchingResidue = groups.stream()
-                                .filter(group -> group.getResidueNumber()
-                                        .toString()
-                                        .equals(residue.getResidueId()))
-                                .findFirst()
-                                .orElse(groups.get(0));
-
+                    Group group = residueMapping.get(residue);
+                    if (group != null) {
+                        Group matchingResidue = group;
                         if (!found.contains(matchingResidue)) {
-                            seq1.add(residue);
-                            seq2.add(matchingResidue);
+                            activeSiteResidueList.add(residue);
+                            alignedResidueList.add(matchingResidue);
                             alignmentMapping.put(residue, matchingResidue);
                             found.add(matchingResidue);
                         }
@@ -131,47 +134,50 @@ public class AlignmentService {
         ArrayList<Residue> activeSiteOutput = new ArrayList<>();
         Set<Residue> used = new HashSet<>();
 
-        for (int i = 0; i < seq1.size(); i++) {
-            activeSiteOutput.add(seq1.get(i));
-            used.add(seq1.get(i));
+        for (int i = 0; i < activeSiteResidueList.size(); i++) {
+            activeSiteOutput.add(activeSiteResidueList.get(i));
+            used.add(activeSiteResidueList.get(i));
         }
 
-        int missingResidues = 0;
         for (Residue residue : motif.getActiveSiteResidues()) {
             if (!used.contains(residue)) {
                 activeSiteOutput.add(residue);
-                missingResidues++;
             }
         }
 
-        List<Group> seq2Sorted = new ArrayList<>();
-        seq2Sorted.addAll(seq2);
-        Collections.sort(seq2Sorted, Comparator.comparingInt(o -> o.getResidueNumber()
+        List<Group> alignedResidueListSorted = new ArrayList<>();
+        alignedResidueListSorted.addAll(alignedResidueList);
+        Collections.sort(alignedResidueListSorted, Comparator.comparingInt(o -> o.getResidueNumber()
                 .getSeqNum()));
 
-        String alignmentString = AlignmentUtils.groupListToResString(seq2Sorted);
+        String alignmentString = AlignmentUtils.groupListToResString(alignedResidueListSorted);
         String motifResString = AlignmentUtils.residueListToResString(motif.getActiveSiteResidues());
         int distance = AlignmentUtils.levensteinDistance(alignmentString, motifResString);
 
-        if (seq2.size() > 1 && acceptableDistance(activeSiteOutput.size(), distance)) {
-            HashSet<Group> residues = new HashSet<>();
-            residueMap.values()
-                    .forEach(residues::addAll);
+        if (alignedResidueList.size() > 1 && acceptableDistance(activeSiteResidueList.size(), distance)) {
             Alignment alignment = new Alignment();
-            alignment.setActiveSiteResidues(activeSiteOutput);
+            alignment.setActiveSiteResidues(activeSiteResidueList);
             alignment.setMotifPdbId(motif.getPdbId());
             alignment.setMinDistance(distance);
             alignment.setMaxDistance(distance);
-            alignment.setAlignedResidues(seq2.stream()
+            alignment.setAlignedResidues(alignedResidueList.stream()
                                                  .map(Residue::fromGroup)
                                                  .collect(Collectors.toList()));
-            alignment.setRmsd(rmsd(motif.getPdbId(), motif.getActiveSiteResidues(), seq2));
+            alignment.setRmsd(rmsd(motif.getPdbId(), motif.getActiveSiteResidues(), alignedResidueList));
             return alignment;
         }
 
         return null;
     }
 
+    /**
+     * This is a simple heuristic for deciding whether or not our alignment
+     * has an acceptable levenstein distance.
+     *
+     * @param activeSiteSize: number of residues in the active site
+     * @param distance:       calculated levenstein distance
+     * @return true if the distance is acceptable
+     */
     private boolean acceptableDistance(int activeSiteSize, int distance) {
         if (activeSiteSize == 2) {
             return false;
@@ -181,6 +187,18 @@ public class AlignmentService {
         return distance <= 1;
     }
 
+    /**
+     * Calculate the RMSD (root mean squared distance) between atoms in an alignment.
+     * Tl;dr: average atom distance of an alignment. The lower it is, the better the alignment.
+     * <p>
+     * We do this by applying an SVD superposition and finding the RMSD of that
+     *
+     * @param motifId:            name of the motif that is being used
+     * @param activeSiteResidues: List of active site residues
+     * @param alignedResidues:    list of residues aligned with active site
+     * @return a floating point value representing the RMSD of the superposition alignment of the active site of
+     * the motif and the aligned residues.
+     */
     private double rmsd(String motifId, List<Residue> activeSiteResidues, List<Group> alignedResidues) {
         Structure motifStruct = ProteinUtils.queryPdb(motifId);
 
@@ -198,6 +216,13 @@ public class AlignmentService {
         return superPositionSVD.getRmsd(activeSitePoints, alignedResiduePoints);
     }
 
+    /**
+     * Get all atoms from a group (residue). We filter some atoms out, specifically
+     * hydrogen and backbone atoms. This is so we can reliably use the atoms to calculate RMSD
+     *
+     * @param group: biojava group to get atoms from
+     * @return filtered list of atoms from the group
+     */
     private List<Atom> getAtomsFromGroup(Group group) {
         List<Atom> atoms = group.getAtoms();
         atoms = atoms.stream()
@@ -219,6 +244,12 @@ public class AlignmentService {
         return atoms;
     }
 
+    /**
+     * Get atoms as 3d points from a set of biojava groups (residues)
+     *
+     * @param residues: residues to get atoms from
+     * @return the atoms in the residues presented as an array of 3d points representing their locations
+     */
     private Point3d[] atomListFromResidueSet(List<Group> residues) {
         List<Atom> atoms = new ArrayList<>();
         for (Group residue : residues) {
@@ -229,5 +260,100 @@ public class AlignmentService {
                 .collect(Collectors.toList());
         Point3d[] point3ds = new Point3d[points.size()];
         return points.toArray(point3ds);
+    }
+
+    /**
+     * Finds all permutations of a residue mapping
+     *
+     * @param residueMapping: mapping of residue to its candidate matches for alignment
+     * @return a list of mappings from residue to group where each map is a possible alignment permutation
+     */
+    private List<Map<Residue, Group>> findAllPermutations(Map<Residue, List<Group>> residueMapping) {
+        List<Map<Residue, Group>> result = new ArrayList<>();
+        List<List<Group>> groupLists = new ArrayList<>(residueMapping.values());
+        List<List<Group>> results = cartesianProduct(groupLists);
+        List<Residue> residues = new ArrayList<>(residueMapping.keySet());
+
+        for (List<Group> res : results) {
+            Map<Residue, Group> mapping = new HashMap<>();
+            for (int i = 0; i < res.size(); i++) {
+                mapping.put(residues.get(i), res.get(i));
+            }
+            result.add(mapping);
+        }
+        return result;
+    }
+
+    /**
+     * Finds the best permutation of a list of permutations of matches to an active site
+     * of a motif
+     *
+     * @param permutations: data structure containing your permutations
+     * @param motif:        motif that the alignment permutations relate to
+     * @return best fit permutation for alignment. We calculate this by checking if the permutation fits
+     * the constraint we have for levenstein distance and then find the one with minimum RMSD that
+     * fits this requirement.
+     */
+    private Map<Residue, Group> findBestPermutation(List<Map<Residue, Group>> permutations, Motif motif) {
+        double min_rmsd = Double.MAX_VALUE;
+        Map<Residue, Group> best_match = new HashMap<>();
+        for (Map<Residue, Group> permutation : permutations) {
+            List<Group> alignmentSeq = new ArrayList<>(permutation.values());
+            Collections.sort(alignmentSeq, Comparator.comparingInt(o -> o.getResidueNumber()
+                    .getSeqNum()));
+
+            String alignmentString = AlignmentUtils.groupListToResString(alignmentSeq);
+            String motifResString = AlignmentUtils.residueListToResString(motif.getActiveSiteResidues());
+
+            int distance = AlignmentUtils.levensteinDistance(alignmentString, motifResString);
+
+            if (acceptableDistance(motif.getActiveSiteResidues()
+                                           .size(), distance)) {
+
+                double rmsd = rmsd(motif.getPdbId(), motif.getActiveSiteResidues(), alignmentSeq);
+                if (rmsd != -1 && rmsd < min_rmsd) {
+                    min_rmsd = rmsd;
+                    best_match = permutation;
+                }
+            }
+        }
+
+        return best_match;
+    }
+
+    /**
+     * Finds the cartesian product of multiple lists.
+     * This is used to get all combinations of a set of lists
+     * for example:
+     * <p>
+     * consider the following three lists:
+     * [a]
+     * [b c]
+     * [d e]
+     * <p>
+     * the total combinations in the cartesian product would be:
+     * [a b d]
+     * [a b e]
+     * [a c d]
+     * [a c e]
+     */
+    private <T> List<List<T>> cartesianProduct(List<List<T>> lists) {
+        List<List<T>> resultLists = new ArrayList<List<T>>();
+        if (lists.size() == 0) {
+            resultLists.add(new ArrayList<T>());
+            return resultLists;
+        } else {
+            List<T> firstList = lists.get(0);
+            List<List<T>> remainingLists = cartesianProduct(lists.subList(1, lists.size()));
+            for (T condition : firstList) {
+                for (List<T> remainingList : remainingLists) {
+                    ArrayList<T> resultList = new ArrayList<T>();
+                    resultList.add(condition);
+                    resultList.addAll(remainingList);
+                    resultLists.add(resultList);
+                }
+            }
+        }
+        return resultLists;
     }
 }
