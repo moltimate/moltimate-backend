@@ -28,6 +28,7 @@ public class ActiveSiteAlignmentRequest {
     private List<String> filters = new ArrayList<>();
     private List<MultipartFile> customMotifs = new ArrayList<>();
     private String ecNumber; // TODO: Make this into a filter
+    private int precisionFactor;
 
     public List<Structure> getPdbIdsAsStructures() {
         return ProteinUtils.queryPdb(pdbIds);
@@ -38,5 +39,12 @@ public class ActiveSiteAlignmentRequest {
                 .map(FileUtils::getMotifFromFile)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
+    }
+
+    public int getPrecisionFactor() {
+        if (this.precisionFactor <= 0) {
+            return 1;
+        }
+        return this.precisionFactor;
     }
 }
