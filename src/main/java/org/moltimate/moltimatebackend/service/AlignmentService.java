@@ -147,7 +147,7 @@ public class AlignmentService {
 
         List<Group> alignedResidueListSorted = new ArrayList<>();
         alignedResidueListSorted.addAll(alignedResidueList);
-        Collections.sort(alignedResidueListSorted, Comparator.comparingInt(o -> o.getResidueNumber()
+        alignedResidueListSorted.sort(Comparator.comparingInt(o -> o.getResidueNumber()
                 .getSeqNum()));
 
         String alignmentString = AlignmentUtils.groupListToResString(alignedResidueListSorted);
@@ -299,7 +299,7 @@ public class AlignmentService {
         Map<Residue, Group> best_match = new HashMap<>();
         for (Map<Residue, Group> permutation : permutations) {
             List<Group> alignmentSeq = new ArrayList<>(permutation.values());
-            Collections.sort(alignmentSeq, Comparator.comparingInt(o -> o.getResidueNumber()
+            alignmentSeq.sort(Comparator.comparingInt(o -> o.getResidueNumber()
                     .getSeqNum()));
 
             String alignmentString = AlignmentUtils.groupListToResString(alignmentSeq);
