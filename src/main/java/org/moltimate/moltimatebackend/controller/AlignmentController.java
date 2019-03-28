@@ -21,8 +21,8 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping(value = "/align")
-@Api(value = "/align", description = "Alignment Controller", produces = "application/json")
 @Slf4j
+@Api(value = "/align", description = "Alignment Controller", produces = "application/json")
 public class AlignmentController {
 
     @Autowired

@@ -1,5 +1,6 @@
 package org.moltimate.moltimatebackend;
 
+import com.google.common.base.Predicates;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -28,6 +29,7 @@ public class Application {
                 .select()
                 .apis(RequestHandlerSelectors.any())
                 .paths(PathSelectors.any())
+                .paths(Predicates.not(PathSelectors.regex("/error.*")))
                 .build()
                 .pathMapping("/")
                 .directModelSubstitute(LocalDate.class, String.class)

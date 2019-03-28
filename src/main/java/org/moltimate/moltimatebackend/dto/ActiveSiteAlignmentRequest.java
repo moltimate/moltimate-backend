@@ -3,7 +3,6 @@ package org.moltimate.moltimatebackend.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.biojava.nbio.structure.Structure;
 import org.moltimate.moltimatebackend.model.Motif;
 import org.moltimate.moltimatebackend.util.FileUtils;
 import org.moltimate.moltimatebackend.util.ProteinUtils;
@@ -30,14 +29,6 @@ public class ActiveSiteAlignmentRequest {
     private List<MultipartFile> customMotifs = new ArrayList<>();
     private String ecNumber; // TODO: Make this into a filter
 
-    public List<Structure> callPdbForStructures() {
-        List<Structure> structures = ProteinUtils.queryPdb(pdbIds);
-        if (structures.size() == 0) {
-            throw new InvalidPdbIdException(pdbIds);
-        }
-        return structures;
-    }
-
     public PdbQueryResponse callPdbForResponse() {
         PdbQueryResponse response = ProteinUtils.queryPdbResponse(pdbIds);
         if (response.structures.size() == 0) {
@@ -46,7 +37,7 @@ public class ActiveSiteAlignmentRequest {
         return response;
     }
 
-    public List<Motif> convertCustomMotifs() {
+    public List<Motif> extractCustomMotifsFromFiles() {
         return customMotifs.stream()
                 .map(FileUtils::getMotifFromFile)
                 .filter(Objects::nonNull)

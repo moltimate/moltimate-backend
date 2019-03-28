@@ -48,7 +48,7 @@ public class AlignmentService {
     public ActiveSiteAlignmentResponse alignActiveSites(ActiveSiteAlignmentRequest alignmentRequest) {
         PdbQueryResponse pdbResponse = alignmentRequest.callPdbForResponse();
         List<Structure> sourceStructures = pdbResponse.getStructures();
-        List<Motif> customMotifs = alignmentRequest.convertCustomMotifs();
+        List<Motif> customMotifs = alignmentRequest.extractCustomMotifsFromFiles();
         String motifEcNumberFilter = alignmentRequest.getEcNumber();
 
         HashMap<String, List<Alignment>> results = new HashMap<>();
@@ -57,8 +57,8 @@ public class AlignmentService {
         int pageNumber = 0;
         Page<Motif> motifs = motifService.queryByEcNumber(motifEcNumberFilter, pageNumber);
 
-        log.info("Aligning active sites of " + sourceStructures.size() + " PDB entries with "
-                         + (motifs.getTotalElements() + customMotifs.size()) + " motifs.");
+        log.info(String.format("Aligning active sites of %d PDB entries with %d motifs & %d custom motifs.",
+                sourceStructures.size(), motifs.getTotalElements(), customMotifs.size()));
 
         // Align structures with motifs from the database
         while (motifs.hasContent()) {
@@ -96,8 +96,8 @@ public class AlignmentService {
                     .size();
         }
 
-        log.info("Found " + resultsCount + " results");
-        log.error("Could not find structures for the following PDB ids:" + pdbResponse.getFailedPdbIds());
+        log.info(String.format("Found %d results", resultsCount));
+        log.error(String.format("Could not find PDB structures for the following ids: %s", pdbResponse.getFailedPdbIds()));
         return new ActiveSiteAlignmentResponse(results, pdbResponse.getFailedPdbIds());
     }
 
