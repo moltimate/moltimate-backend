@@ -11,8 +11,6 @@ import org.moltimate.moltimatebackend.dto.PdbQueryResponse;
 import org.moltimate.moltimatebackend.model.Alignment;
 import org.moltimate.moltimatebackend.model.Motif;
 import org.moltimate.moltimatebackend.model.Residue;
-import org.moltimate.moltimatebackend.request.ActiveSiteAlignmentRequest;
-import org.moltimate.moltimatebackend.response.ActiveSiteAlignmentResponse;
 import org.moltimate.moltimatebackend.util.AlignmentUtils;
 import org.moltimate.moltimatebackend.util.ProteinUtils;
 import org.moltimate.moltimatebackend.util.StructureUtils;
@@ -30,7 +28,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * AlignmentService provides a way to align the active sites of proteins
@@ -55,7 +52,7 @@ public class AlignmentService {
         String motifEcNumberFilter = alignmentRequest.getEcNumber();
 
         HashMap<String, List<Alignment>> results = new HashMap<>();
-        sourceStructures.forEach(structure -> results.put(structure.getPDBCode(), new ArrayList<>()));
+        pdbResponse.getFoundPdbIds().forEach(pdbId -> results.put(pdbId, new ArrayList<>()));
 
         int pageNumber = 0;
         Page<Motif> motifs = motifService.queryByEcNumber(motifEcNumberFilter, pageNumber);

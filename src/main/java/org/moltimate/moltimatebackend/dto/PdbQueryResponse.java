@@ -25,13 +25,14 @@ public class PdbQueryResponse {
         this.structures = structures;
         foundPdbIds = structures.stream()
                 .map(Structure::getPDBCode)
-                .map(String::toLowerCase)
+                .map(String::toUpperCase)
                 .collect(Collectors.toList());
         if (pdbIds.size() == foundPdbIds.size()) {
             return this;
         }
 
         failedPdbIds = pdbIds.stream()
+                .map(String::toUpperCase)
                 .filter(pdbId -> !foundPdbIds.contains(pdbId))
                 .collect(Collectors.toList());
         return this;
