@@ -27,7 +27,7 @@ public class ActiveSiteAlignmentRequest {
     private List<String> options = new ArrayList<>();
     private List<String> filters = new ArrayList<>();
     private List<MultipartFile> customMotifs = new ArrayList<>();
-    private String ecNumber; // TODO: Make this into a filter
+    private String ecNumber;
 
     public PdbQueryResponse callPdbForResponse() {
         PdbQueryResponse response = ProteinUtils.queryPdbResponse(pdbIds);
