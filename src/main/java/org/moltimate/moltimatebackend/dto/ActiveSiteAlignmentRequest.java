@@ -1,4 +1,4 @@
-package org.moltimate.moltimatebackend.request;
+package org.moltimate.moltimatebackend.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -36,6 +36,14 @@ public class ActiveSiteAlignmentRequest {
             throw new InvalidPdbIdException(pdbIds);
         }
         return structures;
+    }
+
+    public PdbQueryResponse callPdbForResponse() {
+        PdbQueryResponse response = ProteinUtils.queryPdbResponse(pdbIds);
+        if (response.structures.size() == 0) {
+            throw new InvalidPdbIdException(pdbIds);
+        }
+        return response;
     }
 
     public List<Motif> convertCustomMotifs() {

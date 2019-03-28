@@ -5,11 +5,12 @@ import org.biojava.nbio.structure.Atom;
 import org.biojava.nbio.structure.Group;
 import org.biojava.nbio.structure.Structure;
 import org.biojava.nbio.structure.geometry.SuperPositionSVD;
+import org.moltimate.moltimatebackend.dto.ActiveSiteAlignmentRequest;
+import org.moltimate.moltimatebackend.dto.ActiveSiteAlignmentResponse;
+import org.moltimate.moltimatebackend.dto.PdbQueryResponse;
 import org.moltimate.moltimatebackend.model.Alignment;
 import org.moltimate.moltimatebackend.model.Motif;
 import org.moltimate.moltimatebackend.model.Residue;
-import org.moltimate.moltimatebackend.request.ActiveSiteAlignmentRequest;
-import org.moltimate.moltimatebackend.response.ActiveSiteAlignmentResponse;
 import org.moltimate.moltimatebackend.util.AlignmentUtils;
 import org.moltimate.moltimatebackend.util.ProteinUtils;
 import org.moltimate.moltimatebackend.util.StructureUtils;
@@ -27,6 +28,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * AlignmentService provides a way to align the active sites of proteins
@@ -45,7 +47,8 @@ public class AlignmentService {
      * @return ActiveSiteAlignmentResponse which contains all alignments and their relevant data
      */
     public ActiveSiteAlignmentResponse alignActiveSites(ActiveSiteAlignmentRequest alignmentRequest) {
-        List<Structure> sourceStructures = alignmentRequest.callPdbForStructures();
+        PdbQueryResponse pdbResponse = alignmentRequest.callPdbForResponse();
+        List<Structure> sourceStructures = pdbResponse.getStructures();
         List<Motif> customMotifs = alignmentRequest.convertCustomMotifs();
         String motifEcNumberFilter = alignmentRequest.getEcNumber();
 
@@ -95,7 +98,8 @@ public class AlignmentService {
         }
 
         log.info("Found " + resultsCount + " results");
-        return new ActiveSiteAlignmentResponse(results);
+        log.error("Could not find structures for the following PDB ids:" + pdbResponse.getFailedPdbIds());
+        return new ActiveSiteAlignmentResponse(results, pdbResponse.getFailedPdbIds());
     }
 
     private Alignment alignActiveSites(Structure structure, Motif motif) {

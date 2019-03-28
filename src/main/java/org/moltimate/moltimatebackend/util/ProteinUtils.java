@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.biojava.nbio.structure.Structure;
 import org.biojava.nbio.structure.io.MMCIFFileReader;
 import org.biojava.nbio.structure.io.PDBFileReader;
+import org.moltimate.moltimatebackend.dto.PdbQueryResponse;
 import org.moltimate.moltimatebackend.validation.exceptions.InvalidPdbIdException;
 
 import java.io.IOException;
@@ -27,6 +28,10 @@ public class ProteinUtils {
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(Collectors.toList());
+    }
+
+    public static PdbQueryResponse queryPdbResponse(List<String> pdbIds) {
+        return new PdbQueryResponse().generatePdbQueryResponse(pdbIds, queryPdb(pdbIds));
     }
 
     /**
@@ -53,14 +58,9 @@ public class ProteinUtils {
      */
     public static Optional<Structure> queryPdbOptional(String pdbId) {
         try {
-            return Optional.of(PDB_FILE_READER.getStructureById(pdbId));
-        } catch (IOException pdbReaderError) {
-            try {
-                return Optional.of(MMCIF_FILE_READER.getStructureById(pdbId));
-            } catch (IOException mmcifReaderError) {
-                log.error("Cannot find structure with PDB id " + pdbId);
-                return Optional.empty();
-            }
+            return Optional.of(queryPdb(pdbId));
+        } catch (InvalidPdbIdException e) {
+            return Optional.empty();
         }
     }
 }
