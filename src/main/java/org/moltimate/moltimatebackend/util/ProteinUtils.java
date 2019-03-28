@@ -4,12 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.biojava.nbio.structure.Structure;
 import org.biojava.nbio.structure.io.MMCIFFileReader;
 import org.biojava.nbio.structure.io.PDBFileReader;
-import org.moltimate.moltimatebackend.dto.PdbQueryResponse;
-import org.moltimate.moltimatebackend.validation.exceptions.InvalidPdbIdException;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
