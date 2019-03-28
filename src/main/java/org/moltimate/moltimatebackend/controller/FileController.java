@@ -1,5 +1,6 @@
 package org.moltimate.moltimatebackend.controller;
 
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.moltimate.moltimatebackend.util.FileUtils;
 import org.springframework.core.io.Resource;
@@ -33,6 +34,7 @@ public class FileController {
         }
     }
 
+    @ApiOperation(value = "Download PDB")
     @RequestMapping(
             path = "/pdb/{pdbId}",
             method = RequestMethod.GET,
@@ -45,6 +47,7 @@ public class FileController {
         );
     }
 
+    @ApiOperation(value = "Download MMCIF")
     @RequestMapping(
             path = "/mmcif/{pdbId}",
             method = RequestMethod.GET,
@@ -57,6 +60,7 @@ public class FileController {
         );
     }
 
+    @ApiOperation(value = "Download Motif")
     @RequestMapping(
             path = "/motif/{pdbId}",
             method = RequestMethod.POST,
