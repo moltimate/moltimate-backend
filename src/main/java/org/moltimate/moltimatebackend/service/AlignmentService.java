@@ -51,6 +51,8 @@ public class AlignmentService {
         List<Motif> customMotifs = alignmentRequest.extractCustomMotifsFromFiles();
         String motifEcNumberFilter = alignmentRequest.getEcNumber();
 
+        int precision = alignmentRequest.getPrecisionFactor();
+
         HashMap<String, List<Alignment>> results = new HashMap<>();
         pdbResponse.getFoundPdbIds().forEach(pdbId -> results.put(pdbId, new ArrayList<>()));
 
@@ -68,7 +70,8 @@ public class AlignmentService {
                                         .parallel()
                                         .map(motif -> alignActiveSites(
                                                 structure,
-                                                motif
+                                                motif,
+                                                precision
                                         ))
                                         .filter(Objects::nonNull)
                                         .collect(Collectors.toList()));
@@ -84,7 +87,8 @@ public class AlignmentService {
                                     .parallel()
                                     .map(motif -> alignActiveSites(
                                             structure,
-                                            motif
+                                            motif,
+                                            precision
                                     ))
                                     .filter(Objects::nonNull)
                                     .collect(Collectors.toList()));
@@ -101,8 +105,8 @@ public class AlignmentService {
         return new ActiveSiteAlignmentResponse(results, pdbResponse.getFailedPdbIds());
     }
 
-    private Alignment alignActiveSites(Structure structure, Motif motif) {
-        Map<Residue, List<Group>> residueMap = motif.runQueries(structure, 1);
+    private Alignment alignActiveSites(Structure structure, Motif motif, int precisionFactor) {
+        Map<Residue, List<Group>> residueMap = motif.runQueries(structure, precisionFactor);
 
         List<Residue> seq1 = new ArrayList<>();
         List<Group> seq2 = new ArrayList<>();
