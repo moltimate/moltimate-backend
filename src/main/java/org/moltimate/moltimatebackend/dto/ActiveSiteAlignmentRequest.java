@@ -1,12 +1,12 @@
-package org.moltimate.moltimatebackend.request;
+package org.moltimate.moltimatebackend.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.biojava.nbio.structure.Structure;
 import org.moltimate.moltimatebackend.model.Motif;
 import org.moltimate.moltimatebackend.util.FileUtils;
 import org.moltimate.moltimatebackend.util.ProteinUtils;
+import org.moltimate.moltimatebackend.validation.exceptions.InvalidPdbIdException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
@@ -27,16 +27,28 @@ public class ActiveSiteAlignmentRequest {
     private List<String> options = new ArrayList<>();
     private List<String> filters = new ArrayList<>();
     private List<MultipartFile> customMotifs = new ArrayList<>();
-    private String ecNumber; // TODO: Make this into a filter
+    private String ecNumber;
+    private int precisionFactor;
 
-    public List<Structure> getPdbIdsAsStructures() {
-        return ProteinUtils.queryPdb(pdbIds);
+    public PdbQueryResponse callPdbForResponse() {
+        PdbQueryResponse response = ProteinUtils.queryPdbResponse(pdbIds);
+        if (response.structures.size() == 0) {
+            throw new InvalidPdbIdException(pdbIds);
+        }
+        return response;
     }
 
-    public List<Motif> getCustomMotifs() {
+    public List<Motif> extractCustomMotifsFromFiles() {
         return customMotifs.stream()
                 .map(FileUtils::getMotifFromFile)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
+    }
+
+    public int getPrecisionFactor() {
+        if (this.precisionFactor <= 0) {
+            return 1;
+        }
+        return this.precisionFactor;
     }
 }

@@ -5,11 +5,12 @@ import org.biojava.nbio.structure.Atom;
 import org.biojava.nbio.structure.Group;
 import org.biojava.nbio.structure.Structure;
 import org.biojava.nbio.structure.geometry.SuperPositionSVD;
+import org.moltimate.moltimatebackend.dto.ActiveSiteAlignmentRequest;
+import org.moltimate.moltimatebackend.dto.ActiveSiteAlignmentResponse;
+import org.moltimate.moltimatebackend.dto.PdbQueryResponse;
 import org.moltimate.moltimatebackend.model.Alignment;
 import org.moltimate.moltimatebackend.model.Motif;
 import org.moltimate.moltimatebackend.model.Residue;
-import org.moltimate.moltimatebackend.request.ActiveSiteAlignmentRequest;
-import org.moltimate.moltimatebackend.response.ActiveSiteAlignmentResponse;
 import org.moltimate.moltimatebackend.util.AlignmentUtils;
 import org.moltimate.moltimatebackend.util.StructureUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,18 +45,21 @@ public class AlignmentService {
      * @return ActiveSiteAlignmentResponse which contains all alignments and their relevant data
      */
     public ActiveSiteAlignmentResponse alignActiveSites(ActiveSiteAlignmentRequest alignmentRequest) {
-        List<Structure> sourceStructures = alignmentRequest.getPdbIdsAsStructures();
-        List<Motif> customMotifs = alignmentRequest.getCustomMotifs();
+        PdbQueryResponse pdbResponse = alignmentRequest.callPdbForResponse();
+        List<Structure> sourceStructures = pdbResponse.getStructures();
+        List<Motif> customMotifs = alignmentRequest.extractCustomMotifsFromFiles();
         String motifEcNumberFilter = alignmentRequest.getEcNumber();
 
+        int precision = alignmentRequest.getPrecisionFactor();
+
         HashMap<String, List<Alignment>> results = new HashMap<>();
-        sourceStructures.forEach(structure -> results.put(structure.getPDBCode(), new ArrayList<>()));
+        pdbResponse.getFoundPdbIds().forEach(pdbId -> results.put(pdbId, new ArrayList<>()));
 
         int pageNumber = 0;
         Page<Motif> motifs = motifService.queryByEcNumber(motifEcNumberFilter, pageNumber);
 
-        log.info("Aligning active sites of " + sourceStructures.size() + " PDB entries with "
-                         + (motifs.getTotalElements() + customMotifs.size()) + " motifs.");
+        log.info(String.format("Aligning active sites of %d PDB entries with %d motifs & %d custom motifs.",
+                sourceStructures.size(), motifs.getTotalElements(), customMotifs.size()));
 
         // Align structures with motifs from the database
         while (motifs.hasContent()) {
@@ -65,7 +69,8 @@ public class AlignmentService {
                                         .parallel()
                                         .map(motif -> alignActiveSites(
                                                 structure,
-                                                motif
+                                                motif,
+                                                precision
                                         ))
                                         .filter(Objects::nonNull)
                                         .collect(Collectors.toList()));
@@ -81,7 +86,8 @@ public class AlignmentService {
                                     .parallel()
                                     .map(motif -> alignActiveSites(
                                             structure,
-                                            motif
+                                            motif,
+                                            precision
                                     ))
                                     .filter(Objects::nonNull)
                                     .collect(Collectors.toList()));
@@ -93,8 +99,9 @@ public class AlignmentService {
                     .size();
         }
 
-        log.info("Found " + resultsCount + " results");
-        return new ActiveSiteAlignmentResponse(results);
+        log.info(String.format("Found %d results", resultsCount));
+        log.error(String.format("Could not find PDB structures for the following ids: %s", pdbResponse.getFailedPdbIds()));
+        return new ActiveSiteAlignmentResponse(results, pdbResponse.getFailedPdbIds());
     }
 
     /**

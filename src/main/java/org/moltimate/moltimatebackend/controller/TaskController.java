@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import springfox.documentation.annotations.ApiIgnore;
 
 /**
  * Task REST API contains tasks which are useful and often run periodically by cron jobs
@@ -21,6 +22,7 @@ public class TaskController {
     /**
      * Updates the motif database using the CSA and RCSB PDB
      */
+    @ApiIgnore // This doesn't need to be publicly listed in API documentation
     @RequestMapping(value = "/updatemotifs", method = RequestMethod.GET)
     public void updateMotifs() {
         motifService.updateMotifs();
