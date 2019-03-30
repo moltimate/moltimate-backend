@@ -11,7 +11,6 @@ import org.moltimate.moltimatebackend.model.Residue;
 import org.moltimate.moltimatebackend.request.ActiveSiteAlignmentRequest;
 import org.moltimate.moltimatebackend.response.ActiveSiteAlignmentResponse;
 import org.moltimate.moltimatebackend.util.AlignmentUtils;
-import org.moltimate.moltimatebackend.util.ProteinUtils;
 import org.moltimate.moltimatebackend.util.StructureUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -19,7 +18,6 @@ import org.springframework.stereotype.Service;
 
 import javax.vecmath.Point3d;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -109,7 +107,7 @@ public class AlignmentService {
     private Alignment alignActiveSites(Structure structure, Motif motif) {
         Map<Residue, List<Group>> residueMap = motif.runQueries(structure, 1);
         List<Map<Residue, Group>> permutations = findAllPermutations(residueMap);
-        Map<Residue, Group> residueMapping = findBestPermutation(permutations, motif);
+        Map<Residue, Group> residueMapping = findBestPermutation(structure, permutations, motif);
 
         Set<Group> found = new HashSet<>();
         List<Residue> activeSiteResidueList = new ArrayList<>();
@@ -163,7 +161,7 @@ public class AlignmentService {
             alignment.setAlignedResidues(alignedResidueList.stream()
                                                  .map(Residue::fromGroup)
                                                  .collect(Collectors.toList()));
-            alignment.setRmsd(rmsd(motif.getPdbId(), motif.getActiveSiteResidues(), alignedResidueList));
+            alignment.setRmsd(rmsd(structure, motif.getActiveSiteResidues(), alignedResidueList));
             return alignment;
         }
 
@@ -193,15 +191,13 @@ public class AlignmentService {
      * <p>
      * We do this by applying an SVD superposition and finding the RMSD of that
      *
-     * @param motifId:            name of the motif that is being used
+     * @param motifStruct:        Structure object for the motif
      * @param activeSiteResidues: List of active site residues
      * @param alignedResidues:    list of residues aligned with active site
      * @return a floating point value representing the RMSD of the superposition alignment of the active site of
      * the motif and the aligned residues.
      */
-    private double rmsd(String motifId, List<Residue> activeSiteResidues, List<Group> alignedResidues) {
-        Structure motifStruct = ProteinUtils.queryPdb(motifId);
-
+    private double rmsd(Structure motifStruct, List<Residue> activeSiteResidues, List<Group> alignedResidues) {
         List<Group> activeSite = new ArrayList<>();
         for (Residue residue : activeSiteResidues) {
             activeSite.add(StructureUtils.getResidue(motifStruct, residue.getResidueName(), residue.getResidueId()));
@@ -288,13 +284,14 @@ public class AlignmentService {
      * Finds the best permutation of a list of permutations of matches to an active site
      * of a motif
      *
+     * @param motifStruct:  structure object of motif to find permutation of
      * @param permutations: data structure containing your permutations
      * @param motif:        motif that the alignment permutations relate to
      * @return best fit permutation for alignment. We calculate this by checking if the permutation fits
      * the constraint we have for levenstein distance and then find the one with minimum RMSD that
      * fits this requirement.
      */
-    private Map<Residue, Group> findBestPermutation(List<Map<Residue, Group>> permutations, Motif motif) {
+    private Map<Residue, Group> findBestPermutation(Structure motifStruct, List<Map<Residue, Group>> permutations, Motif motif) {
         double min_rmsd = Double.MAX_VALUE;
         Map<Residue, Group> best_match = new HashMap<>();
         for (Map<Residue, Group> permutation : permutations) {
@@ -310,7 +307,7 @@ public class AlignmentService {
             if (acceptableDistance(motif.getActiveSiteResidues()
                                            .size(), distance)) {
 
-                double rmsd = rmsd(motif.getPdbId(), motif.getActiveSiteResidues(), alignmentSeq);
+                double rmsd = rmsd(motifStruct, motif.getActiveSiteResidues(), alignmentSeq);
                 if (rmsd != -1 && rmsd < min_rmsd) {
                     min_rmsd = rmsd;
                     best_match = permutation;
