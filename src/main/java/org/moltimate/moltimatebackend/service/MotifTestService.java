@@ -9,6 +9,7 @@ import org.moltimate.moltimatebackend.dto.PdbQueryResponse;
 import org.moltimate.moltimatebackend.model.Alignment;
 import org.moltimate.moltimatebackend.model.Motif;
 import org.moltimate.moltimatebackend.model.Residue;
+import org.moltimate.moltimatebackend.util.PdbxmlClient;
 import org.moltimate.moltimatebackend.util.ProteinUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -39,6 +40,7 @@ public class MotifTestService {
         List<Structure> structureList = new ArrayList<>();
         List<String> failedIds = new ArrayList<>();
         HashMap<String, List<Alignment>> results = new HashMap<>();
+        PdbQueryResponse pdbQueryResponse;
 
         switch (motifTestRequest.getType()) {
             case SELF:
@@ -48,7 +50,7 @@ public class MotifTestService {
                 structureList.forEach(structure -> results.put(structure.getPDBCode(), new ArrayList<>()));
                 break;
             case LIST:
-                PdbQueryResponse pdbQueryResponse = motifTestRequest.callPdbForResponse();
+                pdbQueryResponse = motifTestRequest.callPdbForResponse();
                 structureList.addAll(pdbQueryResponse.getStructures());
                 structureList.addAll(motifTestRequest.extractCustomStructuresFromFiles());
 
@@ -56,7 +58,14 @@ public class MotifTestService {
                 failedIds.addAll(pdbQueryResponse.getFailedPdbIds());
                 break;
             case HOMOLOGUE:
-                // TODO: Using the given EC number find its HOMOLOGUE structures (from the PDB) and test alignment
+                List<String> homologuePdbIds = PdbxmlClient.postEcNumberForPdbIds(motifEcNumber);
+                pdbQueryResponse = ProteinUtils.queryPdbResponse(homologuePdbIds);
+
+                structureList.addAll(pdbQueryResponse.getStructures());
+                structureList.addAll(motifTestRequest.extractCustomStructuresFromFiles());
+
+                structureList.forEach(structure -> results.put(structure.getPDBCode(), new ArrayList<>()));
+                failedIds.addAll(pdbQueryResponse.getFailedPdbIds());
                 break;
             case RANDOM:
                 int max = motifTestRequest.getRandomCount();
@@ -75,6 +84,8 @@ public class MotifTestService {
                 break;
         }
 
+        log.info(String.format("Aligning active sites of %s with %d structures (%d custom structures).",
+                motifPdbId, structureList.size(), motifTestRequest.getCustomStructures().size()));
         alignmentService.alignActiveSiteStructureList(results, testMotif, structureList, motifTestRequest.getPrecisionFactor());
         return new ActiveSiteAlignmentResponse(results, failedIds);
     }

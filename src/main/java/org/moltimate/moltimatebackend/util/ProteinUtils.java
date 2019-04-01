@@ -49,7 +49,6 @@ public class ProteinUtils {
             try {
                 return MMCIF_FILE_READER.getStructureById(pdbId);
             } catch (IOException mmcifReaderError) {
-//                mmcifReaderError.printStackTrace();
                 throw new InvalidPdbIdException(pdbId);
             }
         }
