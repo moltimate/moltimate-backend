@@ -109,7 +109,7 @@ public class AlignmentService {
      *
      * @param structure: structure to align
      * @param motif:     motif that we search for in the structure
-     * @return an alignment if one exists
+     * @return an alignment (if one exists) or null (if none found)
      */
     private Alignment alignActiveSites(Structure structure, Motif motif, int precisionFactor) {
         Map<Residue, List<Group>> residueMap = motif.runQueries(structure, precisionFactor);
