@@ -167,6 +167,7 @@ public class AlignmentService {
                     .map(Residue::fromGroup)
                     .collect(Collectors.toList()));
             alignment.setRmsd(rmsd(structure, motif.getActiveSiteResidues(), alignedResidueList));
+            alignment.setEcNumber(motif.getEcNumber());
             return alignment;
         }
 
