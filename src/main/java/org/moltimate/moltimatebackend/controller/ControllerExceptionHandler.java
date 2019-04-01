@@ -1,6 +1,7 @@
 package org.moltimate.moltimatebackend.controller;
 
 import org.moltimate.moltimatebackend.validation.exceptions.InvalidEcNumberException;
+import org.moltimate.moltimatebackend.validation.exceptions.InvalidFileException;
 import org.moltimate.moltimatebackend.validation.exceptions.InvalidMotifException;
 import org.moltimate.moltimatebackend.validation.exceptions.InvalidPdbIdException;
 import org.springframework.http.HttpHeaders;
@@ -29,6 +30,11 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(value = {InvalidMotifException.class})
     protected ResponseEntity<Object> invalidMotif(InvalidMotifException ex, WebRequest request) {
+        return handleExceptionInternal(ex, ex.getMessage(), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+    }
+
+    @ExceptionHandler(value = {InvalidFileException.class})
+    protected ResponseEntity<Object> invalidFile(InvalidFileException ex, WebRequest request) {
         return handleExceptionInternal(ex, ex.getMessage(), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
 }

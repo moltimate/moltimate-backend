@@ -108,6 +108,23 @@ public class MotifService {
         return motifRepository.findByEcNumberStartingWith(ecNumber, PageRequest.of(pageNumber, MOTIF_BATCH_SIZE));
     }
 
+    public Motif generateMotif(String pdbId, String ecNumber, Structure structure, List<Residue> residues) {
+        for (Residue res : residues) {
+            Group group = StructureUtils.getResidue(
+                    structure, res.getResidueName(), res.getResidueId());
+            assert group != null;
+            res.setResidueChainName(group.getResidueNumber().getChainName());
+            res.setResidueAltLoc(Residue.getAltLocFromGroup(group));
+        }
+        return Motif.builder()
+                .pdbId(pdbId)
+                .activeSiteResidues(residues)
+                .ecNumber(ecNumber)
+                .selectionQueries(generateSelectionQueries(structure, residues))
+                .build();
+
+    }
+
     /**
      * Delete all motifs and their residue query sets
      */
@@ -135,19 +152,9 @@ public class MotifService {
                     try {
                         List<Residue> residues = activeSite.getResidues();
                         Structure structure = ProteinUtils.queryPdb(pdbId);
-                        for (Residue res : residues) {
-                            Group group = StructureUtils.getResidue(
-                                    structure, res.getResidueName(), res.getResidueId());
-                            res.setResidueChainName(group.getResidueNumber()
-                                                            .getChainName());
-                            res.setResidueAltLoc(Residue.getAltLocFromGroup(group));
-                        }
-                        Motif motif = Motif.builder()
-                                .pdbId(pdbId)
-                                .activeSiteResidues(residues)
-                                .ecNumber(StructureUtils.ecNumber(structure))
-                                .selectionQueries(generateSelectionQueries(structure, residues))
-                                .build();
+                        String ecNumber = StructureUtils.ecNumber(structure);
+
+                        Motif motif = generateMotif(pdbId, ecNumber, structure, residues);
                         motifService.saveMotif(motif);
                         motifsSaved.incrementAndGet();
                     } catch (Exception e) {

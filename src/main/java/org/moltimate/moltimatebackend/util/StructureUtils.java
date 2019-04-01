@@ -29,7 +29,7 @@ public class StructureUtils {
                 if (group.getChemComp()
                         .getThree_letter_code()
                         .equalsIgnoreCase(residueName)
-                        && group.getResidueNumber()
+                    && group.getResidueNumber()
                         .toString()
                         .equals(String.valueOf(residueNumber))) {
                     return group;

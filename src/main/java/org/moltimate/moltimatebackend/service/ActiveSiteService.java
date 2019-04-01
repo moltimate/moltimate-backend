@@ -97,7 +97,7 @@ public class ActiveSiteService {
      */
     private List<ActiveSite> getPromolActiveSites() {
         try {
-            CSVReader reader = new CSVReader(new FileReader(PROMOL_CSV_PATH), ',');
+            CSVReader reader = new CSVReader(new FileReader(PROMOL_CSV_PATH));
             String[] residueEntry;
             List<ActiveSite> activeSites = new ArrayList<>();
             while ((residueEntry = reader.readNext()) != null) {
