@@ -170,6 +170,7 @@ public class AlignmentService {
                                                  .map(Residue::fromGroup)
                                                  .collect(Collectors.toList()));
             alignment.setRmsd(rmsd(motif.getPdbId(), motif.getActiveSiteResidues(), seq2));
+            alignment.setEcNumber(motif.getEcNumber());
             return alignment;
         }
 
