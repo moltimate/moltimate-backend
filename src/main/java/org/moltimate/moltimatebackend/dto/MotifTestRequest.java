@@ -22,31 +22,31 @@ public class MotifTestRequest {
         SELF,
         LIST,
         HOMOLOGUE,
-        RANDOM,
-        BULK_RANDOM
+        RANDOM
     }
 
     // Motif Attributes
     private String pdbId;
     private String ecNumber;
     private List<String> activeSiteResidues = new ArrayList<>();
-    private MultipartFile customStructure;
+    private MultipartFile customMotifStructure;
 
     // Testing Attributes
     private Type type;
     private int precisionFactor = 1;
+    private int randomCount = 1;
     private List<String> testPdbIds = new ArrayList<>();
     private List<MultipartFile> customStructures = new ArrayList<>();
 
     public Structure motifStructure() {
-        if (customStructure == null) {
+        if (customMotifStructure == null) {
             Optional<Structure> response = ProteinUtils.queryPdbOptional(pdbId);
             if (response.isPresent()) {
                 return response.get();
             }
             throw new InvalidPdbIdException(pdbId);
         }
-        return ProteinUtils.structureFromFile(customStructure);
+        return ProteinUtils.structureFromFile(customMotifStructure);
     }
 
     public int getPrecisionFactor() {
@@ -54,6 +54,13 @@ public class MotifTestRequest {
             return 1;
         }
         return this.precisionFactor;
+    }
+
+    public int getRandomCount() {
+        if (this.randomCount <= 0) {
+            return 1;
+        }
+        return this.randomCount;
     }
 
     public PdbQueryResponse callPdbForResponse() {

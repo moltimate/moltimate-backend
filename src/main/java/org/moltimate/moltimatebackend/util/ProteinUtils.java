@@ -33,7 +33,9 @@ public class ProteinUtils {
     }
 
     public static PdbQueryResponse queryPdbResponse(List<String> pdbIds) {
-        return new PdbQueryResponse().generatePdbQueryResponse(pdbIds, queryPdb(pdbIds));
+        if (pdbIds.size() > 0){
+            return new PdbQueryResponse().generatePdbQueryResponse(pdbIds, queryPdb(pdbIds));
+        } return new PdbQueryResponse();
     }
 
     /**
@@ -47,7 +49,7 @@ public class ProteinUtils {
             try {
                 return MMCIF_FILE_READER.getStructureById(pdbId);
             } catch (IOException mmcifReaderError) {
-                mmcifReaderError.printStackTrace();
+//                mmcifReaderError.printStackTrace();
                 throw new InvalidPdbIdException(pdbId);
             }
         }

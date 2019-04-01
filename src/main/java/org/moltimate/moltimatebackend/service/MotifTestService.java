@@ -1,6 +1,7 @@
 package org.moltimate.moltimatebackend.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.biojava.nbio.structure.Structure;
 import org.moltimate.moltimatebackend.dto.ActiveSiteAlignmentResponse;
 import org.moltimate.moltimatebackend.dto.MotifTestRequest;
@@ -8,6 +9,7 @@ import org.moltimate.moltimatebackend.dto.PdbQueryResponse;
 import org.moltimate.moltimatebackend.model.Alignment;
 import org.moltimate.moltimatebackend.model.Motif;
 import org.moltimate.moltimatebackend.model.Residue;
+import org.moltimate.moltimatebackend.util.ProteinUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -39,12 +42,12 @@ public class MotifTestService {
 
         switch (motifTestRequest.getType()) {
             case SELF:
-                // TODO: confirm custom structure is used
-                results.put(motifPdbId, new ArrayList<>());
                 structureList.add(motifStructure);
+                structureList.addAll(motifTestRequest.extractCustomStructuresFromFiles());
+
+                structureList.forEach(structure -> results.put(structure.getPDBCode(), new ArrayList<>()));
                 break;
             case LIST:
-                // TODO: confirm custom structure is included in search
                 PdbQueryResponse pdbQueryResponse = motifTestRequest.callPdbForResponse();
                 structureList.addAll(pdbQueryResponse.getStructures());
                 structureList.addAll(motifTestRequest.extractCustomStructuresFromFiles());
@@ -56,10 +59,19 @@ public class MotifTestService {
                 // TODO: Using the given EC number find its HOMOLOGUE structures (from the PDB) and test alignment
                 break;
             case RANDOM:
-                // TODO: Obtain a random PDB id and then test alignment
-                break;
-            case BULK_RANDOM:
-                // TODO: Generate a list of random PDB ids and then test alignment
+                int max = motifTestRequest.getRandomCount();
+                while (max > 0) {
+                    String randomPdbId = RandomStringUtils.randomAlphanumeric(4).toUpperCase();
+                    Optional<Structure> optionalStructure = ProteinUtils.queryPdbOptional(randomPdbId);
+                    if (optionalStructure.isPresent()) {
+                        Structure testStructure = optionalStructure.get();
+                        structureList.add(testStructure);
+                        results.put(testStructure.getPDBCode(), new ArrayList<>());
+                        max--;
+                    } else {
+                        failedIds.add(randomPdbId);
+                    }
+                }
                 break;
         }
 
