@@ -10,7 +10,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Data
 @NoArgsConstructor
@@ -24,15 +26,17 @@ public class MotifTestRequest {
         BULK_RANDOM
     }
 
-    // Motif to be created and then tested
+    // Motif Attributes
     private String pdbId;
     private String ecNumber;
     private List<String> activeSiteResidues = new ArrayList<>();
     private MultipartFile customStructure;
-    private Type type;
 
-    // Test information
-    private int precisionFactor;
+    // Testing Attributes
+    private Type type;
+    private int precisionFactor = 1;
+    private List<String> testPdbIds = new ArrayList<>();
+    private List<MultipartFile> customStructures = new ArrayList<>();
 
     public Structure motifStructure() {
         if (customStructure == null) {
@@ -50,5 +54,16 @@ public class MotifTestRequest {
             return 1;
         }
         return this.precisionFactor;
+    }
+
+    public PdbQueryResponse callPdbForResponse() {
+        return ProteinUtils.queryPdbResponse(testPdbIds);
+    }
+
+    public List<Structure> extractCustomStructuresFromFiles() {
+        return customStructures.stream()
+                .map(ProteinUtils::structureFromFile)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 }

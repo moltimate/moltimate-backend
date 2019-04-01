@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.biojava.nbio.structure.Structure;
 import org.moltimate.moltimatebackend.dto.ActiveSiteAlignmentResponse;
 import org.moltimate.moltimatebackend.dto.MotifTestRequest;
+import org.moltimate.moltimatebackend.dto.PdbQueryResponse;
 import org.moltimate.moltimatebackend.model.Alignment;
 import org.moltimate.moltimatebackend.model.Motif;
 import org.moltimate.moltimatebackend.model.Residue;
@@ -26,29 +27,30 @@ public class MotifTestService {
     private AlignmentService alignmentService;
 
     public ActiveSiteAlignmentResponse testMotifAlignment(MotifTestRequest motifTestRequest) {
-        // Make motif to be tested
-        String pdbId = motifTestRequest.getPdbId();
-        String ecNumber = motifTestRequest.getEcNumber();
+        String motifPdbId = motifTestRequest.getPdbId();
+        String motifEcNumber = motifTestRequest.getEcNumber();
         Structure motifStructure = motifTestRequest.motifStructure();
-        List<Residue> residues = parseResidueEntries(motifTestRequest.getActiveSiteResidues());
-        Motif testMotif = motifService.generateMotif(pdbId, ecNumber, motifStructure, residues);
-
-        // Accumulate Test Data
-        int precisionFactor = motifTestRequest.getPrecisionFactor();
+        List<Residue> motifResidues = parseResidueEntries(motifTestRequest.getActiveSiteResidues());
+        Motif testMotif = motifService.generateMotif(motifPdbId, motifEcNumber, motifStructure, motifResidues);
 
         List<Structure> structureList = new ArrayList<>();
-
-        // Build structure list based on test
+        List<String> failedIds = new ArrayList<>();
         HashMap<String, List<Alignment>> results = new HashMap<>();
 
         switch (motifTestRequest.getType()) {
             case SELF:
-                results.put(pdbId, new ArrayList<>());
+                // TODO: confirm custom structure is used
+                results.put(motifPdbId, new ArrayList<>());
                 structureList.add(motifStructure);
                 break;
             case LIST:
-//                pdbResponse.getFoundPdbIds().forEach(_pdbId -> results.put(_pdbId, new ArrayList<>()));
-//                structureList.addAll(pdbResponse.getStructures());
+                // TODO: confirm custom structure is included in search
+                PdbQueryResponse pdbQueryResponse = motifTestRequest.callPdbForResponse();
+                structureList.addAll(pdbQueryResponse.getStructures());
+                structureList.addAll(motifTestRequest.extractCustomStructuresFromFiles());
+
+                structureList.forEach(structure -> results.put(structure.getPDBCode(), new ArrayList<>()));
+                failedIds.addAll(pdbQueryResponse.getFailedPdbIds());
                 break;
             case HOMOLOGUE:
                 // TODO: Using the given EC number find its HOMOLOGUE structures (from the PDB) and test alignment
@@ -60,13 +62,12 @@ public class MotifTestService {
                 // TODO: Generate a list of random PDB ids and then test alignment
                 break;
         }
-        alignmentService.alignActiveSiteStructureList(results, testMotif, structureList, precisionFactor);
 
-        return new ActiveSiteAlignmentResponse(results, new ArrayList<>());
+        alignmentService.alignActiveSiteStructureList(results, testMotif, structureList, motifTestRequest.getPrecisionFactor());
+        return new ActiveSiteAlignmentResponse(results, failedIds);
     }
 
     private List<Residue> parseResidueEntries(List<String> residueEntries) {
-//        Request : His C 57, Asp C 102, Gly E 193, Ser E 195, Gly E 196
         List<Residue> activeSiteResidues = new ArrayList<>();
         for (String residueEntry : residueEntries) {
             String[] res = residueEntry.split(" ");

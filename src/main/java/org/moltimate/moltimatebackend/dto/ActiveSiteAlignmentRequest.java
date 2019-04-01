@@ -31,11 +31,7 @@ public class ActiveSiteAlignmentRequest {
     private int precisionFactor;
 
     public PdbQueryResponse callPdbForResponse() {
-        PdbQueryResponse response = ProteinUtils.queryPdbResponse(pdbIds);
-        if (response.structures.size() == 0) {
-            throw new InvalidPdbIdException(pdbIds);
-        }
-        return response;
+        return ProteinUtils.queryPdbResponse(pdbIds);
     }
 
     public List<Motif> extractCustomMotifsFromFiles() {

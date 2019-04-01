@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.biojava.nbio.structure.Structure;
+import org.moltimate.moltimatebackend.validation.exceptions.InvalidPdbIdException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,6 +23,10 @@ public class PdbQueryResponse {
     List<String> failedPdbIds = new ArrayList<>();
 
     public PdbQueryResponse generatePdbQueryResponse(List<String> pdbIds, List<Structure> structures) {
+        if (structures.size() == 0) {
+            throw new InvalidPdbIdException(pdbIds);
+        }
+
         this.structures = structures;
         foundPdbIds = structures.stream()
                 .map(Structure::getPDBCode)
