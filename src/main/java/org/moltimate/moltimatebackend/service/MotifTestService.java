@@ -9,12 +9,13 @@ import org.moltimate.moltimatebackend.dto.PdbQueryResponse;
 import org.moltimate.moltimatebackend.model.Alignment;
 import org.moltimate.moltimatebackend.model.Motif;
 import org.moltimate.moltimatebackend.model.Residue;
-import org.moltimate.moltimatebackend.util.PdbxmlClient;
+import org.moltimate.moltimatebackend.util.PdbXmlClient;
 import org.moltimate.moltimatebackend.util.ProteinUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -31,6 +32,7 @@ public class MotifTestService {
     private AlignmentService alignmentService;
 
     public ActiveSiteAlignmentResponse testMotifAlignment(MotifTestRequest motifTestRequest) {
+        log.info("Received request to test motif: " + motifTestRequest);
         String motifPdbId = motifTestRequest.getPdbId();
         String motifEcNumber = motifTestRequest.getEcNumber();
         Structure motifStructure = motifTestRequest.motifStructure();
@@ -58,7 +60,7 @@ public class MotifTestService {
                 failedIds.addAll(pdbQueryResponse.getFailedPdbIds());
                 break;
             case HOMOLOGUE:
-                List<String> homologuePdbIds = PdbxmlClient.postEcNumberForPdbIds(motifEcNumber);
+                List<String> homologuePdbIds = PdbXmlClient.postEcNumberForPdbIds(motifEcNumber);
                 pdbQueryResponse = ProteinUtils.queryPdbResponse(homologuePdbIds);
 
                 structureList.addAll(pdbQueryResponse.getStructures());
@@ -69,8 +71,10 @@ public class MotifTestService {
                 break;
             case RANDOM:
                 int max = motifTestRequest.getRandomCount();
+                List<String> allPdbIds = PdbXmlClient.getPdbIds();
+                Collections.shuffle(allPdbIds);
                 while (max > 0) {
-                    String randomPdbId = RandomStringUtils.randomAlphanumeric(4).toUpperCase();
+                    String randomPdbId = allPdbIds.get(max);
                     Optional<Structure> optionalStructure = ProteinUtils.queryPdbOptional(randomPdbId);
                     if (optionalStructure.isPresent()) {
                         Structure testStructure = optionalStructure.get();
