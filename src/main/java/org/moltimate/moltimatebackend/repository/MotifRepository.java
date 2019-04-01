@@ -12,4 +12,6 @@ public interface MotifRepository extends JpaRepository<Motif, String> {
     Page<Motif> findAll(Pageable pageable);
 
     Page<Motif> findByEcNumberStartingWith(String ecNumber, Pageable pageable);
+
+    Page<Motif> findByEcNumberEqualsOrEcNumberStartingWith(String unknown, String ecNumber, Pageable pageable);
 }

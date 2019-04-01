@@ -105,7 +105,7 @@ public class MotifService {
             return findAll(pageNumber);
         }
         EcNumberValidator.validate(ecNumber);
-        return motifRepository.findByEcNumberStartingWith(ecNumber, PageRequest.of(pageNumber, MOTIF_BATCH_SIZE));
+        return motifRepository.findByEcNumberEqualsOrEcNumberStartingWith("unknown", ecNumber, PageRequest.of(pageNumber, MOTIF_BATCH_SIZE));
     }
 
     public Motif generateMotif(String pdbId, String ecNumber, Structure structure, List<Residue> residues) {

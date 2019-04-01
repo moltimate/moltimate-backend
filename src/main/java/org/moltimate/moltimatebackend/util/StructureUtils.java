@@ -219,7 +219,7 @@ public class StructureUtils {
                     .findFirst()
                     .get();
         } catch (Exception e) {
-            return "-1.-1.-1.-1";
+            return "unknown";
         }
     }
 }
