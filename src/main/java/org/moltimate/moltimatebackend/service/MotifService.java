@@ -95,9 +95,9 @@ public class MotifService {
      * Delete all motifs and their residue query sets
      */
     public void deleteAllAndFlush() {
-        motifRepository.deleteAll();
-        motifRepository.flush();
-        residueQuerySetRepository.deleteAll();
-        residueQuerySetRepository.flush();
+        //motifRepository.deleteAll();
+        //motifRepository.flush();
+        //residueQuerySetRepository.deleteAll();
+        //residueQuerySetRepository.flush();
     }
 }

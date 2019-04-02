@@ -33,18 +33,18 @@ public class GenerateMotifService {
     @Autowired
     private ProteinService proteinService;
 
-    // TODO: Pessimistic lock the motifs table until update is finished
-    public void updateMotifs() {
+
+    public Integer threadUpdateMotifs() {
         log.info("Updating Motif database");
         List<ActiveSite> activeSites = activeSiteService.getActiveSites();
 
         log.info("Deleting and flushing Motif database");
-        motifService.deleteAllAndFlush();
+//        motifService.deleteAllAndFlush();
 
         log.info("Saving " + activeSites.size() + " new motifs");
         AtomicInteger motifsSaved = new AtomicInteger(0);
         List<String> failedPdbIds = new ArrayList<>();
-        activeSites.parallelStream()
+        activeSites.stream()
                 .forEach(activeSite -> {
                     String pdbId = activeSite.getPdbId();
                     try {
@@ -54,7 +54,50 @@ public class GenerateMotifService {
                             Group group = StructureUtils.getResidue(
                                     structure, res.getResidueName(), res.getResidueId());
                             res.setResidueChainName(group.getResidueNumber()
-                                                            .getChainName());
+                                    .getChainName());
+                            res.setResidueAltLoc(Residue.getAltLocFromGroup(group));
+                        }
+                        Motif motif = Motif.builder()
+                                .pdbId(pdbId)
+                                .activeSiteResidues(residues)
+                                .ecNumber(StructureUtils.ecNumber(structure))
+                                .selectionQueries(generateSelectionQueries(structure, residues))
+                                .build();
+                        motifService.saveMotif(motif);
+                        motifsSaved.incrementAndGet();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        failedPdbIds.add(pdbId);
+                    }
+                });
+
+        log.info("Failed to save " + failedPdbIds.size() + " motifs to the database: " + failedPdbIds.toString());
+        log.info("Finished saving " + motifsSaved.get() + " motifs to the database");
+        return motifsSaved.get();
+    }
+
+    // TODO: Pessimistic lock the motifs table until update is finished
+    public void updateMotifs() {
+        log.info("Updating Motif database");
+        List<ActiveSite> activeSites = activeSiteService.getActiveSites();
+
+        log.info("Deleting and flushing Motif database");
+//        motifService.deleteAllAndFlush();
+
+        log.info("Saving " + activeSites.size() + " new motifs");
+        AtomicInteger motifsSaved = new AtomicInteger(0);
+        List<String> failedPdbIds = new ArrayList<>();
+        activeSites.stream()
+                .forEach(activeSite -> {
+                    String pdbId = activeSite.getPdbId();
+                    try {
+                        List<Residue> residues = activeSite.getResidues();
+                        Structure structure = proteinService.queryPdb(pdbId);
+                        for (Residue res : residues) {
+                            Group group = StructureUtils.getResidue(
+                                    structure, res.getResidueName(), res.getResidueId());
+                            res.setResidueChainName(group.getResidueNumber()
+                                    .getChainName());
                             res.setResidueAltLoc(Residue.getAltLocFromGroup(group));
                         }
                         Motif motif = Motif.builder()
@@ -116,11 +159,11 @@ public class GenerateMotifService {
                                 .atomType1(atom.getName())
                                 .atomType2(compareAtom.getName())
                                 .residueName1(atom.getGroup()
-                                                      .getChemComp()
-                                                      .getThree_letter_code())
+                                        .getChemComp()
+                                        .getThree_letter_code())
                                 .residueName2(compareAtom.getGroup()
-                                                      .getChemComp()
-                                                      .getThree_letter_code())
+                                        .getChemComp()
+                                        .getThree_letter_code())
                                 .distance(StructureUtils.rmsd(atom, compareAtom) + 2)
                                 .build();
                         motifSelections.add(motifSelection);
