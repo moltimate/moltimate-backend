@@ -44,7 +44,7 @@ public class GenerateMotifService {
         log.info("Saving " + activeSites.size() + " new motifs");
         AtomicInteger motifsSaved = new AtomicInteger(0);
         List<String> failedPdbIds = new ArrayList<>();
-        activeSites.stream()
+        activeSites.parallelStream()
                 .forEach(activeSite -> {
                     String pdbId = activeSite.getPdbId();
                     try {
@@ -87,7 +87,7 @@ public class GenerateMotifService {
         log.info("Saving " + activeSites.size() + " new motifs");
         AtomicInteger motifsSaved = new AtomicInteger(0);
         List<String> failedPdbIds = new ArrayList<>();
-        activeSites.stream()
+        activeSites.parallelStream()
                 .forEach(activeSite -> {
                     String pdbId = activeSite.getPdbId();
                     try {
