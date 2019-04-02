@@ -66,15 +66,24 @@ public class MotifTestService {
                 structureList.addAll(pdbQueryResponse.getStructures());
                 structureList.addAll(motifTestRequest.extractCustomStructuresFromFiles());
 
-                structureList.forEach(structure -> results.put(structure.getPDBCode(), new ArrayList<>()));
+                structureList.stream()
+                        .parallel()
+                        .forEach(structure -> results.put(structure.getPDBCode(), new ArrayList<>()));
                 failedIds.addAll(pdbQueryResponse.getFailedPdbIds());
                 break;
             case RANDOM:
-                int max = motifTestRequest.getRandomCount();
                 List<String> allPdbIds = PdbXmlClient.getPdbIds();
                 Collections.shuffle(allPdbIds);
-                while (max > 0) {
-                    String randomPdbId = allPdbIds.get(max);
+
+                int max;
+                if (motifTestRequest.getRandomCount() < 50) {
+                    max = motifTestRequest.getRandomCount();
+                }
+                else {
+                    max = 50;
+                }
+                while (max >= 0) {
+                    String randomPdbId = allPdbIds.get(max - 1);
                     Optional<Structure> optionalStructure = ProteinUtils.queryPdbOptional(randomPdbId);
                     if (optionalStructure.isPresent()) {
                         Structure testStructure = optionalStructure.get();

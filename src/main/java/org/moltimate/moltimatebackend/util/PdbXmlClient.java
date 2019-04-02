@@ -34,7 +34,8 @@ public class PdbXmlClient {
                 "</orgPdbQuery>]]></parent>" +
                 "</orgPdbQuery>";
         try {
-            return postXMLQuery(xml).stream().parallel()
+            return postXMLQuery(xml).stream()
+                    .parallel()
                     .map(s -> s.split(":")[0])
                     .collect(Collectors.toList());
         } catch (Exception e) {
@@ -44,7 +45,8 @@ public class PdbXmlClient {
 
     public static List<String> getPdbIds() {
         try {
-            return getAllCurrentPdbIds().stream().parallel()
+            return getAllCurrentPdbIds().stream()
+                    .parallel()
                     .map(s -> {
                         Matcher m = Pattern.compile(".*structureId=\"(.{4})\".*").matcher(s);
                         if (m.matches()) {
