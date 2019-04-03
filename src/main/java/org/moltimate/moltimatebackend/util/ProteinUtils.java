@@ -6,7 +6,6 @@ import org.biojava.nbio.structure.io.MMCIFFileReader;
 import org.biojava.nbio.structure.io.PDBFileReader;
 import org.moltimate.moltimatebackend.dto.PdbQueryResponse;
 import org.moltimate.moltimatebackend.validation.exceptions.InvalidPdbIdException;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
@@ -53,6 +52,7 @@ public class ProteinUtils {
 
     /**
      * Use this when processing a list so that an error doesn't interrupt execution
+     *
      * @param pdbId PDB ID string
      * @return Optional of a BioJava Structure object representing the PDB ID
      */
@@ -61,20 +61,6 @@ public class ProteinUtils {
             return Optional.of(queryPdb(pdbId));
         } catch (InvalidPdbIdException e) {
             return Optional.empty();
-        }
-    }
-
-     public static Structure structureFromFile(MultipartFile file) {
-        try {
-            return PDB_FILE_READER.getStructure(file.getInputStream());
-        } catch (IOException pdbReaderError) {
-            try {
-                return MMCIF_FILE_READER.getStructure(file.getInputStream());
-            } catch (IOException ignored) {
-                // Todo make its own exception
-                throw new InvalidPdbIdException("could not parse file");
-//                throw new IOException("Could not parse given file\nPlease check the file to make sure it is a valid PDB or MMCIF file");
-            }
         }
     }
 }

@@ -51,10 +51,10 @@ public class ActiveSiteAlignmentRequest {
     public Map<Motif, Structure> extractCustomMotifMapFromFiles() {
         Map<Motif, Structure> results = new HashMap<>();
         for (MultipartFile file : customMotifs) {
-            Motif cMotif = FileUtils.getMotifFromFile(file);
-            Structure cStructure = ProteinUtils.structureFromFile(file);
-            if (cMotif != null && cStructure != null) {
-                results.put(cMotif, cStructure);
+            Motif _customMotif = FileUtils.getMotifFromFile(file);
+            Structure _customStructure = FileUtils.structureFromFile(file);
+            if (_customMotif != null && _customStructure != null) {
+                results.put(_customMotif, _customStructure);
             }
         }
         return results;

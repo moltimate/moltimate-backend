@@ -1,13 +1,16 @@
 package org.moltimate.moltimatebackend.util;
 
+import org.biojava.nbio.structure.Structure;
 import org.biojava.nbio.structure.io.MMCIFFileReader;
 import org.biojava.nbio.structure.io.PDBFileReader;
 import org.moltimate.moltimatebackend.model.Motif;
 import org.moltimate.moltimatebackend.model.Residue;
+import org.moltimate.moltimatebackend.validation.exceptions.InvalidPdbIdException;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 public class FileUtils {
@@ -34,5 +37,19 @@ public class FileUtils {
 
     public static Resource getMotifFile(String pdbId, List<Residue> activeSiteResidues) {
         return null;
+    }
+
+    public static Structure structureFromFile(MultipartFile file) {
+        try {
+            return PDB_FILE_READER.getStructure(file.getInputStream());
+        } catch (IOException pdbReaderError) {
+            try {
+                return MMCIF_FILE_READER.getStructure(file.getInputStream());
+            } catch (IOException ignored) {
+                // Todo make its own exception
+                throw new InvalidPdbIdException("could not parse file");
+//                throw new IOException("Could not parse given file\nPlease check the file to make sure it is a valid PDB or MMCIF file");
+            }
+        }
     }
 }
