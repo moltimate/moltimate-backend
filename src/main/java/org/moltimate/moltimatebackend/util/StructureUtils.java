@@ -46,7 +46,7 @@ public class StructureUtils {
      * @param residue: residue to find location of
      * @return x, y, z coordinates of the residue
      */
-    public static double[] getResidueLocation(Group residue) {
+    private static double[] getResidueLocation(Group residue) {
         List<Atom> atoms = residue.getAtoms();
         double[] location = new double[3];
         for (Atom atom : atoms) {
@@ -70,7 +70,7 @@ public class StructureUtils {
      * @param residueName: name of residue to search for
      * @return list of residues with given name inside structure
      */
-    public static List<Group> getResiduesByType(Structure structure, String residueName) {
+    private static List<Group> getResiduesByType(Structure structure, String residueName) {
         ArrayList<Group> results = new ArrayList<>();
         for (Chain chain : structure.getChains()) {
             for (Group residue : chain.getAtomGroups(GroupType.AMINOACID)) {
@@ -91,21 +91,21 @@ public class StructureUtils {
      * @param atomType:  type of atom to search for in structure
      * @return a list of atoms in the structure matching the specified type
      */
-    public static List<Atom> getAtomByType(Structure structure, String atomType) {
+    private static List<Atom> getAtomByType(Structure structure, String atomType) {
         ArrayList<Atom> atoms = new ArrayList<>();
         structure.getChains()
                 .forEach(chain ->
-                                 chain.getAtomGroups(GroupType.AMINOACID)
-                                         .forEach(group ->
-                                                          atoms.addAll(
-                                                                  group.getAtoms()
-                                                                          .stream()
-                                                                          .filter(atom -> atom
-                                                                                  .getName()
-                                                                                  .equals(atomType))
-                                                                          .collect(
-                                                                                  Collectors
-                                                                                          .toList()))));
+                        chain.getAtomGroups(GroupType.AMINOACID)
+                                .forEach(group ->
+                                        atoms.addAll(
+                                                group.getAtoms()
+                                                        .stream()
+                                                        .filter(atom -> atom
+                                                                .getName()
+                                                                .equals(atomType))
+                                                        .collect(
+                                                                Collectors
+                                                                        .toList()))));
         return atoms;
     }
 
@@ -131,7 +131,7 @@ public class StructureUtils {
      * @return map of residue -> double[] where each array is a 3 dimensional coordinate
      * representing the center of that residue.
      */
-    public static Map<Group, double[]> residueToLocationMap(List<Group> residues) {
+    private static Map<Group, double[]> residueToLocationMap(List<Group> residues) {
         HashMap<Group, double[]> locationMap = new HashMap<>();
         residues.forEach(residue -> locationMap.put(residue, getResidueLocation(residue)));
         return locationMap;
@@ -148,7 +148,7 @@ public class StructureUtils {
      * @param point2: second point
      * @return root mean squared distance between the two points
      */
-    public static double rmsd(double[] point1, double[] point2) {
+    private static double rmsd(double[] point1, double[] point2) {
         double distance = 0.0;
         for (int i = 0; i < point1.length; i++) {
             distance += (point1[i] - point2[i]) * (point1[i] - point2[i]);
@@ -157,28 +157,9 @@ public class StructureUtils {
     }
 
     public static List<Atom> runQuery(Structure structure,
-                                      String atom1Name,
-                                      String atom2Name,
-                                      String residue1Name,
-                                      String residue2Name,
-                                      double distance,
-                                      double precision) {
-        return runQuery(
-                structure,
-                atom1Name,
-                atom2Name,
-                residue1Name,
-                residue2Name,
-                distance * precision
-        );
-    }
-
-    public static List<Atom> runQuery(Structure structure,
-                                      String atom1Name,
-                                      String atom2Name,
-                                      String residue1Name,
-                                      String residue2Name,
-                                      double distance) {
+                                      String atom1Name, String atom2Name,
+                                      String residue1Name, String residue2Name,
+                                      double distance, double precision) {
         ArrayList<Atom> results = new ArrayList<>();
 
         List<Group> residue1List = getResiduesByType(structure, residue1Name);
@@ -188,14 +169,20 @@ public class StructureUtils {
         residue1List.forEach(residue -> atom1List.addAll(getAtomByType(residue, atom1Name)));
         residue2List.forEach(residue -> atom2List.addAll(getAtomByType(residue, atom2Name)));
 
-        atom1List.forEach(atom1 -> atom2List.forEach(atom2 -> {
-
-            if (atom1.getGroup() != atom2.getGroup() &&
-                    rmsd(atom1.getCoords(), atom2.getCoords()) < distance &&
-                    Math.abs(rmsd(atom1.getCoords(), atom2.getCoords()) - distance) < 4) {
-                results.add(atom1);
-            }
-        }));
+        atom1List.forEach(atom1 ->
+                atom2List.forEach(atom2 -> {
+                    double _rmsd = rmsd(atom1, atom2);
+                    double _errorMargin = l2Norm(new double[]{2d, 2d, 2d});
+                    double _precisionMod = l2Norm(new double[]{precision, precision, precision});
+                    if (atom1.getGroup() != atom2.getGroup()
+                            && (_rmsd < distance * precision)
+                            && (Math.abs(_rmsd - (distance * precision)) < (_errorMargin * _precisionMod))
+                        // Todo: @jmiller Insert explanation as to why the above line says 4
+                    ) {
+                        results.add(atom1);
+                    }
+                })
+        );
 
         return results;
     }
@@ -221,5 +208,13 @@ public class StructureUtils {
         } catch (Exception e) {
             return "unknown";
         }
+    }
+
+    private static double l2Norm(double[] w2v) {
+        double norm = 0.0;
+        for (Double x : w2v) {
+            norm += x * x;
+        }
+        return Math.sqrt(norm);
     }
 }
