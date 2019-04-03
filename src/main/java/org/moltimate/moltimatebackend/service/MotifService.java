@@ -151,7 +151,6 @@ public class MotifService {
                         motifService.saveMotif(motif);
                         motifsSaved.incrementAndGet();
                     } catch (Exception e) {
-                        e.printStackTrace();
                         failedPdbIds.add(pdbId);
                     }
                 });

@@ -45,7 +45,6 @@ public class ProteinUtils {
             try {
                 return MMCIF_FILE_READER.getStructureById(pdbId);
             } catch (IOException mmcifReaderError) {
-                mmcifReaderError.printStackTrace();
                 throw new InvalidPdbIdException(pdbId);
             }
         }
@@ -53,6 +52,7 @@ public class ProteinUtils {
 
     /**
      * Use this when processing a list so that an error doesn't interrupt execution
+     *
      * @param pdbId PDB ID string
      * @return Optional of a BioJava Structure object representing the PDB ID
      */
