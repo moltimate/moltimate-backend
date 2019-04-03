@@ -38,20 +38,21 @@ public class ActiveSiteAlignmentRequest {
 
     public List<Motif> extractCustomMotifsFromFiles() {
         return customMotifs.stream()
-                .map(FileUtils::getMotifFromFile)
+                .map(FileUtils::readMotifFile)
                 .filter(Objects::nonNull)
+                .map(MotifFile::getMotif)
                 .collect(Collectors.toList());
     }
 
     public Map<Motif, Structure> extractCustomMotifMapFromFiles() {
         Map<Motif, Structure> results = new HashMap<>();
-        for (MultipartFile file : customMotifs) {
-            Motif _customMotif = FileUtils.getMotifFromFile(file);
-            Structure _customStructure = FileUtils.structureFromFile(file);
-            if (_customMotif != null && _customStructure != null) {
-                results.put(_customMotif, _customStructure);
+        customMotifs.forEach(customMotif -> {
+            MotifFile motifFile = FileUtils.readMotifFile(customMotif);
+            if (motifFile.getMotif() != null && motifFile.getStructure() != null) {
+                results.put(motifFile.getMotif(), motifFile.getStructure());
             }
-        }
+        });
+
         return results;
     }
 

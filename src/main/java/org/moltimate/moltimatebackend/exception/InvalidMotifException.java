@@ -1,4 +1,4 @@
-package org.moltimate.moltimatebackend.validation.exceptions;
+package org.moltimate.moltimatebackend.exception;
 
 import java.util.List;
 

@@ -1,9 +1,10 @@
 package org.moltimate.moltimatebackend.controller;
 
-import org.moltimate.moltimatebackend.validation.exceptions.InvalidEcNumberException;
-import org.moltimate.moltimatebackend.validation.exceptions.InvalidFileException;
-import org.moltimate.moltimatebackend.validation.exceptions.InvalidMotifException;
-import org.moltimate.moltimatebackend.validation.exceptions.InvalidPdbIdException;
+import org.moltimate.moltimatebackend.exception.InvalidEcNumberException;
+import org.moltimate.moltimatebackend.exception.InvalidFileException;
+import org.moltimate.moltimatebackend.exception.InvalidMotifException;
+import org.moltimate.moltimatebackend.exception.InvalidPdbIdException;
+import org.moltimate.moltimatebackend.exception.MotifFileParseException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
