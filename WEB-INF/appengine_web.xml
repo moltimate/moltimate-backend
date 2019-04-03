@@ -5,9 +5,4 @@
     <version>alpha-001</version><!-- unused for Cloud SDK based tooling -->
     <threadsafe>true</threadsafe>
     <runtime>java8</runtime>
-    <resource-files>
-        <include path="**.json" />
-        <include path="../**.json" />
-        <include path="../../**.json" />
-    </resource-files>
 </appengine-web-app>
