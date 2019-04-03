@@ -3,6 +3,7 @@ package org.moltimate.moltimatebackend.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.biojava.nbio.structure.Structure;
 import org.moltimate.moltimatebackend.model.Motif;
 import org.moltimate.moltimatebackend.util.FileUtils;
 import org.moltimate.moltimatebackend.util.ProteinUtils;
@@ -10,7 +11,9 @@ import org.moltimate.moltimatebackend.validation.exceptions.InvalidPdbIdExceptio
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -43,6 +46,18 @@ public class ActiveSiteAlignmentRequest {
                 .map(FileUtils::getMotifFromFile)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
+    }
+
+    public Map<Motif, Structure> extractCustomMotifMapFromFiles() {
+        Map<Motif, Structure> results = new HashMap<>();
+        for (MultipartFile file : customMotifs) {
+            Motif cMotif = FileUtils.getMotifFromFile(file);
+            Structure cStructure = ProteinUtils.structureFromFile(file);
+            if (cMotif != null && cStructure != null) {
+                results.put(cMotif, cStructure);
+            }
+        }
+        return results;
     }
 
     public int getPrecisionFactor() {
