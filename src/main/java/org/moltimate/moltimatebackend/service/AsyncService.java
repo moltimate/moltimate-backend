@@ -15,7 +15,7 @@ public class AsyncService {
     private ExecutorService executorService;
 
     @Autowired
-    private GenerateMotifService generateMotifService;
+    private MotifService motifService;
 
     @PostConstruct
     private void create() {
@@ -23,7 +23,7 @@ public class AsyncService {
     }
 
     public void process() {
-        Callable<Integer> c = () -> generateMotifService.updateMotifs();
+        Callable<Integer> c = () -> motifService.updateMotifs();
         executorService.submit(c);
     }
 

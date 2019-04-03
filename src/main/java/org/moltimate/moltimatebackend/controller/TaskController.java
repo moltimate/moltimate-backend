@@ -2,7 +2,6 @@ package org.moltimate.moltimatebackend.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.moltimate.moltimatebackend.service.AsyncService;
-import org.moltimate.moltimatebackend.service.GenerateMotifService;
 import org.moltimate.moltimatebackend.service.MotifService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

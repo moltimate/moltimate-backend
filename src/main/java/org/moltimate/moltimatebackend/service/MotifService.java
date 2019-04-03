@@ -9,7 +9,6 @@ import org.moltimate.moltimatebackend.model.Motif;
 import org.moltimate.moltimatebackend.model.MotifSelection;
 import org.moltimate.moltimatebackend.model.Residue;
 import org.moltimate.moltimatebackend.model.ResidueQuerySet;
-import org.moltimate.moltimatebackend.model.ResidueQuerySet;
 import org.moltimate.moltimatebackend.repository.MotifRepository;
 import org.moltimate.moltimatebackend.repository.ResidueQuerySetRepository;
 import org.moltimate.moltimatebackend.util.ProteinUtils;
@@ -26,11 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -111,7 +105,8 @@ public class MotifService {
             return findAll(pageNumber);
         }
         EcNumberValidator.validate(ecNumber);
-        return motifRepository.findByEcNumberEqualsOrEcNumberStartingWith("unknown", ecNumber, PageRequest.of(pageNumber, MOTIF_BATCH_SIZE));
+        return motifRepository.findByEcNumberEqualsOrEcNumberStartingWith(
+                "unknown", ecNumber, PageRequest.of(pageNumber, MOTIF_BATCH_SIZE));
     }
 
     /**
@@ -126,12 +121,13 @@ public class MotifService {
     }
 
     // TODO: Pessimistic lock the motifs table until update is finished
-    public void updateMotifs() {
+    // TODO: Pessimistic lock the motifs table until update is finished
+    public Integer updateMotifs() {
         log.info("Updating Motif database");
         List<ActiveSite> activeSites = activeSiteService.getActiveSites();
 
         log.info("Deleting and flushing Motif database");
-        motifService.deleteAllAndFlush();
+//        motifService.deleteAllAndFlush();
 
         log.info("Saving " + activeSites.size() + " new motifs");
         AtomicInteger motifsSaved = new AtomicInteger(0);
@@ -158,12 +154,14 @@ public class MotifService {
                         motifService.saveMotif(motif);
                         motifsSaved.incrementAndGet();
                     } catch (Exception e) {
+                        e.printStackTrace();
                         failedPdbIds.add(pdbId);
                     }
                 });
 
         log.info("Failed to save " + failedPdbIds.size() + " motifs to the database: " + failedPdbIds.toString());
         log.info("Finished saving " + motifsSaved.get() + " motifs to the database");
+        return motifsSaved.get();
     }
 
     /**
