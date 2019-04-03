@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.biojava.nbio.structure.Structure;
-import org.moltimate.moltimatebackend.validation.exceptions.InvalidPdbIdException;
+import org.moltimate.moltimatebackend.exception.InvalidPdbIdException;
 
 import java.util.ArrayList;
 import java.util.List;

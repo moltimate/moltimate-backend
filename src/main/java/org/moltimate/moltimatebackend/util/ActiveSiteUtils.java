@@ -1,12 +1,10 @@
-package org.moltimate.moltimatebackend.service;
+package org.moltimate.moltimatebackend.util;
 
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
-import lombok.extern.slf4j.Slf4j;
 import org.moltimate.moltimatebackend.model.ActiveSite;
 import org.moltimate.moltimatebackend.model.Residue;
 import org.springframework.core.io.FileUrlResource;
-import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -19,23 +17,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Service used to query for or create active site Residues. Also provides the functionality to update our database's
- * active site table.
- */
-@Service
-@Slf4j
-public class ActiveSiteService {
+public class ActiveSiteUtils {
 
     //TODO: don't make web requests for these, use the local files.
     private static final String PROMOL_CSV_URL = "https://raw.githubusercontent.com/moltimate/moltimate-backend/master/src/main/resources/motifdata/promol_active_sites.csv";
     private static final String CSA_CSV_URL = "https://raw.githubusercontent.com/moltimate/moltimate-backend/master/src/main/resources/motifdata/csa_curated_data.csv";
-//    private static final String CSA_CSV_URL = "https://www.ebi.ac.uk/thornton-srv/m-csa/media/flat_files/csa_curated_data.csv";
 
     /**
      * Returns a list of protein active sites from known sources of truth
      */
-    public List<ActiveSite> getActiveSites() {
+    public static List<ActiveSite> getActiveSites() {
         return dedupeActiveSites(Arrays.asList(
                 getCsaActiveSites(),
                 getPromolActiveSites()
@@ -49,7 +40,7 @@ public class ActiveSiteService {
      * @param activeSiteLists Ordered list of active site lists
      * @return List of distinct active sites from all of the provided active site lists
      */
-    private List<ActiveSite> dedupeActiveSites(List<List<ActiveSite>> activeSiteLists) {
+    private static List<ActiveSite> dedupeActiveSites(List<List<ActiveSite>> activeSiteLists) {
         Map<String, Boolean> pdbIdSeen = new HashMap<>();
         List<ActiveSite> distinctActiveSites = new ArrayList<>();
 
@@ -75,7 +66,7 @@ public class ActiveSiteService {
      *
      * @return A list of ActiveSites
      */
-    private List<ActiveSite> getCsaActiveSites() {
+    private static List<ActiveSite> getCsaActiveSites() {
         try {
             Reader reader = new InputStreamReader(new FileUrlResource(new URL(CSA_CSV_URL)).getInputStream());
             CSVReader csvReader = new CSVReaderBuilder(reader).withSkipLines(1)
@@ -100,7 +91,7 @@ public class ActiveSiteService {
      *
      * @return A list of ActiveSites
      */
-    private List<ActiveSite> getPromolActiveSites() {
+    private static List<ActiveSite> getPromolActiveSites() {
         try {
             Reader reader = new InputStreamReader(new FileUrlResource(new URL(PROMOL_CSV_URL)).getInputStream());
             CSVReader csvReader = new CSVReaderBuilder(reader).withSkipLines(1)
@@ -137,7 +128,7 @@ public class ActiveSiteService {
     /**
      * Reads the next protein's active site residues from the Catalytic Site Atlas curated data file.
      */
-    private ActiveSite readNextCsaActiveSite(CSVReader csvReader) throws IOException {
+    private static ActiveSite readNextCsaActiveSite(CSVReader csvReader) throws IOException {
         List<Residue> activeSiteResidues = new ArrayList<>();
 
         String[] residueEntry;

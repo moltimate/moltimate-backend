@@ -1,4 +1,4 @@
-package org.moltimate.moltimatebackend.validation.exceptions;
+package org.moltimate.moltimatebackend.exception;
 
 public class InvalidEcNumberException extends RuntimeException {
     public InvalidEcNumberException(String ecNumber) {
