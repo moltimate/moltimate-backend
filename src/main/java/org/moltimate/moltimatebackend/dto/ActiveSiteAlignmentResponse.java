@@ -1,4 +1,4 @@
-package org.moltimate.moltimatebackend.response;
+package org.moltimate.moltimatebackend.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,6 +14,8 @@ import java.util.Map;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AlignmentResponse {
+public class ActiveSiteAlignmentResponse {
     Map<String, List<Alignment>> alignments;
+
+    List<String> failedPdbIds;
 }
