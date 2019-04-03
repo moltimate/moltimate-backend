@@ -259,14 +259,20 @@
                 </configuration>
             </plugin>
 
+            <!--<plugin>-->
+                <!--<groupId>org.eclipse.jetty</groupId>-->
+                <!--<artifactId>jetty-maven-plugin</artifactId>-->
+                <!--<configuration>-->
+                    <!--<webAppConfig>-->
+                        <!--<allowDuplicateFragmentNames>true</allowDuplicateFragmentNames>-->
+                    <!--</webAppConfig>-->
+                <!--</configuration>-->
+            <!--</plugin>-->
+
             <plugin>
-                <groupId>org.mortbay.jetty</groupId>
+                <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-maven-plugin</artifactId>
-                <configuration>
-                    <webAppConfig>
-                        <allowDuplicateFragmentNames>true</allowDuplicateFragmentNames>
-                    </webAppConfig>
-                </configuration>
+                <version>9.4.2.v20170220</version>
             </plugin>
 
             <plugin>
