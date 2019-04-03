@@ -16,6 +16,15 @@ import java.util.stream.Collectors;
 public class StructureUtils {
 
     /**
+     * We have an error of 2 angstroms in any direction, so our margin is 2 in all directions
+     * This is used to check that not only is the distance less than the query amount, but also that it is similar
+     * We use the norm of the error vector to find the acceptable threshold
+     * With precision factor, we make a similar vector and multiply the previous norm
+     * by the norm of the new precision factor vector
+     */
+    private static double distanceErrorMargin = 2d;
+
+    /**
      * Get Residue from a structure
      *
      * @param structure:     structure to search for residue in
@@ -172,12 +181,11 @@ public class StructureUtils {
         atom1List.forEach(atom1 ->
                 atom2List.forEach(atom2 -> {
                     double _rmsd = rmsd(atom1, atom2);
-                    double _errorMargin = l2Norm(new double[]{2d, 2d, 2d});
+                    double _errorMargin = l2Norm(new double[]{distanceErrorMargin, distanceErrorMargin, distanceErrorMargin});
                     double _precisionMod = l2Norm(new double[]{precision, precision, precision});
                     if (atom1.getGroup() != atom2.getGroup()
                             && (_rmsd < distance * precision)
                             && (Math.abs(_rmsd - (distance * precision)) < (_errorMargin * _precisionMod))
-                        // Todo: @jmiller Insert explanation as to why the above line says 4
                     ) {
                         results.add(atom1);
                     }
