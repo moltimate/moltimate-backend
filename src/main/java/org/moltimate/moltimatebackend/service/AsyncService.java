@@ -23,7 +23,7 @@ public class AsyncService {
     }
 
     public void process() {
-        Callable<Integer> c = () -> generateMotifService.threadUpdateMotifs();
+        Callable<Integer> c = () -> generateMotifService.updateMotifs();
         executorService.submit(c);
     }
 

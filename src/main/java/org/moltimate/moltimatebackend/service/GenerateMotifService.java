@@ -34,7 +34,8 @@ public class GenerateMotifService {
     private ProteinService proteinService;
 
 
-    public Integer threadUpdateMotifs() {
+    // TODO: Pessimistic lock the motifs table until update is finished
+    public Integer updateMotifs() {
         log.info("Updating Motif database");
         List<ActiveSite> activeSites = activeSiteService.getActiveSites();
 
@@ -74,48 +75,6 @@ public class GenerateMotifService {
         log.info("Failed to save " + failedPdbIds.size() + " motifs to the database: " + failedPdbIds.toString());
         log.info("Finished saving " + motifsSaved.get() + " motifs to the database");
         return motifsSaved.get();
-    }
-
-    // TODO: Pessimistic lock the motifs table until update is finished
-    public void updateMotifs() {
-        log.info("Updating Motif database");
-        List<ActiveSite> activeSites = activeSiteService.getActiveSites();
-
-        log.info("Deleting and flushing Motif database");
-//        motifService.deleteAllAndFlush();
-
-        log.info("Saving " + activeSites.size() + " new motifs");
-        AtomicInteger motifsSaved = new AtomicInteger(0);
-        List<String> failedPdbIds = new ArrayList<>();
-        activeSites.parallelStream()
-                .forEach(activeSite -> {
-                    String pdbId = activeSite.getPdbId();
-                    try {
-                        List<Residue> residues = activeSite.getResidues();
-                        Structure structure = proteinService.queryPdb(pdbId);
-                        for (Residue res : residues) {
-                            Group group = StructureUtils.getResidue(
-                                    structure, res.getResidueName(), res.getResidueId());
-                            res.setResidueChainName(group.getResidueNumber()
-                                    .getChainName());
-                            res.setResidueAltLoc(Residue.getAltLocFromGroup(group));
-                        }
-                        Motif motif = Motif.builder()
-                                .pdbId(pdbId)
-                                .activeSiteResidues(residues)
-                                .ecNumber(StructureUtils.ecNumber(structure))
-                                .selectionQueries(generateSelectionQueries(structure, residues))
-                                .build();
-                        motifService.saveMotif(motif);
-                        motifsSaved.incrementAndGet();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        failedPdbIds.add(pdbId);
-                    }
-                });
-
-        log.info("Failed to save " + failedPdbIds.size() + " motifs to the database: " + failedPdbIds.toString());
-        log.info("Finished saving " + motifsSaved.get() + " motifs to the database");
     }
 
     /**
