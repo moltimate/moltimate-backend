@@ -4,12 +4,16 @@ env: flex
 runtime_config:
     jdk: openjdk8
 service: moltimate-backend
+resources:
+    cpu: 2
+    memory_gb: 2.3
 automatic_scaling:
     min_num_instances: 1
-    max_num_instances: 5
+    max_num_instances: 1
 readiness_check:
-    path: "/"
-    app_start_timeout_sec: 600
+    path: "/motifs"
+liveness_check:
+    path: "/motifs"
 skip_files:
   - .git/objects/
   - target/
