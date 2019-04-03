@@ -20,4 +20,5 @@ public class Alignment {
     private int minDistance;
     private int maxDistance;
     private double rmsd;
+    private String ecNumber;
 }

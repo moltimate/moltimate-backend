@@ -7,7 +7,6 @@ import org.moltimate.moltimatebackend.model.ActiveSite;
 import org.moltimate.moltimatebackend.model.Residue;
 import org.springframework.core.io.FileUrlResource;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.annotation.Validated;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -25,10 +24,10 @@ import java.util.Map;
  * active site table.
  */
 @Service
-@Validated
 @Slf4j
 public class ActiveSiteService {
 
+    //TODO: don't make web requests for these, use the local files.
     private static final String PROMOL_CSV_URL = "https://raw.githubusercontent.com/moltimate/moltimate-backend/master/src/main/resources/motifdata/promol_active_sites.csv";
     private static final String CSA_CSV_URL = "https://raw.githubusercontent.com/moltimate/moltimate-backend/master/src/main/resources/motifdata/csa_curated_data.csv";
 //    private static final String CSA_CSV_URL = "https://www.ebi.ac.uk/thornton-srv/m-csa/media/flat_files/csa_curated_data.csv";
@@ -56,7 +55,8 @@ public class ActiveSiteService {
 
         activeSiteLists.forEach(activeSites -> {
             activeSites.forEach(activeSite -> {
-                if (activeSite.getResidues().size() < 3) {
+                if (activeSite.getResidues()
+                        .size() < 3) {
                     return; // ignore active sites with fewer than 3 residues
                 }
 
@@ -121,9 +121,9 @@ public class ActiveSiteService {
                 }
 
                 activeSites.add(ActiveSite.builder()
-                        .pdbId(pdbId)
-                        .residues(activeSiteResidues)
-                        .build());
+                                        .pdbId(pdbId)
+                                        .residues(activeSiteResidues)
+                                        .build());
             }
 
             return activeSites;

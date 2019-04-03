@@ -28,17 +28,6 @@
             <version>4.13-beta-1</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <version>2.23.4</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.jcabi</groupId>
-            <artifactId>jcabi-matchers</artifactId>
-            <version>1.4</version>
-        </dependency>
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -87,18 +76,11 @@
         </dependency>
 
         <!-- JPA/Hibernate -->
-        <!-- <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-orm</artifactId>
-            <version>5.0.2.RELEASE</version>
-        </dependency> -->
-
         <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-commons</artifactId>
             <version>2.1.5.RELEASE</version>
         </dependency>
-
 
         <dependency>
             <groupId>org.springframework.data</groupId>
@@ -144,6 +126,19 @@
             <artifactId>hsqldb</artifactId>
             <version>2.4.0</version>
             <scope>runtime</scope>
+        </dependency>
+
+        <!-- Swagger Documentation -->
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger2</artifactId>
+            <version>2.9.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger-ui</artifactId>
+            <version>2.9.2</version>
         </dependency>
 
         <!-- Protein Function Analysis -->
@@ -264,15 +259,9 @@
             </plugin>
 
             <plugin>
-                <groupId>org.mortbay.jetty</groupId>
+                <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-maven-plugin</artifactId>
-                <configuration>
-                    <webAppConfig>
-                        <allowDuplicateFragmentNames>true</allowDuplicateFragmentNames>
-                    </webAppConfig>
-                    <stopKey/>
-                    <stopPort/>
-                </configuration>
+                <version>9.4.2.v20170220</version>
             </plugin>
 
             <plugin>
