@@ -1,36 +1,32 @@
 package org.moltimate.moltimatebackend.util;
 
-import com.opencsv.CSVReader;
-import com.opencsv.CSVReaderBuilder;
 import org.moltimate.moltimatebackend.model.ActiveSite;
-import org.moltimate.moltimatebackend.model.Residue;
-import org.springframework.core.io.FileUrlResource;
+import org.moltimate.moltimatebackend.parser.ActiveSiteParser;
+import org.moltimate.moltimatebackend.parser.CsaActiveSiteParser;
+import org.moltimate.moltimatebackend.parser.PromolActiveSiteParser;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ActiveSiteUtils {
 
-    //TODO: don't make web requests for these, use the local files.
-    private static final String PROMOL_CSV_URL = "https://raw.githubusercontent.com/moltimate/moltimate-backend/master/src/main/resources/motifdata/promol_active_sites.csv";
-    private static final String CSA_CSV_URL = "https://raw.githubusercontent.com/moltimate/moltimate-backend/master/src/main/resources/motifdata/csa_curated_data.csv";
+    // Duplicate active sites are handled by favoring the active site from the parser defined earlier in this list.
+    private static final List<ActiveSiteParser> ORDERED_PARSERS = Arrays.asList(
+            new CsaActiveSiteParser(),
+            new PromolActiveSiteParser()
+    );
 
     /**
-     * Returns a list of protein active sites from known sources of truth
+     * Returns a list of protein active sites from known sources of truth.
      */
     public static List<ActiveSite> getActiveSites() {
-        return dedupeActiveSites(Arrays.asList(
-                getCsaActiveSites(),
-                getPromolActiveSites()
-        ));
+        return dedupeActiveSites(ORDERED_PARSERS.stream()
+                                         .map(ActiveSiteParser::parseMotifs)
+                                         .collect(Collectors.toList()));
     }
 
     /**
@@ -59,104 +55,5 @@ public class ActiveSiteUtils {
         });
 
         return distinctActiveSites;
-    }
-
-    /**
-     * Retrieve all active sites from the Catalytic Site Atlas.
-     *
-     * @return A list of ActiveSites
-     */
-    private static List<ActiveSite> getCsaActiveSites() {
-        try {
-            Reader reader = new InputStreamReader(new FileUrlResource(new URL(CSA_CSV_URL)).getInputStream());
-            CSVReader csvReader = new CSVReaderBuilder(reader).withSkipLines(1)
-                    .build();
-
-            List<ActiveSite> activeSites = new ArrayList<>();
-            ActiveSite nextSite;
-            while ((nextSite = readNextCsaActiveSite(csvReader)) != null) {
-                activeSites.add(nextSite);
-            }
-
-            return activeSites;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return Collections.emptyList();
-    }
-
-    /**
-     * Retrieve all active sites from the scraped Promol motifs.
-     *
-     * @return A list of ActiveSites
-     */
-    private static List<ActiveSite> getPromolActiveSites() {
-        try {
-            Reader reader = new InputStreamReader(new FileUrlResource(new URL(PROMOL_CSV_URL)).getInputStream());
-            CSVReader csvReader = new CSVReaderBuilder(reader).withSkipLines(1)
-                    .build();
-            String[] residueEntry;
-            List<ActiveSite> activeSites = new ArrayList<>();
-            while ((residueEntry = csvReader.readNext()) != null) {
-                String pdbId = residueEntry[0];
-                List<Residue> activeSiteResidues = new ArrayList<>();
-                for (int i = 1; i < residueEntry.length; i++) {
-                    String[] res = residueEntry[i].split(" ");
-                    Residue residue = Residue.builder()
-                            .residueName(res[0])
-                            .residueId(res[1])
-                            .residueChainName(res[2])
-                            .build();
-                    activeSiteResidues.add(residue);
-                }
-
-                activeSites.add(ActiveSite.builder()
-                                        .pdbId(pdbId)
-                                        .residues(activeSiteResidues)
-                                        .build());
-            }
-
-            return activeSites;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return Collections.emptyList();
-    }
-
-    /**
-     * Reads the next protein's active site residues from the Catalytic Site Atlas curated data file.
-     */
-    private static ActiveSite readNextCsaActiveSite(CSVReader csvReader) throws IOException {
-        List<Residue> activeSiteResidues = new ArrayList<>();
-
-        String[] residueEntry;
-        while ((residueEntry = csvReader.readNext()) != null) {
-            String pdbId = residueEntry[2];
-
-            boolean isResidue = "residue".equals(residueEntry[4]);
-            if (isResidue) {
-                Residue residue = Residue.builder()
-                        .residueName(residueEntry[5])
-                        .residueChainName(residueEntry[6])
-                        .residueId(residueEntry[7])
-                        .build();
-                if (!activeSiteResidues.contains(residue)) {
-                    activeSiteResidues.add(residue);
-                }
-            }
-
-            // If the next row is the end of file OR start of a different protein, stop and return current Residue list
-            String[] nextEntry = csvReader.peek();
-            if (nextEntry == null || !nextEntry[2].equals(pdbId)) {
-                return ActiveSite.builder()
-                        .pdbId(pdbId)
-                        .residues(activeSiteResidues)
-                        .build();
-            }
-        }
-
-        return null;
     }
 }

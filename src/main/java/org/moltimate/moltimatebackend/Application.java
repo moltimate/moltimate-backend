@@ -38,7 +38,6 @@ public class Application {
                 .directModelSubstitute(Character.class, String.class)
                 .genericModelSubstitutes(ResponseEntity.class)
                 .useDefaultResponseMessages(false)
-                .enableUrlTemplating(true)
-                ;
+                .enableUrlTemplating(true);
     }
 }
