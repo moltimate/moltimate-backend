@@ -3,6 +3,7 @@ package org.moltimate.moltimatebackend;
 import com.google.common.base.Predicates;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,7 @@ import java.time.LocalDate;
 @SpringBootApplication
 @EnableJpaRepositories
 @EnableSwagger2
+@EnableCaching
 public class Application {
 
     public static void main(String[] args) {
