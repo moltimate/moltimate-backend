@@ -8,6 +8,7 @@ import org.moltimate.moltimatebackend.dto.MotifTestRequest;
 import org.moltimate.moltimatebackend.dto.PdbQueryResponse;
 import org.moltimate.moltimatebackend.model.Alignment;
 import org.moltimate.moltimatebackend.model.Residue;
+import org.moltimate.moltimatebackend.util.MotifUtils;
 import org.moltimate.moltimatebackend.util.PdbXmlClient;
 import org.moltimate.moltimatebackend.util.ProteinUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,14 +35,11 @@ public class MotifTestService {
 
     public ActiveSiteAlignmentResponse testMotifAlignment(MotifTestRequest motifTestRequest) {
         log.info("Received request to test motif: " + motifTestRequest);
-        MotifStructure testMotifStructure = MotifStructure.builder()
-                .motif(motifService.generateMotif(
-                        motifTestRequest.getPdbId(),
-                        motifTestRequest.getEcNumber(),
-                        motifTestRequest.motifStructure(),
-                        parseResidueEntries(motifTestRequest.getActiveSiteResidues())))
-                .motifStructure(motifTestRequest.motifStructure())
-                .build();
+        String motifPdbId = motifTestRequest.getPdbId();
+        String motifEcNumber = motifTestRequest.getEcNumber();
+        Structure motifStructure = motifTestRequest.motifStructure();
+        List<Residue> motifResidues = parseResidueEntries(motifTestRequest.getActiveSiteResidues());
+        Motif testMotif = MotifUtils.generateMotif(motifPdbId, motifEcNumber, motifStructure, motifResidues);
 
         List<Structure> structureList = new ArrayList<>();
         List<String> failedIds = new ArrayList<>();

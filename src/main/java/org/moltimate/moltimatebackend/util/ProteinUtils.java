@@ -5,7 +5,7 @@ import org.biojava.nbio.structure.Structure;
 import org.biojava.nbio.structure.io.MMCIFFileReader;
 import org.biojava.nbio.structure.io.PDBFileReader;
 import org.moltimate.moltimatebackend.dto.PdbQueryResponse;
-import org.moltimate.moltimatebackend.validation.exceptions.InvalidPdbIdException;
+import org.moltimate.moltimatebackend.exception.InvalidPdbIdException;
 
 import java.io.IOException;
 import java.util.List;

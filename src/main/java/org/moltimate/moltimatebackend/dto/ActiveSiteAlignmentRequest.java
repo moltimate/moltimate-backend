@@ -36,24 +36,24 @@ public class ActiveSiteAlignmentRequest {
 
     public List<Motif> extractCustomMotifsFromFiles() {
         return customMotifs.stream()
-                .map(FileUtils::getMotifFromFile)
+                .map(FileUtils::readMotifFile)
                 .filter(Objects::nonNull)
+                .map(MotifFile::getMotif)
                 .collect(Collectors.toList());
     }
 
-    public List<MotifStructure> extractCustomMotifMapFromFiles() {
-        List<MotifStructure> motifStructureList = new ArrayList<>();
-        for (MultipartFile file : customMotifs) {
-            Motif _customMotif = FileUtils.getMotifFromFile(file);
-            Structure _customStructure = FileUtils.structureFromFile(file);
-            if (_customMotif != null && _customStructure != null) {
-                motifStructureList.add(MotifStructure.builder()
-                        .motif(_customMotif)
-                        .motifStructure(_customStructure)
-                        .build());
+    public Map<Motif, Structure> extractCustomMotifMapFromFiles() {
+        Map<Motif, Structure> results = new HashMap<>();
+        customMotifs.forEach(customMotif -> {
+            MotifFile motifFile = FileUtils.readMotifFile(customMotif);
+            if (motifFile.getMotif() != null && motifFile.getStructure() != null) {
+                results.put(motifFile.getMotif(), motifFile.getStructure());
             }
         }
         return motifStructureList;
+        });
+
+        return results;
     }
 
     public double getPrecisionFactor() {
