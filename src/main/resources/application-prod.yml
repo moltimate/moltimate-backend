@@ -3,10 +3,8 @@ spring:
     gcp:
       project-id: moltimate
       sql:
-        database-name: motifs
+        database-name: moltimate
         instance-connection-name: moltimate:us-east4:backend-db-sql
-        credentials:
-          location: file:cloud-sql-secret.json
   datasource:
     continue-on-error: true
     initialization-mode: always
