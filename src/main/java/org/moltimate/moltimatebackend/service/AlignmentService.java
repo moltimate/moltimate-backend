@@ -15,6 +15,8 @@ import org.moltimate.moltimatebackend.util.AlignmentUtils;
 import org.moltimate.moltimatebackend.util.ProteinUtils;
 import org.moltimate.moltimatebackend.util.StructureUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
@@ -34,6 +36,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @Slf4j
+@CacheConfig(cacheNames={"Alignments"})
 public class AlignmentService {
 
     @Autowired
@@ -45,6 +48,7 @@ public class AlignmentService {
      * @param alignmentRequest The alignment request JSON mapped to an object
      * @return ActiveSiteAlignmentResponse which contains all alignments and their relevant data
      */
+    @Cacheable
     public ActiveSiteAlignmentResponse alignActiveSites(ActiveSiteAlignmentRequest alignmentRequest) {
         PdbQueryResponse pdbResponse = alignmentRequest.callPdbForResponse();
         List<Structure> sourceStructures = pdbResponse.getStructures();
