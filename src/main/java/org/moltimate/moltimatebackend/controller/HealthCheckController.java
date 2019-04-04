@@ -21,8 +21,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class HealthCheckController {
-  @GetMapping("/")
-  public String hello() {
-    return "Welcome to Moltimate!";
-  }
+    @GetMapping("/")
+    public String hello() {
+        return "Welcome to Moltimate!";
+    }
 }

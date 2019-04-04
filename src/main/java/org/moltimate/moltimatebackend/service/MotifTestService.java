@@ -112,14 +112,13 @@ public class MotifTestService {
         return new ActiveSiteAlignmentResponse(results, failedIds);
     }
 
-    private List<Residue> parseResidueEntries(List<String> residueEntries) {
+    private List<Residue> parseResidueEntries(List<List<String>> residueEntries) {
         List<Residue> activeSiteResidues = new ArrayList<>();
-        for (String residueEntry : residueEntries) {
-            String[] res = residueEntry.split(" ");
+        for (List<String> residueEntry : residueEntries) {
             Residue residue = Residue.builder()
-                    .residueName(res[0])
-                    .residueChainName(res[1])
-                    .residueId(res[2])
+                    .residueName(residueEntry.get(0))
+                    .residueChainName(residueEntry.get(1))
+                    .residueId(residueEntry.get(2))
                     .build();
             activeSiteResidues.add(residue);
         }

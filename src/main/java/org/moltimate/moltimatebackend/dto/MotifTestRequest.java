@@ -29,7 +29,7 @@ public class MotifTestRequest {
     // Motif Attributes
     private String pdbId;
     private String ecNumber;
-    private List<String> activeSiteResidues = new ArrayList<>();
+    private List<List<String>> activeSiteResidues = new ArrayList<>();
     private MultipartFile customMotifStructure;
 
     // Testing Attributes
