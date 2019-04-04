@@ -5,9 +5,7 @@ import org.biojava.nbio.structure.Structure;
 import org.biojava.nbio.structure.io.MMCIFFileReader;
 import org.biojava.nbio.structure.io.PDBFileReader;
 import org.moltimate.moltimatebackend.dto.PdbQueryResponse;
-import org.moltimate.moltimatebackend.validation.exceptions.InvalidFileException;
 import org.moltimate.moltimatebackend.validation.exceptions.InvalidPdbIdException;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
@@ -33,9 +31,10 @@ public class ProteinUtils {
     }
 
     public static PdbQueryResponse queryPdbResponse(List<String> pdbIds) {
-        if (pdbIds.size() > 0){
+        if (pdbIds.size() > 0) {
             return new PdbQueryResponse().generatePdbQueryResponse(pdbIds, queryPdb(pdbIds));
-        } return new PdbQueryResponse();
+        }
+        return new PdbQueryResponse();
     }
 
     /**
@@ -65,18 +64,6 @@ public class ProteinUtils {
             return Optional.of(queryPdb(pdbId));
         } catch (InvalidPdbIdException e) {
             return Optional.empty();
-        }
-    }
-
-    public static Structure structureFromFile(MultipartFile file) {
-        try {
-            return PDB_FILE_READER.getStructure(file.getInputStream());
-        } catch (IOException pdbReaderError) {
-            try {
-                return MMCIF_FILE_READER.getStructure(file.getInputStream());
-            } catch (IOException ignored) {
-                throw new InvalidFileException("Could not parse given file\nPlease check the file to make sure it is a valid PDB or MMCIF file");
-            }
         }
     }
 }

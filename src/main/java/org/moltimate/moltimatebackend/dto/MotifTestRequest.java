@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.biojava.nbio.structure.Structure;
+import org.moltimate.moltimatebackend.util.FileUtils;
 import org.moltimate.moltimatebackend.util.ProteinUtils;
 import org.moltimate.moltimatebackend.validation.exceptions.InvalidPdbIdException;
 import org.springframework.web.multipart.MultipartFile;
@@ -46,7 +47,7 @@ public class MotifTestRequest {
             }
             throw new InvalidPdbIdException(pdbId);
         }
-        return ProteinUtils.structureFromFile(customMotifStructure);
+        return FileUtils.structureFromFile(customMotifStructure);
     }
 
     public int getPrecisionFactor() {
@@ -69,7 +70,7 @@ public class MotifTestRequest {
 
     public List<Structure> extractCustomStructuresFromFiles() {
         return customStructures.stream()
-                .map(ProteinUtils::structureFromFile)
+                .map(FileUtils::structureFromFile)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
