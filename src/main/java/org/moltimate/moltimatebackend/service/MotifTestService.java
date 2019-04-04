@@ -99,7 +99,7 @@ public class MotifTestService {
 
         log.info(String.format("Aligning active sites of %s with %d structures (%d custom structures).",
                 motifPdbId, structureList.size(), motifTestRequest.getCustomStructures().size()));
-        alignmentService.alignActiveSiteStructureList(results, testMotif, structureList, motifTestRequest.getPrecisionFactor());
+        alignmentService.alignActiveSiteStructureList(results, testMotif, motifStructure, structureList, motifTestRequest.getPrecisionFactor());
         return new ActiveSiteAlignmentResponse(results, failedIds);
     }
 
