@@ -96,7 +96,7 @@ public class AlignmentService {
         return new ActiveSiteAlignmentResponse(results, pdbResponse.getFailedPdbIds());
     }
 
-    public void alignActiveSiteStructureList(HashMap<String, List<Alignment>> results, Motif motif, Structure motifStructure, List<Structure> structures, int precisionFactor) {
+    public void alignActiveSiteStructureList(HashMap<String, List<Alignment>> results, Motif motif, Structure motifStructure, List<Structure> structures, double precisionFactor) {
         structures.stream()
                 .parallel()
                 .forEach(structure -> results.get(structure.getPDBCode())
