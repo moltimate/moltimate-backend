@@ -2,7 +2,6 @@ package org.moltimate.moltimatebackend.util;
 
 import org.biojava.nbio.structure.Atom;
 import org.biojava.nbio.structure.Chain;
-import org.biojava.nbio.structure.EntityInfo;
 import org.biojava.nbio.structure.Group;
 import org.biojava.nbio.structure.GroupType;
 import org.biojava.nbio.structure.Structure;
@@ -12,7 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 
 public class StructureUtils {
 
@@ -23,7 +21,7 @@ public class StructureUtils {
      * With precision factor, we make a similar vector and multiply the previous norm
      * by the norm of the new precision factor vector
      */
-    private static double distanceErrorMargin = 2d;
+    private static final double distanceErrorMargin = 2d;
 
     /**
      * Get Residue from a structure
@@ -202,18 +200,10 @@ public class StructureUtils {
 
     public static String ecNumber(Structure structure) {
         try {
-            for (EntityInfo entityInfo : structure.getEntityInfos())
-                if (entityInfo != null) {
-                    for (String s : Optional.of(entityInfo).get().getEcNums()) {
-                        if (s != null) {
-                            return Optional.of(s)
-                                    .get();
-                        }
-                    }
-                    return Optional.<String>empty()
-                            .get();
-                }
-            return Optional.<EntityInfo>empty()
+            return structure.getEntityInfos()
+                    .stream()
+                    .filter(Objects::nonNull)
+                    .findFirst()
                     .get()
                     .getEcNums()
                     .stream()

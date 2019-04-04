@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class FileController {
 
-    private static enum ProteinFileType {
+    private enum ProteinFileType {
         PDB(".pdb"),
         MMCIF(".cif"),
         MOTIF(".motif");

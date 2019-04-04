@@ -6,7 +6,6 @@ import org.biojava.nbio.structure.io.PDBFileReader;
 import org.moltimate.moltimatebackend.model.Motif;
 import org.moltimate.moltimatebackend.model.Residue;
 import org.moltimate.moltimatebackend.validation.exceptions.InvalidFileException;
-import org.moltimate.moltimatebackend.validation.exceptions.InvalidPdbIdException;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;

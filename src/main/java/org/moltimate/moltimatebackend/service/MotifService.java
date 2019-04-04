@@ -54,7 +54,7 @@ public class MotifService {
      * @param motif New Motif to save
      * @return A newly generated Motif
      */
-    public Motif saveMotif(Motif motif) {
+    private Motif saveMotif(Motif motif) {
         motif.getSelectionQueries()
                 .values()
                 .forEach(residueQuerySetRepository::save);
@@ -92,7 +92,7 @@ public class MotifService {
     /**
      * @return List of all Motifs in the database
      */
-    public Page<Motif> findAll(int pageNumber) {
+    private Page<Motif> findAll(int pageNumber) {
         return motifRepository.findAll(PageRequest.of(pageNumber, MOTIF_BATCH_SIZE));
     }
 
@@ -111,8 +111,7 @@ public class MotifService {
 
     public Motif generateMotif(String pdbId, String ecNumber, Structure structure, List<Residue> residues) {
         for (Residue res : residues) {
-            Group group = StructureUtils.getResidue(
-                    structure, res.getResidueName(), res.getResidueId());
+            Group group = StructureUtils.getResidue(structure, res.getResidueName(), res.getResidueId());
             assert group != null;
             res.setResidueChainName(group.getResidueNumber().getChainName());
             res.setResidueAltLoc(Residue.getAltLocFromGroup(group));
@@ -130,14 +129,13 @@ public class MotifService {
      * Delete all motifs and their residue query sets
      */
     public void deleteAllAndFlush() {
-        //TODO: figure out why this breaks
+        //TODO: figure out why this breaks deployments
 //        motifRepository.deleteAll();
 //        motifRepository.flush();
 //        residueQuerySetRepository.deleteAll();
 //        residueQuerySetRepository.flush();
     }
 
-    // TODO: Pessimistic lock the motifs table until update is finished
     // TODO: Pessimistic lock the motifs table until update is finished
     public Integer updateMotifs() {
         log.info("Updating Motif database");
@@ -181,54 +179,61 @@ public class MotifService {
     private Map<String, ResidueQuerySet> generateSelectionQueries(Structure structure, List<Residue> activeSiteResidues) {
         // Remove unwanted atoms from each residue's list of atoms
         Map<Residue, List<Atom>> filteredResidueAtoms = new HashMap<>();
-        activeSiteResidues.forEach(residue -> {
-            Group group = StructureUtils.getResidue(structure, residue.getResidueName(), residue.getResidueId());
+        for (Residue activeSiteResidue : activeSiteResidues) {
+            Group group = StructureUtils.getResidue(structure, activeSiteResidue.getResidueName(), activeSiteResidue.getResidueId());
+            assert group != null;
             List<Atom> groupAtoms = group.getAtoms();
-            Atom firstCbAtom = groupAtoms.stream()
-                    .filter(atom -> atom.getName()
-                            .equals("CB"))
-                    .findFirst()
-                    .orElse(groupAtoms.get(1));
-            if (residue.getResidueName()
-                    .equalsIgnoreCase("ALA")) {
+            Atom firstCbAtom = groupAtoms.get(1);
+            for (Atom groupAtom : groupAtoms) {
+                if (groupAtom.getName().equals("CB")) {
+                    firstCbAtom = groupAtom;
+                    break;
+                }
+            }
+            if (activeSiteResidue.getResidueName().equalsIgnoreCase("ALA")) {
                 firstCbAtom = groupAtoms.get(1);
             }
             List<Atom> filteredAtoms = groupAtoms.subList(groupAtoms.indexOf(firstCbAtom), groupAtoms.size());
-            filteredAtoms = filteredAtoms.stream()
-                    .filter(atom -> !atom.getName()
-                            .contains("H"))
-                    .collect(Collectors.toList());
-            filteredResidueAtoms.put(residue, filteredAtoms);
-        });
+            List<Atom> list = new ArrayList<>();
+            for (Atom atom : filteredAtoms) {
+                if (!atom.getName().contains("H")) {
+                    list.add(atom);
+                }
+            }
+            filteredAtoms = list;
+            filteredResidueAtoms.put(activeSiteResidue, filteredAtoms);
+        }
 
         // Compare every filtered atom in each residue to every other filtered atom in every other residue of this protein
         Map<String, ResidueQuerySet> selectionQueries = new HashMap<>();
-        filteredResidueAtoms.forEach((residue, filteredAtoms) -> {
+        for (Map.Entry<Residue, List<Atom>> e : filteredResidueAtoms.entrySet()) {
+            Residue residue = e.getKey();
+            List<Atom> filteredAtoms = e.getValue();
             List<MotifSelection> motifSelections = new ArrayList<>();
-            filteredResidueAtoms.forEach((compareResidue, compareFilteredAtoms) -> {
-                if (residue == compareResidue) {
-                    return; // Do not compare a residue to itself
+            for (Map.Entry<Residue, List<Atom>> entry : filteredResidueAtoms.entrySet()) {
+                if (residue == entry.getKey()) {
+                    continue;
                 }
 
-                filteredAtoms.forEach(atom -> {
-                    compareFilteredAtoms.forEach(compareAtom -> {
+                for (Atom atom : filteredAtoms) {
+                    for (Atom compareAtom : entry.getValue()) {
                         MotifSelection motifSelection = MotifSelection.builder()
                                 .atomType1(atom.getName())
                                 .atomType2(compareAtom.getName())
                                 .residueName1(atom.getGroup()
-                                                      .getChemComp()
-                                                      .getThree_letter_code())
+                                        .getChemComp()
+                                        .getThree_letter_code())
                                 .residueName2(compareAtom.getGroup()
-                                                      .getChemComp()
-                                                      .getThree_letter_code())
+                                        .getChemComp()
+                                        .getThree_letter_code())
                                 .distance(StructureUtils.rmsd(atom, compareAtom) + 2)
                                 .build();
                         motifSelections.add(motifSelection);
-                    });
-                });
-            });
+                    }
+                }
+            }
             selectionQueries.put(residue.getIdentifier(), new ResidueQuerySet(motifSelections));
-        });
+        }
 
         return selectionQueries;
     }
