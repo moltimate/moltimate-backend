@@ -51,7 +51,7 @@ public class AlignmentService {
         Map<Motif, Structure> customMotifs = alignmentRequest.extractCustomMotifMapFromFiles();
         String motifEcNumberFilter = alignmentRequest.getEcNumber();
 
-        int precision = alignmentRequest.getPrecisionFactor();
+        double precision = alignmentRequest.getPrecisionFactor();
 
         HashMap<String, List<Alignment>> results = new HashMap<>();
         pdbResponse.getFoundPdbIds().forEach(pdbId -> results.put(pdbId, new ArrayList<>()));
@@ -115,7 +115,7 @@ public class AlignmentService {
      * @param motif:     motif that we search for in the structure
      * @return an alignment (if one exists) or null (if none found)
      */
-    private Alignment alignActiveSites(Structure structure, Motif motif, Structure motifStructure, int precisionFactor) {
+    private Alignment alignActiveSites(Structure structure, Motif motif, Structure motifStructure, double precisionFactor) {
         Map<Residue, List<Group>> residueMap = motif.runQueries(structure, precisionFactor);
         List<Map<Residue, Group>> permutations = findAllPermutations(residueMap);
         Map<Residue, Group> residueMapping = findBestPermutation(motifStructure, permutations, motif);

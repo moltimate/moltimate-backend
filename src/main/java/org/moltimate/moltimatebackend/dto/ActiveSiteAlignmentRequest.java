@@ -30,7 +30,7 @@ public class ActiveSiteAlignmentRequest {
     private List<String> filters = new ArrayList<>();
     private List<MultipartFile> customMotifs = new ArrayList<>();
     private String ecNumber;
-    private int precisionFactor;
+    private double precisionFactor;
 
     public PdbQueryResponse callPdbForResponse() {
         return ProteinUtils.queryPdbResponse(pdbIds);
@@ -55,9 +55,9 @@ public class ActiveSiteAlignmentRequest {
         return results;
     }
 
-    public int getPrecisionFactor() {
+    public double getPrecisionFactor() {
         if (this.precisionFactor <= 0) {
-            return 1;
+            return 1d;
         }
         return this.precisionFactor;
     }

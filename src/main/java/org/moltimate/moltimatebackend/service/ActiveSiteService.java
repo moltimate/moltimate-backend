@@ -5,10 +5,13 @@ import com.opencsv.CSVReaderBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.moltimate.moltimatebackend.model.ActiveSite;
 import org.moltimate.moltimatebackend.model.Residue;
+import org.springframework.core.io.FileUrlResource;
 import org.springframework.stereotype.Service;
 
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -24,8 +27,9 @@ import java.util.Map;
 @Slf4j
 public class ActiveSiteService {
 
-    private static final String PROMOL_CSV_PATH = "src/main/resources/motifdata/promol_active_sites.csv";
-    private static final String CSA_CSV_PATH = "src/main/resources/motifdata/csa_curated_data.csv";
+    //TODO: don't make web requests for these, use the local files.
+    private static final String PROMOL_CSV_URL = "https://raw.githubusercontent.com/moltimate/moltimate-backend/master/src/main/resources/motifdata/promol_active_sites.csv";
+    private static final String CSA_CSV_URL = "https://raw.githubusercontent.com/moltimate/moltimate-backend/master/src/main/resources/motifdata/csa_curated_data.csv";
 //    private static final String CSA_CSV_URL = "https://www.ebi.ac.uk/thornton-srv/m-csa/media/flat_files/csa_curated_data.csv";
 
     /**
@@ -73,7 +77,8 @@ public class ActiveSiteService {
      */
     private List<ActiveSite> getCsaActiveSites() {
         try {
-            CSVReader csvReader = new CSVReaderBuilder(new FileReader(CSA_CSV_PATH)).withSkipLines(1)
+            Reader reader = new InputStreamReader(new FileUrlResource(new URL(CSA_CSV_URL)).getInputStream());
+            CSVReader csvReader = new CSVReaderBuilder(reader).withSkipLines(1)
                     .build();
 
             List<ActiveSite> activeSites = new ArrayList<>();
@@ -97,10 +102,12 @@ public class ActiveSiteService {
      */
     private List<ActiveSite> getPromolActiveSites() {
         try {
-            CSVReader reader = new CSVReader(new FileReader(PROMOL_CSV_PATH));
+            Reader reader = new InputStreamReader(new FileUrlResource(new URL(PROMOL_CSV_URL)).getInputStream());
+            CSVReader csvReader = new CSVReaderBuilder(reader).withSkipLines(1)
+                    .build();
             String[] residueEntry;
             List<ActiveSite> activeSites = new ArrayList<>();
-            while ((residueEntry = reader.readNext()) != null) {
+            while ((residueEntry = csvReader.readNext()) != null) {
                 String pdbId = residueEntry[0];
                 List<Residue> activeSiteResidues = new ArrayList<>();
                 for (int i = 1; i < residueEntry.length; i++) {

@@ -105,7 +105,8 @@ public class MotifService {
             return findAll(pageNumber);
         }
         EcNumberValidator.validate(ecNumber);
-        return motifRepository.findByEcNumberEqualsOrEcNumberStartingWith("unknown", ecNumber, PageRequest.of(pageNumber, MOTIF_BATCH_SIZE));
+        return motifRepository.findByEcNumberEqualsOrEcNumberStartingWith(
+                "unknown", ecNumber, PageRequest.of(pageNumber, MOTIF_BATCH_SIZE));
     }
 
     public Motif generateMotif(String pdbId, String ecNumber, Structure structure, List<Residue> residues) {
@@ -129,19 +130,21 @@ public class MotifService {
      * Delete all motifs and their residue query sets
      */
     public void deleteAllAndFlush() {
-        motifRepository.deleteAll();
-        motifRepository.flush();
-        residueQuerySetRepository.deleteAll();
-        residueQuerySetRepository.flush();
+        //TODO: figure out why this breaks
+//        motifRepository.deleteAll();
+//        motifRepository.flush();
+//        residueQuerySetRepository.deleteAll();
+//        residueQuerySetRepository.flush();
     }
 
     // TODO: Pessimistic lock the motifs table until update is finished
-    public void updateMotifs() {
+    // TODO: Pessimistic lock the motifs table until update is finished
+    public Integer updateMotifs() {
         log.info("Updating Motif database");
         List<ActiveSite> activeSites = activeSiteService.getActiveSites();
 
         log.info("Deleting and flushing Motif database");
-        motifService.deleteAllAndFlush();
+//        motifService.deleteAllAndFlush();
 
         log.info("Saving " + activeSites.size() + " new motifs");
         AtomicInteger motifsSaved = new AtomicInteger(0);
@@ -158,12 +161,14 @@ public class MotifService {
                         motifService.saveMotif(motif);
                         motifsSaved.incrementAndGet();
                     } catch (Exception e) {
+                        e.printStackTrace();
                         failedPdbIds.add(pdbId);
                     }
                 });
 
         log.info("Failed to save " + failedPdbIds.size() + " motifs to the database: " + failedPdbIds.toString());
         log.info("Finished saving " + motifsSaved.get() + " motifs to the database");
+        return motifsSaved.get();
     }
 
     /**
