@@ -43,16 +43,19 @@ public class ActiveSiteAlignmentRequest {
                 .collect(Collectors.toList());
     }
 
-    public Map<Motif, Structure> extractCustomMotifMapFromFiles() {
-        Map<Motif, Structure> results = new HashMap<>();
+    public List<MotifStructure> extractCustomMotifMapFromFiles() {
+        List<MotifStructure> motifStructureList = new ArrayList<>();
         for (MultipartFile file : customMotifs) {
             Motif _customMotif = FileUtils.getMotifFromFile(file);
             Structure _customStructure = FileUtils.structureFromFile(file);
             if (_customMotif != null && _customStructure != null) {
-                results.put(_customMotif, _customStructure);
+                motifStructureList.add(MotifStructure.builder()
+                        .motif(_customMotif)
+                        .motifStructure(_customStructure)
+                        .build());
             }
         }
-        return results;
+        return motifStructureList;
     }
 
     public double getPrecisionFactor() {
