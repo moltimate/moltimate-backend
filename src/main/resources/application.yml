@@ -2,6 +2,8 @@
 spring:
   profiles:
     active: @activatedSpringProfile@
+  main:
+    allow-bean-definition-overriding: true
 logging:
   level:
     org.biojava: OFF
