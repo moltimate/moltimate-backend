@@ -7,7 +7,6 @@ import org.biojava.nbio.structure.Structure;
 import org.moltimate.moltimatebackend.model.Motif;
 import org.moltimate.moltimatebackend.util.FileUtils;
 import org.moltimate.moltimatebackend.util.ProteinUtils;
-import org.moltimate.moltimatebackend.validation.exceptions.InvalidPdbIdException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
@@ -34,11 +33,7 @@ public class ActiveSiteAlignmentRequest {
     private double precisionFactor;
 
     public PdbQueryResponse callPdbForResponse() {
-        PdbQueryResponse response = ProteinUtils.queryPdbResponse(pdbIds);
-        if (response.structures.size() == 0) {
-            throw new InvalidPdbIdException(pdbIds);
-        }
-        return response;
+        return ProteinUtils.queryPdbResponse(pdbIds);
     }
 
     public List<Motif> extractCustomMotifsFromFiles() {

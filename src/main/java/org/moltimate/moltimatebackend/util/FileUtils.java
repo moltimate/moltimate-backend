@@ -5,6 +5,7 @@ import org.biojava.nbio.structure.io.MMCIFFileReader;
 import org.biojava.nbio.structure.io.PDBFileReader;
 import org.moltimate.moltimatebackend.model.Motif;
 import org.moltimate.moltimatebackend.model.Residue;
+import org.moltimate.moltimatebackend.validation.exceptions.InvalidFileException;
 import org.moltimate.moltimatebackend.validation.exceptions.InvalidPdbIdException;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -46,9 +47,7 @@ public class FileUtils {
             try {
                 return MMCIF_FILE_READER.getStructure(file.getInputStream());
             } catch (IOException ignored) {
-                // Todo make its own exception
-                throw new InvalidPdbIdException("could not parse file");
-//                throw new IOException("Could not parse given file\nPlease check the file to make sure it is a valid PDB or MMCIF file");
+                throw new InvalidFileException("Could not parse given file\nPlease check the file to make sure it is a valid PDB or MMCIF file");
             }
         }
     }

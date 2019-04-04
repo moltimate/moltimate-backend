@@ -64,35 +64,24 @@ public class AlignmentService {
 
         // Align structures with motifs from the database
         while (motifs.hasContent()) {
-            for (Structure structure : sourceStructures) {
-                results.get(structure.getPDBCode())
-                        .addAll(motifs.stream()
-                                .parallel()
-                                .map(motif -> {
-                                    Structure motifStructure = ProteinUtils.queryPdb(motif.getPdbId());
-                                    return alignActiveSites(structure, motif, motifStructure, precision);
-                                })
-                                .filter(Objects::nonNull)
-                                .collect(Collectors.toList()));
-            }
+            motifs.stream()
+                    .parallel()
+                    .forEach(motif -> {
+                        Structure motifStructure = ProteinUtils.queryPdb(motif.getPdbId());
+                        alignActiveSiteStructureList(results, motif, motifStructure, sourceStructures, precision);
+                    });
             pageNumber++;
             motifs = motifService.queryByEcNumber(motifEcNumberFilter, pageNumber);
         }
 
         // Align structures with custom uploaded motifs
-        for (Structure structure : sourceStructures) {
-            results.get(structure.getPDBCode())
-                    .addAll(customMotifs.entrySet()
-                            .stream()
-                            .parallel()
-                            .map(customMotifMap -> alignActiveSites(
-                                    structure,
-                                    customMotifMap.getKey(),
-                                    customMotifMap.getValue(),
-                                    precision))
-                            .filter(Objects::nonNull)
-                            .collect(Collectors.toList()));
-        }
+        customMotifs.forEach((customMotif, customMotifStructure) -> {
+            alignActiveSiteStructureList(results, customMotif, customMotifStructure, sourceStructures, precision);
+        });
+
+        results.forEach((pdbId, alignments) -> results.replace(pdbId, alignments.stream()
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList())));
 
         int resultsCount = 0;
         for (String key : results.keySet()) {
@@ -101,8 +90,22 @@ public class AlignmentService {
         }
 
         log.info(String.format("Found %d results", resultsCount));
-        log.error(String.format("Could not find PDB structures for the following ids: %s", pdbResponse.getFailedPdbIds()));
+        if (pdbResponse.getFailedPdbIds().size() > 0) {
+            log.error(String.format("Could not find PDB structures for the following ids: %s", pdbResponse.getFailedPdbIds()));
+        }
         return new ActiveSiteAlignmentResponse(results, pdbResponse.getFailedPdbIds());
+    }
+
+    public void alignActiveSiteStructureList(HashMap<String, List<Alignment>> results, Motif motif, Structure motifStructure, List<Structure> structures, double precisionFactor) {
+        structures.stream()
+                .parallel()
+                .forEach(structure -> results.get(structure.getPDBCode())
+                        .add(alignActiveSites(
+                                structure,
+                                motif,
+                                motifStructure,
+                                precisionFactor
+                        )));
     }
 
     /**
