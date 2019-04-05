@@ -46,22 +46,22 @@ public class FileUtils {
 
         public static List<String> getValidFileTypes() {
             return Arrays.stream(ProteinFileType.values())
-                    .map(proteinFileType -> proteinFileType.toString())
+                    .map(ProteinFileType::toString)
                     .collect(Collectors.toList());
         }
     }
 
     public static ResponseEntity<Resource> createPdbFile(String pdbId) {
         Resource pdbFile = new ByteArrayResource(ProteinUtils.queryPdb(pdbId)
-                .toPDB()
-                .getBytes());
+                                                         .toPDB()
+                                                         .getBytes());
         return createResponseFile(pdbFile, pdbId, ProteinFileType.PDB);
     }
 
     public static ResponseEntity<Resource> createMmcifFile(String pdbId) {
         Resource mmcifFile = new ByteArrayResource(ProteinUtils.queryPdb(pdbId)
-                .toMMCIF()
-                .getBytes());
+                                                           .toMMCIF()
+                                                           .getBytes());
         return createResponseFile(mmcifFile, pdbId, ProteinFileType.MMCIF);
     }
 
@@ -77,7 +77,7 @@ public class FileUtils {
                         residue.getResidueName(),
                         residue.getResidueId(),
                         residue.getResidueChainName()
-                        )
+                     )
                 )
                 .collect(Collectors.toList());
 
@@ -132,10 +132,10 @@ public class FileUtils {
         for (int i = 2; i < motifData.length; i++) {
             String[] residueData = motifData[i].split(" ");
             activeSiteResidues.add(Residue.builder()
-                    .residueName(residueData[0])
-                    .residueId(residueData[1])
-                    .residueChainName(residueData[2])
-                    .build());
+                                           .residueName(residueData[0])
+                                           .residueId(residueData[1])
+                                           .residueChainName(residueData[2])
+                                           .build());
         }
 
         String pdbId = motifData[0];

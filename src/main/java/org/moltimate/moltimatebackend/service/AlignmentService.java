@@ -114,13 +114,7 @@ public class AlignmentService {
     public Alignment alignActiveSites(Structure queryStructure, Motif motif, Structure motifStructure, double precisionFactor) {
         Map<Residue, List<Group>> residueMap = motif.runQueries(queryStructure, precisionFactor);
         List<Map<Residue, Group>> permutations = findAllPermutations(residueMap);
-        Map<Residue, Group> residueMapping;
-        if (permutations.size() > 1) {
-            log.info(String.format("Found %d permutations for alignment structure: %s motif: %s", permutations.size(), queryStructure.getPDBCode(), motif.getPdbId().toUpperCase()));
-            residueMapping = findBestPermutation(motif, motifStructure, permutations);
-        } else {
-            residueMapping = permutations.get(0);
-        }
+        Map<Residue, Group> residueMapping = findBestPermutation(motif, motifStructure, permutations);
 
         Set<Group> found = new HashSet<>();
         List<Residue> activeSiteResidueList = new ArrayList<>();
@@ -287,6 +281,9 @@ public class AlignmentService {
      * fits this requirement.
      */
     private Map<Residue, Group> findBestPermutation(Motif motif, Structure motifStructure, List<Map<Residue, Group>> permutations) {
+        if (permutations.size() <= 1) {
+            return permutations.get(0);
+        }
         double min_rmsd = Double.MAX_VALUE;
         Map<Residue, Group> best_match = new HashMap<>();
         for (Map<Residue, Group> permutation : permutations) {

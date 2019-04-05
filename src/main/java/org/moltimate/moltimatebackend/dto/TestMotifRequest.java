@@ -8,6 +8,7 @@ import org.moltimate.moltimatebackend.exception.InvalidPdbIdException;
 import org.moltimate.moltimatebackend.model.Residue;
 import org.moltimate.moltimatebackend.util.FileUtils;
 import org.moltimate.moltimatebackend.util.ProteinUtils;
+import org.moltimate.moltimatebackend.exception.InvalidPdbIdException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
