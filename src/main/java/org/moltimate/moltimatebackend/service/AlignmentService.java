@@ -126,33 +126,16 @@ public class AlignmentService {
         List<Residue> activeSiteResidueList = new ArrayList<>();
         List<Group> alignedResidueList = new ArrayList<>();
 
-//        Map<Residue, Group> alignmentMapping = new HashMap<>(); // Todo: Check remove
-
         for (Residue _residue : motif.getActiveSiteResidues()) {
             Group group = residueMapping.get(_residue);
             if (group != null) {
                 if (!found.contains(group)) {
                     activeSiteResidueList.add(_residue);
                     alignedResidueList.add(group);
-//                    alignmentMapping.put(_residue, group);
                     found.add(group);
                 }
             }
         }
-
-//        ArrayList<Residue> activeSiteOutput = new ArrayList<>(); // Todo: Check remove
-//        Set<Residue> used = new HashSet<>(); // Todo: Check remove
-
-//        for (int i = 0; i < activeSiteResidueList.size(); i++) {
-//            activeSiteOutput.add(activeSiteResidueList.get(i));
-//            used.add(activeSiteResidueList.get(i));
-//        }
-
-//        for (Residue residue : motif.getActiveSiteResidues()) {
-//            if (!used.contains(residue)) {
-//                activeSiteOutput.add(residue);
-//            }
-//        }
 
         List<Group> alignedResidueListSorted = new ArrayList<>(alignedResidueList);
         alignedResidueListSorted.sort(Comparator.comparingInt(o -> o.getResidueNumber().getSeqNum()));
