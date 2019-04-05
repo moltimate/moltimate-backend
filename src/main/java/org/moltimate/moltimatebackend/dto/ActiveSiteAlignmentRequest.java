@@ -3,7 +3,6 @@ package org.moltimate.moltimatebackend.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.biojava.nbio.structure.Structure;
 import org.moltimate.moltimatebackend.model.Motif;
 import org.moltimate.moltimatebackend.util.FileUtils;
 import org.moltimate.moltimatebackend.util.ProteinUtils;
@@ -42,18 +41,11 @@ public class ActiveSiteAlignmentRequest {
                 .collect(Collectors.toList());
     }
 
-    public Map<Motif, Structure> extractCustomMotifMapFromFiles() {
-        Map<Motif, Structure> results = new HashMap<>();
-        customMotifs.forEach(customMotif -> {
-            MotifFile motifFile = FileUtils.readMotifFile(customMotif);
-            if (motifFile.getMotif() != null && motifFile.getStructure() != null) {
-                results.put(motifFile.getMotif(), motifFile.getStructure());
-            }
-        }
-        return motifStructureList;
-        });
-
-        return results;
+    public List<MotifFile> extractCustomMotifFileList() {
+        return customMotifs.stream()
+                .map(FileUtils::readMotifFile)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
     public double getPrecisionFactor() {

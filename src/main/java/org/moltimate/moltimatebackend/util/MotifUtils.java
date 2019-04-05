@@ -25,7 +25,7 @@ public class MotifUtils {
             res.setResidueAltLoc(Residue.getAltLocFromGroup(group));
         }
         return Motif.builder()
-                .pdbId(pdbId)
+                .pdbId(pdbId.toUpperCase())
                 .activeSiteResidues(residues)
                 .ecNumber(ecNumber)
                 .selectionQueries(generateSelectionQueries(structure, residues))

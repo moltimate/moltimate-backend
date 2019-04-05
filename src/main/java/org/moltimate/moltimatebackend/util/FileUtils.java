@@ -1,7 +1,6 @@
 package org.moltimate.moltimatebackend.util;
 
 import org.biojava.nbio.structure.Structure;
-import org.biojava.nbio.structure.io.FileConvert;
 import org.biojava.nbio.structure.io.MMCIFFileReader;
 import org.biojava.nbio.structure.io.PDBFileReader;
 import org.moltimate.moltimatebackend.dto.MakeMotifRequest;
@@ -10,7 +9,6 @@ import org.moltimate.moltimatebackend.exception.InvalidFileException;
 import org.moltimate.moltimatebackend.exception.MotifFileParseException;
 import org.moltimate.moltimatebackend.model.Motif;
 import org.moltimate.moltimatebackend.model.Residue;
-import org.moltimate.moltimatebackend.validation.exceptions.InvalidFileException;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -55,15 +53,15 @@ public class FileUtils {
 
     public static ResponseEntity<Resource> createPdbFile(String pdbId) {
         Resource pdbFile = new ByteArrayResource(ProteinUtils.queryPdb(pdbId)
-                                                         .toPDB()
-                                                         .getBytes());
+                .toPDB()
+                .getBytes());
         return createResponseFile(pdbFile, pdbId, ProteinFileType.PDB);
     }
 
     public static ResponseEntity<Resource> createMmcifFile(String pdbId) {
         Resource mmcifFile = new ByteArrayResource(ProteinUtils.queryPdb(pdbId)
-                                                           .toMMCIF()
-                                                           .getBytes());
+                .toMMCIF()
+                .getBytes());
         return createResponseFile(mmcifFile, pdbId, ProteinFileType.MMCIF);
     }
 
@@ -79,7 +77,7 @@ public class FileUtils {
                         residue.getResidueName(),
                         residue.getResidueId(),
                         residue.getResidueChainName()
-                     )
+                        )
                 )
                 .collect(Collectors.toList());
 
@@ -134,10 +132,10 @@ public class FileUtils {
         for (int i = 2; i < motifData.length; i++) {
             String[] residueData = motifData[i].split(" ");
             activeSiteResidues.add(Residue.builder()
-                                           .residueName(residueData[0])
-                                           .residueId(residueData[1])
-                                           .residueChainName(residueData[2])
-                                           .build());
+                    .residueName(residueData[0])
+                    .residueId(residueData[1])
+                    .residueChainName(residueData[2])
+                    .build());
         }
 
         String pdbId = motifData[0];

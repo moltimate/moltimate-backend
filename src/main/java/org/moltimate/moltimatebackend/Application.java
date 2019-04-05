@@ -18,7 +18,6 @@ import java.time.LocalDate;
 @SpringBootApplication
 @EnableJpaRepositories
 @EnableSwagger2
-@EnableCaching
 public class Application {
 
     public static void main(String[] args) {

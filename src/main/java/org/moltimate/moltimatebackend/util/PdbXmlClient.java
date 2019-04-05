@@ -39,6 +39,7 @@ public class PdbXmlClient {
                     .map(s -> s.split(":")[0])
                     .collect(Collectors.toList());
         } catch (Exception e) {
+            log.error(e.getMessage());
             return new ArrayList<>();
         }
     }

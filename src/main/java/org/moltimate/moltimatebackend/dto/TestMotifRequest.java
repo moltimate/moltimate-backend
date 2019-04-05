@@ -4,9 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.biojava.nbio.structure.Structure;
+import org.moltimate.moltimatebackend.exception.InvalidPdbIdException;
+import org.moltimate.moltimatebackend.model.Residue;
 import org.moltimate.moltimatebackend.util.FileUtils;
 import org.moltimate.moltimatebackend.util.ProteinUtils;
-import org.moltimate.moltimatebackend.exception.InvalidPdbIdException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
@@ -18,22 +19,22 @@ import java.util.stream.Collectors;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class MotifTestRequest {
+public class TestMotifRequest {
     public enum Type {
         SELF,
         LIST,
-        HOMOLOGUE,
+        HOMOLOG,
         RANDOM
     }
 
     // Motif Attributes
     private String pdbId;
     private String ecNumber;
-    private List<List<String>> activeSiteResidues = new ArrayList<>();
+    private List<Residue> activeSiteResidues;
     private MultipartFile customMotifStructure;
 
     // Testing Attributes
-    private Type type;
+    private Type testType;
     private int precisionFactor = 1;
     private int randomCount = 1;
     private List<String> testPdbIds = new ArrayList<>();
