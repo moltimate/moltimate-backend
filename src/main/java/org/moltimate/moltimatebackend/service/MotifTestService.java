@@ -98,21 +98,14 @@ public class MotifTestService {
                 break;
         }
 
-        log.info(String.format("Aligning active sites of %s with %d structures (%d custom structures).", testMotifFile.getMotif().getPdbId(), structureList.size(), testMotifRequest.getCustomStructures().size()));
+        log.info(String.format("Aligning active sites of %s with %d structures (%d custom structures).",
+                testMotifFile.getMotif().getPdbId(), structureList.size(), testMotifRequest.getCustomStructures().size()));
         for (Structure structure : structureList) {
-            Alignment alignment = alignmentService.alignActiveSites(testMotifFile.getMotif(), testMotifFile.getStructure(), structure, testMotifRequest.getPrecisionFactor());
+            Alignment alignment = alignmentService.alignActiveSites(structure, testMotifFile.getMotif(), motifStructure, testMotifRequest.getPrecisionFactor());
             if (alignment != null) {
-                results.get(structure.getPDBCode())
-                        .add(alignment);
+                results.get(structure.getPDBCode()).add(alignment);
             }
         }
-
-        int resultsCount = 0;
-        for (String key : results.keySet()) {
-            resultsCount += results.get(key).size();
-        }
-        log.info(String.format("Found %d alignments", resultsCount));
-
         return new ActiveSiteAlignmentResponse(results, failedIds);
     }
 }

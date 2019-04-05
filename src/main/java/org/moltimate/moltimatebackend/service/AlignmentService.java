@@ -31,7 +31,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * AlignmentService provides a way to align the active sites of proteins
@@ -71,7 +70,10 @@ public class AlignmentService {
         while (motifs.hasContent()) {
             for (Structure structure : sourceStructures) {
                 results.get(structure.getPDBCode())
-                        .addAll(getResultsListForMotifStream(motifs.stream(), structure, precision));
+                        .addAll(motifs.stream().parallel()
+                                .map(motif -> alignActiveSites(structure, motif, ProteinUtils.queryPdb(motif.getPdbId()), precision))
+                                .filter(Objects::nonNull)
+                                .collect(Collectors.toList()));
             }
             pageNumber++;
             motifs = motifService.queryByEcNumber(motifEcNumberFilter, pageNumber);
@@ -81,7 +83,10 @@ public class AlignmentService {
         if (customMotifFileList.size() > 0) {
             for (Structure structure : sourceStructures) {
                 results.get(structure.getPDBCode())
-                        .addAll(getResultsListForMotifFileStream(customMotifFileList.stream(), structure, precision));
+                        .addAll(customMotifFileList.stream().parallel()
+                                .map(motifFile -> alignActiveSites(structure, motifFile.getMotif(), motifFile.getStructure(), precision))
+                                .filter(Objects::nonNull)
+                                .collect(Collectors.toList()));
             }
         }
 
@@ -97,35 +102,25 @@ public class AlignmentService {
         return new ActiveSiteAlignmentResponse(results, pdbResponse.getFailedPdbIds());
     }
 
-    public List<Alignment> getResultsListForMotifStream(Stream<Motif> motifs, Structure structure, double precision) {
-        return motifs
-                .parallel()
-                .map(motif -> alignActiveSites(motif, ProteinUtils.queryPdb(motif.getPdbId()), structure, precision))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-    }
-
-    public List<Alignment> getResultsListForMotifFileStream(Stream<MotifFile> motifFileStream, Structure structure, double precision) {
-        return motifFileStream
-                .parallel()
-                .map(motifFile -> alignActiveSites(motifFile.getMotif(), motifFile.getStructure(), structure, precision))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-    }
-
     /**
      * Attempt to align the active site of a motif with a structure
      *
+     * @param queryStructure  :  structure to align
      * @param motif           :  motif that we search for in the structure
      * @param motifStructure  :  structure of motif for comparison
-     * @param queryStructure  :  structure to align
      * @param precisionFactor :  precision factor modifier
      * @return an alignment (if one exists) or null (if none found)
      */
-    public Alignment alignActiveSites(Motif motif, Structure motifStructure, Structure queryStructure, double precisionFactor) {
+    public Alignment alignActiveSites(Structure queryStructure, Motif motif, Structure motifStructure, double precisionFactor) {
         Map<Residue, List<Group>> residueMap = motif.runQueries(queryStructure, precisionFactor);
         List<Map<Residue, Group>> permutations = findAllPermutations(residueMap);
-        Map<Residue, Group> residueMapping = findBestPermutation(motif, motifStructure, permutations);
+        Map<Residue, Group> residueMapping;
+        if (permutations.size() > 1) {
+            log.info(String.format("Found %d permutations for alignment structure: %s motif: %s", permutations.size(), queryStructure.getPDBCode(), motif.getPdbId().toUpperCase()));
+            residueMapping = findBestPermutation(motif, motifStructure, permutations);
+        } else {
+            residueMapping = permutations.get(0);
+        }
 
         Set<Group> found = new HashSet<>();
         List<Residue> activeSiteResidueList = new ArrayList<>();
