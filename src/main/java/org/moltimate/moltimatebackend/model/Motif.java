@@ -70,7 +70,6 @@ public class Motif {
         for (Map.Entry<String, ResidueQuerySet> entry : selectionQueries.entrySet()) {
             String residueName = entry.getKey();
             Residue residueValue = getResidueByName(residueName);
-            HashSet<Atom> atoms = new HashSet<>(); // Todo: Check remove
             HashMap<Group, Integer> groupCount = new HashMap<>();
             for (MotifSelection query : selectionQueries.get(residueName).getSelections()) {
                 List<Atom> atomsFound = StructureUtils.runQuery(
@@ -82,7 +81,6 @@ public class Motif {
                         query.getDistance(),
                         precisionFactor
                 );
-                atoms.addAll(atomsFound);
                 Set<Group> groupsMatchingQuery = new HashSet<>();
                 HashSet<String> foundNames = new HashSet<>();
                 for (Atom atom : atomsFound) {

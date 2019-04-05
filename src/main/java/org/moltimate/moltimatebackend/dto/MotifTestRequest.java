@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class TestMotifRequest {
+public class MotifTestRequest {
     public enum Type {
         SELF,
         LIST,

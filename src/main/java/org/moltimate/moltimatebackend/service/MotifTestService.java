@@ -5,7 +5,7 @@ import org.biojava.nbio.structure.Structure;
 import org.moltimate.moltimatebackend.dto.ActiveSiteAlignmentResponse;
 import org.moltimate.moltimatebackend.dto.MotifFile;
 import org.moltimate.moltimatebackend.dto.PdbQueryResponse;
-import org.moltimate.moltimatebackend.dto.TestMotifRequest;
+import org.moltimate.moltimatebackend.dto.MotifTestRequest;
 import org.moltimate.moltimatebackend.model.Alignment;
 import org.moltimate.moltimatebackend.util.MotifUtils;
 import org.moltimate.moltimatebackend.util.PdbXmlClient;
@@ -28,14 +28,13 @@ public class MotifTestService {
 
     private static final int maxRandom = 50;
 
-    public ActiveSiteAlignmentResponse testMotifAlignment(TestMotifRequest testMotifRequest) {
-        log.info("Received request to test motif: " + testMotifRequest);
-        Structure motifStructure = testMotifRequest.motifStructure();
+    public ActiveSiteAlignmentResponse testMotifAlignment(MotifTestRequest motifTestRequest) {
+        Structure motifStructure = motifTestRequest.motifStructure();
         MotifFile testMotifFile = MotifFile.builder()
-                .motif(MotifUtils.generateMotif(testMotifRequest.getPdbId(),
-                        testMotifRequest.getEcNumber(),
+                .motif(MotifUtils.generateMotif(motifTestRequest.getPdbId(),
+                        motifTestRequest.getEcNumber(),
                         motifStructure,
-                        testMotifRequest.getActiveSiteResidues()))
+                        motifTestRequest.getActiveSiteResidues()))
                 .structure(motifStructure)
                 .build();
 
@@ -44,19 +43,19 @@ public class MotifTestService {
         HashMap<String, List<Alignment>> results = new HashMap<>();
         PdbQueryResponse pdbQueryResponse;
 
-        switch (testMotifRequest.getTestType()) {
+        switch (motifTestRequest.getTestType()) {
             case SELF:
-                structureList.add(testMotifFile.getStructure());
-                structureList.addAll(testMotifRequest.extractCustomStructuresFromFiles());
+                structureList.add(motifStructure);
+                structureList.addAll(motifTestRequest.extractCustomStructuresFromFiles());
 
                 for (Structure _structure : structureList) {
                     results.put(_structure.getPDBCode(), new ArrayList<>());
                 }
                 break;
             case LIST:
-                pdbQueryResponse = testMotifRequest.callPdbForResponse();
+                pdbQueryResponse = motifTestRequest.callPdbForResponse();
                 structureList.addAll(pdbQueryResponse.getStructures());
-                structureList.addAll(testMotifRequest.extractCustomStructuresFromFiles());
+                structureList.addAll(motifTestRequest.extractCustomStructuresFromFiles());
 
                 for (Structure _structure : structureList) {
                     results.put(_structure.getPDBCode(), new ArrayList<>());
@@ -68,7 +67,7 @@ public class MotifTestService {
                 pdbQueryResponse = ProteinUtils.queryPdbResponse(homologuePdbIds);
 
                 structureList.addAll(pdbQueryResponse.getStructures());
-                structureList.addAll(testMotifRequest.extractCustomStructuresFromFiles());
+                structureList.addAll(motifTestRequest.extractCustomStructuresFromFiles());
 
                 for (Structure _structure : structureList) {
                     results.put(_structure.getPDBCode(), new ArrayList<>());
@@ -79,7 +78,7 @@ public class MotifTestService {
                 List<String> allPdbIds = PdbXmlClient.getPdbIds();
                 Collections.shuffle(allPdbIds);
 
-                int max = testMotifRequest.getRandomCount();
+                int max = motifTestRequest.getRandomCount();
                 if (max > maxRandom) {
                     max = maxRandom;
                 }
@@ -99,9 +98,9 @@ public class MotifTestService {
         }
 
         log.info(String.format("Aligning active sites of %s with %d structures (%d custom structures).",
-                testMotifFile.getMotif().getPdbId(), structureList.size(), testMotifRequest.getCustomStructures().size()));
+                testMotifFile.getMotif().getPdbId(), structureList.size(), motifTestRequest.getCustomStructures().size()));
         for (Structure structure : structureList) {
-            Alignment alignment = alignmentService.alignActiveSites(structure, testMotifFile.getMotif(), motifStructure, testMotifRequest.getPrecisionFactor());
+            Alignment alignment = alignmentService.alignActiveSites(structure, testMotifFile.getMotif(), motifStructure, motifTestRequest.getPrecisionFactor());
             if (alignment != null) {
                 results.get(structure.getPDBCode()).add(alignment);
             }

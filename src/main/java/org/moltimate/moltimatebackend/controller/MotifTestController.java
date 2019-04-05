@@ -3,7 +3,7 @@ package org.moltimate.moltimatebackend.controller;
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.moltimate.moltimatebackend.dto.ActiveSiteAlignmentResponse;
-import org.moltimate.moltimatebackend.dto.TestMotifRequest;
+import org.moltimate.moltimatebackend.dto.MotifTestRequest;
 import org.moltimate.moltimatebackend.service.MotifTestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -23,7 +23,8 @@ public class MotifTestController {
     private MotifTestService motifTestService;
 
     @RequestMapping(value = "/motif", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ActiveSiteAlignmentResponse> testMotif(@RequestBody TestMotifRequest testMotifRequest) {
-        return ResponseEntity.ok(motifTestService.testMotifAlignment(testMotifRequest));
+    public ResponseEntity<ActiveSiteAlignmentResponse> testMotif(@RequestBody MotifTestRequest motifTestRequest) {
+        log.info("Received request to test motif: " + motifTestRequest);
+        return ResponseEntity.ok(motifTestService.testMotifAlignment(motifTestRequest));
     }
 }
