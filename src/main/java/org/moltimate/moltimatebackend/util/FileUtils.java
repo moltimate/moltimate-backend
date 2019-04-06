@@ -1,7 +1,6 @@
 package org.moltimate.moltimatebackend.util;
 
 import org.biojava.nbio.structure.Structure;
-import org.biojava.nbio.structure.io.FileConvert;
 import org.biojava.nbio.structure.io.MMCIFFileReader;
 import org.biojava.nbio.structure.io.PDBFileReader;
 import org.moltimate.moltimatebackend.dto.MakeMotifRequest;
@@ -71,23 +70,7 @@ public class FileUtils {
     }
 
     public static ResponseEntity<Resource> createMotifFile(String pdbId, String ecNumber, List<Residue> activeSiteResidues) {
-        String pdbFile = ProteinUtils.queryPdb(pdbId).toPDB();
-        List<String> residueStrings = activeSiteResidues.stream()
-                .map(residue -> String.format(
-                        "%s %s %s",
-                        residue.getResidueName(),
-                        residue.getResidueId(),
-                        residue.getResidueChainName()
-                     )
-                )
-                .collect(Collectors.toList());
-
-        String motifFileFooter = MOTIF_DATA_SEPARATOR
-                + String.format("%s,%s,", pdbId, ecNumber)
-                + String.join(",", residueStrings);
-
-        Resource motifFile = new ByteArrayResource((pdbFile + motifFileFooter).getBytes());
-        return createResponseFile(motifFile, pdbId, ProteinFileType.MOTIF);
+        return createMotifFile(pdbId, ecNumber, activeSiteResidues, ProteinUtils.queryPdb(pdbId));
     }
 
     public static ResponseEntity<Resource> createMotifFile(String pdbId, String ecNumber, List<Residue> activeSiteResidues, Structure structure) {
