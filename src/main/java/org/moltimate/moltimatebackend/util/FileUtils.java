@@ -71,7 +71,7 @@ public class FileUtils {
     }
 
     public static ResponseEntity<Resource> createMotifFile(String pdbId, String ecNumber, List<Residue> activeSiteResidues) {
-        String mmcifFile = ProteinUtils.queryPdb(pdbId).toPDB();
+        String pdbFile = ProteinUtils.queryPdb(pdbId).toPDB();
         List<String> residueStrings = activeSiteResidues.stream()
                 .map(residue -> String.format(
                         "%s %s %s",
@@ -86,12 +86,12 @@ public class FileUtils {
                 + String.format("%s,%s,", pdbId, ecNumber)
                 + String.join(",", residueStrings);
 
-        Resource motifFile = new ByteArrayResource((mmcifFile + motifFileFooter).getBytes());
+        Resource motifFile = new ByteArrayResource((pdbFile + motifFileFooter).getBytes());
         return createResponseFile(motifFile, pdbId, ProteinFileType.MOTIF);
     }
 
     public static ResponseEntity<Resource> createMotifFile(String pdbId, String ecNumber, List<Residue> activeSiteResidues, Structure structure) {
-        String mmcifFile = structure.toPDB();
+        String pdbFile = structure.toPDB();
         List<String> residueStrings = activeSiteResidues.stream()
                 .map(residue -> String.format(
                         "%s %s %s",
@@ -106,7 +106,7 @@ public class FileUtils {
                 + String.format("%s,%s,", pdbId, ecNumber)
                 + String.join(",", residueStrings);
 
-        Resource motifFile = new ByteArrayResource((mmcifFile + motifFileFooter).getBytes());
+        Resource motifFile = new ByteArrayResource((pdbFile + motifFileFooter).getBytes());
         return createResponseFile(motifFile, pdbId, ProteinFileType.MOTIF);
     }
 
