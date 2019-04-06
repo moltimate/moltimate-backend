@@ -90,6 +90,26 @@ public class FileUtils {
         return createResponseFile(motifFile, pdbId, ProteinFileType.MOTIF);
     }
 
+    public static ResponseEntity<Resource> createMotifFile(String pdbId, String ecNumber, List<Residue> activeSiteResidues, Structure structure) {
+        String mmcifFile = structure.toPDB();
+        List<String> residueStrings = activeSiteResidues.stream()
+                .map(residue -> String.format(
+                        "%s %s %s",
+                        residue.getResidueName(),
+                        residue.getResidueId(),
+                        residue.getResidueChainName()
+                     )
+                )
+                .collect(Collectors.toList());
+
+        String motifFileFooter = MOTIF_DATA_SEPARATOR
+                + String.format("%s,%s,", pdbId, ecNumber)
+                + String.join(",", residueStrings);
+
+        Resource motifFile = new ByteArrayResource((mmcifFile + motifFileFooter).getBytes());
+        return createResponseFile(motifFile, pdbId, ProteinFileType.MOTIF);
+    }
+
     public static Structure getStructureFromFile(MultipartFile file) {
         return readMotifFile(file).getStructure();
     }
