@@ -12,7 +12,6 @@ import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -45,23 +44,22 @@ public class PdbXmlClient {
     }
 
     public static List<String> getPdbIds() {
+        List<String> pdbResponse;
         try {
-            return getAllCurrentPdbIds().stream()
-                    .parallel()
-                    .map(s -> {
-                        Matcher m = Pattern.compile(".*structureId=\"(.{4})\".*").matcher(s);
-                        if (m.matches()) {
-                            return m.group(1);
-                        }
-                        return null;
-                    })
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
+            pdbResponse = getAllCurrentPdbIds();
         } catch (Exception e) {
-            e.printStackTrace();
-            log.error("Could not get current pdb ids, falling back on random generation");
-            return new ArrayList<>();
+            log.error("Could not get current pdb ids, ");
+            pdbResponse = new ArrayList<>();
         }
+        List<String> pdbIds = new ArrayList<>();
+        Pattern p = Pattern.compile(".*structureId=\"(.{4})\".*");
+        for (String responseString : pdbResponse) {
+            Matcher m = p.matcher(responseString);
+            if (m.matches()) {
+                pdbIds.add(m.group(1));
+            }
+        }
+        return pdbIds;
     }
 
 
