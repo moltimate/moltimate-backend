@@ -61,7 +61,6 @@ public class MotifService {
      * Batch saves a list of new Motif to the database.
      *
      * @param motifs New Motif to save
-     * @return A newly generated Motif
      */
     public void saveMotifs(List<Motif> motifs) {
         log.info("Saving " + motifs.size() + " motifs with IDs " + motifs.stream()

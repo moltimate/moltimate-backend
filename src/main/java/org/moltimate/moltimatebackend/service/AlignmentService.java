@@ -90,12 +90,10 @@ public class AlignmentService {
             }
         }
 
-        int resultsCount = 0;
         for (String key : results.keySet()) {
-            resultsCount += results.get(key).size();
+            log.info(String.format("Found %d results for %s", results.get(key).size(), key));
         }
 
-        log.info(String.format("Found %d results", resultsCount));
         if (pdbResponse.getFailedPdbIds().size() > 0) {
             log.error(String.format("Could not find PDB structures for the following ids: %s", pdbResponse.getFailedPdbIds()));
         }
