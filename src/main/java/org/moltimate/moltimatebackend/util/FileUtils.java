@@ -28,7 +28,7 @@ public class FileUtils {
     private static final MMCIFFileReader MMCIF_FILE_READER = new MMCIFFileReader();
     private static final String MOTIF_DATA_SEPARATOR = "MOLTIMATE-DATA\n";
 
-    private static enum ProteinFileType {
+    private enum ProteinFileType {
         PDB(".pdb"),
         MMCIF(".cif"),
         MOTIF(".motif");
@@ -66,14 +66,18 @@ public class FileUtils {
     }
 
     public static ResponseEntity<Resource> createMotifFile(MakeMotifRequest request) {
-        return createMotifFile(request.getPdbId(), request.getEcNumber(), request.getActiveSiteResidues());
+        if (request.getStructureFile() == null) {
+            return createMotifFile(request.getPdbId(), request.getEcNumber(), request.getActiveSiteResidues());
+        } else {
+            return createMotifFile(request.getPdbId(), request.getEcNumber(), request.getActiveSiteResidues(), getStructureFromFile(request.getStructureFile()));
+        }
     }
 
-    public static ResponseEntity<Resource> createMotifFile(String pdbId, String ecNumber, List<Residue> activeSiteResidues) {
+    private static ResponseEntity<Resource> createMotifFile(String pdbId, String ecNumber, List<Residue> activeSiteResidues) {
         return createMotifFile(pdbId, ecNumber, activeSiteResidues, ProteinUtils.queryPdb(pdbId));
     }
 
-    public static ResponseEntity<Resource> createMotifFile(String pdbId, String ecNumber, List<Residue> activeSiteResidues, Structure structure) {
+    private static ResponseEntity<Resource> createMotifFile(String pdbId, String ecNumber, List<Residue> activeSiteResidues, Structure structure) {
         String pdbFile = structure.toPDB();
         List<String> residueStrings = activeSiteResidues.stream()
                 .map(residue -> String.format(
