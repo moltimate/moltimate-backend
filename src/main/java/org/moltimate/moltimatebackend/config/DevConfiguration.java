@@ -9,7 +9,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Profile("dev")
 public class DevConfiguration implements WebMvcConfigurer {
 
-    private static final String ALLOWED_ORIGIN = "http://localhost:3000";
+    private static final String ALLOWED_ORIGIN = "http://localhost:8081";
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {

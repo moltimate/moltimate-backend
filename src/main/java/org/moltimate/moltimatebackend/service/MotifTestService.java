@@ -34,7 +34,7 @@ public class MotifTestService {
                 .motif(MotifUtils.generateMotif(motifTestRequest.getPdbId(),
                         motifTestRequest.getEcNumber(),
                         motifStructure,
-                        motifTestRequest.getActiveSiteResidues()))
+                        motifTestRequest.parseResidueEntries()))
                 .structure(motifStructure)
                 .build();
 
@@ -43,7 +43,7 @@ public class MotifTestService {
         HashMap<String, List<Alignment>> results = new HashMap<>();
         PdbQueryResponse pdbQueryResponse;
 
-        switch (motifTestRequest.getTestType()) {
+        switch (motifTestRequest.getType()) {
             case SELF:
                 structureList.add(motifStructure);
                 structureList.addAll(motifTestRequest.extractCustomStructuresFromFiles());
@@ -82,7 +82,7 @@ public class MotifTestService {
                 if (max > maxRandom) {
                     max = maxRandom;
                 }
-                while (max >= 0) {
+                while (max > 0) {
                     String randomPdbId = allPdbIds.get(max - 1);
                     Optional<Structure> optionalStructure = ProteinUtils.queryPdbOptional(randomPdbId);
                     if (optionalStructure.isPresent()) {

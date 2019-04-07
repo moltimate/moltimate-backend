@@ -8,10 +8,13 @@ import org.moltimate.moltimatebackend.service.MotifTestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.beans.PropertyEditorSupport;
 
 @RestController
 @RequestMapping(value = "/test")
@@ -22,9 +25,23 @@ public class MotifTestController {
     @Autowired
     private MotifTestService motifTestService;
 
-    @RequestMapping(value = "/motif", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ActiveSiteAlignmentResponse> testMotif(@RequestBody MotifTestRequest motifTestRequest) {
+    @RequestMapping(value = "/motif", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ActiveSiteAlignmentResponse> testMotif(MotifTestRequest motifTestRequest) {
         log.info("Received request to test motif: " + motifTestRequest);
         return ResponseEntity.ok(motifTestService.testMotifAlignment(motifTestRequest));
+    }
+
+    /**
+     * Ignore case sensitivity when parsing test type
+     */
+    @InitBinder
+    public void initBinder(final WebDataBinder webdataBinder) {
+        webdataBinder.registerCustomEditor(MotifTestRequest.Type.class, new TestTypeConverter());
+    }
+
+    private class TestTypeConverter extends PropertyEditorSupport {
+        public void setAsText(final String text) throws IllegalArgumentException {
+            setValue(MotifTestRequest.Type.fromName(text));
+        }
     }
 }
