@@ -279,7 +279,7 @@ public class AlignmentService {
      * fits this requirement.
      */
     private Map<Residue, Group> findBestPermutation(Motif motif, Structure motifStructure, List<Map<Residue, Group>> permutations) {
-        if (permutations.size() <= 1) {
+        if (permutations.size() == 1) {
             return permutations.get(0);
         }
         double min_rmsd = Double.MAX_VALUE;
