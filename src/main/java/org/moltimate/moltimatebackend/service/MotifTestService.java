@@ -9,6 +9,7 @@ import org.moltimate.moltimatebackend.dto.PdbQueryResponse;
 import org.moltimate.moltimatebackend.model.Alignment;
 import org.moltimate.moltimatebackend.model.Motif;
 import org.moltimate.moltimatebackend.model.Residue;
+import org.moltimate.moltimatebackend.util.MotifUtils;
 import org.moltimate.moltimatebackend.util.PdbXmlClient;
 import org.moltimate.moltimatebackend.util.ProteinUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +38,7 @@ public class MotifTestService {
         String motifEcNumber = motifTestRequest.getEcNumber();
         Structure motifStructure = motifTestRequest.motifStructure();
         List<Residue> motifResidues = parseResidueEntries(motifTestRequest.getActiveSiteResidues());
-        Motif testMotif = motifService.generateMotif(motifPdbId, motifEcNumber, motifStructure, motifResidues);
+        Motif testMotif = MotifUtils.generateMotif(motifPdbId, motifEcNumber, motifStructure, motifResidues);
 
         List<Structure> structureList = new ArrayList<>();
         List<String> failedIds = new ArrayList<>();

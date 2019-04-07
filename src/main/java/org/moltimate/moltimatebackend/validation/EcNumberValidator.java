@@ -1,6 +1,6 @@
 package org.moltimate.moltimatebackend.validation;
 
-import org.moltimate.moltimatebackend.validation.exceptions.InvalidEcNumberException;
+import org.moltimate.moltimatebackend.exception.InvalidEcNumberException;
 
 public class EcNumberValidator {
 
