@@ -102,7 +102,7 @@ public class MotifTestRequest {
     }
 
     public List<Residue> parseResidueEntries() {
-        List<Residue> activeSiteResidues = new ArrayList<>();
+        List<Residue> residueList = new ArrayList<>();
         for (String residueEntry : this.activeSiteResidues) {
             for (String residueAttr : residueEntry.split(",")) {
                 String[] res = residueAttr.split(" ");
@@ -111,10 +111,10 @@ public class MotifTestRequest {
                         .residueChainName(res[1])
                         .residueId(res[2])
                         .build();
-                activeSiteResidues.add(residue);
+                residueList.add(residue);
             }
         }
-        activeSiteResidues.sort(Comparator.comparingInt(r -> Integer.parseInt(r.getResidueId())));
-        return activeSiteResidues;
+        residueList.sort(Comparator.comparingInt(r -> Integer.parseInt(r.getResidueId())));
+        return residueList;
     }
 }

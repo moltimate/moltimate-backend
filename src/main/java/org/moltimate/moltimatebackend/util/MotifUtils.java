@@ -49,8 +49,7 @@ public class MotifUtils {
             List<Atom> groupAtoms = group.getAtoms();
             Atom firstCbAtom;
             if (residue.getResidueName().equalsIgnoreCase("ALA")) {
-                // Alanine is a special case [...because it does not have a Carbon Beta atom, CB]
-                // TODO: Include why this is a special case (consult sponsors)
+                // Alanine is a special case because it does not have a Carbon Beta, CB, atom
                 firstCbAtom = groupAtoms.get(1);
             } else {
                 firstCbAtom = groupAtoms.stream()
@@ -59,6 +58,7 @@ public class MotifUtils {
                         .orElse(groupAtoms.get(1));
             }
             List<Atom> filteredAtoms = groupAtoms.subList(groupAtoms.indexOf(firstCbAtom), groupAtoms.size());
+            // Exclude hydrogen atoms, from all residues
             filteredAtoms = filteredAtoms.stream()
                     .filter(atom -> !atom.getName().contains("H"))
                     .collect(Collectors.toList());
