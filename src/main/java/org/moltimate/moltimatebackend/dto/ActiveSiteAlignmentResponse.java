@@ -1,4 +1,4 @@
-package org.moltimate.moltimatebackend.dto.ActiveSiteAlignment;
+package org.moltimate.moltimatebackend.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
