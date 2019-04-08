@@ -13,7 +13,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MotifTestResponse {
-    List<org.moltimate.moltimatebackend.dto.MotifTesting.SuccessfulAlignment> alignments;
+
+    List<SuccessfulAlignment> alignments;
 
     List<FailedAlignment> failedAlignments;
 
