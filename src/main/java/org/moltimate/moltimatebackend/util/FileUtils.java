@@ -56,9 +56,9 @@ public class FileUtils {
      */
     public static ResponseEntity<Resource> createMotifFile(MakeMotifRequest request) {
         if (request.getStructureFile() == null) {
-            return createMotifFile(request.getPdbId(), request.getEcNumber(), request.getActiveSiteResidues());
+            return createMotifFile(request.getPdbId(), request.getEcNumber(), request.parseResidueEntries());
         } else {
-            return createMotifFile(request.getPdbId(), request.getEcNumber(), request.getActiveSiteResidues(), getStructureFromFile(request.getStructureFile()));
+            return createMotifFile(request.getPdbId(), request.getEcNumber(), request.parseResidueEntries(), getStructureFromFile(request.getStructureFile()));
         }
     }
 
