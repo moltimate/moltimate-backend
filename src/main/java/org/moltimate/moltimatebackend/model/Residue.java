@@ -37,10 +37,8 @@ public class Residue {
 
     public static Residue fromGroup(Group residue) {
         return Residue.builder()
-                .residueName(residue.getChemComp()
-                                     .getThree_letter_code())
-                .residueId(residue.getResidueNumber()
-                                   .toString())
+                .residueName(residue.getChemComp().getThree_letter_code())
+                .residueId(residue.getResidueNumber().toString())
                 .residueChainName(residue.getResidueNumber().getChainName())
                 .residueAltLoc(getAltLocFromGroup(residue))
                 .build();

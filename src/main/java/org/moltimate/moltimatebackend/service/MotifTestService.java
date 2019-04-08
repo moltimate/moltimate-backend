@@ -6,6 +6,7 @@ import org.moltimate.moltimatebackend.dto.MotifFile;
 import org.moltimate.moltimatebackend.dto.MotifTesting.FailedAlignment;
 import org.moltimate.moltimatebackend.dto.MotifTesting.MotifTestRequest;
 import org.moltimate.moltimatebackend.dto.MotifTesting.MotifTestResponse;
+import org.moltimate.moltimatebackend.dto.MotifTesting.SuccessfulAlignment;
 import org.moltimate.moltimatebackend.dto.PdbQueryResponse;
 import org.moltimate.moltimatebackend.model.Alignment;
 import org.moltimate.moltimatebackend.util.MotifUtils;
@@ -17,7 +18,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -90,16 +90,16 @@ public class MotifTestService {
         log.info(String.format("Aligning active sites of %s with %d structures (%d custom structures).",
                 testMotifFile.getMotif().getPdbId(), structureList.size(), motifTestRequest.getCustomStructures().size()));
 
-        HashMap<String, List<Alignment>> successfulAlignments = new HashMap<>();
-        HashMap<String, List<FailedAlignment>> failedAlignments = new HashMap<>();
+        SuccessfulAlignment successfulAlignments = new SuccessfulAlignment(motifStructure.getPDBCode(), StructureUtils.ecNumber(motifStructure), testMotifFile.getMotif().getActiveSiteResidues());
+        FailedAlignment failedAlignment = new FailedAlignment(motifStructure.getPDBCode(), StructureUtils.ecNumber(motifStructure));
         for (Structure structure : structureList) {
             Alignment alignment = alignmentService.alignActiveSites(structure, testMotifFile.getMotif(), motifStructure, motifTestRequest.getPrecisionFactor());
             if (alignment != null) {
-                successfulAlignments.put(structure.getPDBCode(), Collections.singletonList(alignment));
+                successfulAlignments.addEntry(structure, alignment);
             } else {
-                failedAlignments.put(structure.getPDBCode(), Collections.singletonList(new FailedAlignment(testMotifFile.getMotif().getPdbId(), StructureUtils.ecNumber(structure))));
+                failedAlignment.addEntry(structure.getPDBCode(), StructureUtils.ecNumber(structure));
             }
         }
-        return new MotifTestResponse(successfulAlignments, failedAlignments, failedIds);
+        return new MotifTestResponse(Collections.singletonList(successfulAlignments), Collections.singletonList(failedAlignment), failedIds);
     }
 }

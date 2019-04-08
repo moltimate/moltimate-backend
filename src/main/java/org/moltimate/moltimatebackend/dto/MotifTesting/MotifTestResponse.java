@@ -15,9 +15,9 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MotifTestResponse {
-    Map<String, List<Alignment>> alignments;
+    List<SuccessfulAlignment> alignments;
 
-    Map<String, List<FailedAlignment>> failedAlignments;
+    List<FailedAlignment> failedAlignments;
 
     List<String> failedPdbIds;
 }
