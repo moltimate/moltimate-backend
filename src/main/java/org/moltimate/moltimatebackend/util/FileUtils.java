@@ -51,20 +51,9 @@ public class FileUtils {
         }
     }
 
-    public static ResponseEntity<Resource> createPdbFile(String pdbId) {
-        Resource pdbFile = new ByteArrayResource(ProteinUtils.queryPdb(pdbId)
-                                                         .toPDB()
-                                                         .getBytes());
-        return createResponseFile(pdbFile, pdbId, ProteinFileType.PDB);
-    }
-
-    public static ResponseEntity<Resource> createMmcifFile(String pdbId) {
-        Resource mmcifFile = new ByteArrayResource(ProteinUtils.queryPdb(pdbId)
-                                                           .toMMCIF()
-                                                           .getBytes());
-        return createResponseFile(mmcifFile, pdbId, ProteinFileType.MMCIF);
-    }
-
+    /**
+     * File Creation
+     */
     public static ResponseEntity<Resource> createMotifFile(MakeMotifRequest request) {
         if (request.getStructureFile() == null) {
             return createMotifFile(request.getPdbId(), request.getEcNumber(), request.getActiveSiteResidues());
@@ -85,7 +74,7 @@ public class FileUtils {
                         residue.getResidueName(),
                         residue.getResidueId(),
                         residue.getResidueChainName()
-                     )
+                        )
                 )
                 .collect(Collectors.toList());
 
@@ -97,14 +86,22 @@ public class FileUtils {
         return createResponseFile(motifFile, pdbId, ProteinFileType.MOTIF);
     }
 
-    public static Structure getStructureFromFile(MultipartFile file) {
-        return readMotifFile(file).getStructure();
+    private static ResponseEntity<Resource> createResponseFile(Resource file, String fileName, ProteinFileType proteinFileType) {
+        return createResponseFile(file, fileName, proteinFileType.toString());
     }
 
-    public static Motif getMotifFromFile(MultipartFile file) {
-        return readMotifFile(file).getMotif();
+    private static ResponseEntity<Resource> createResponseFile(Resource file, String fileName, String fileExtension) {
+        return ResponseEntity.ok()
+                .header(
+                        HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + fileName + fileExtension + "\""
+                )
+                .body(file);
     }
 
+    /**
+     * File Parsing
+     */
     public static MotifFile readMotifFile(MultipartFile file) {
         try {
             String[] partitions = new String(file.getBytes()).split(MOTIF_DATA_SEPARATOR);
@@ -117,6 +114,22 @@ public class FileUtils {
         } catch (Exception e) {
             e.printStackTrace();
             throw new MotifFileParseException(file);
+        }
+    }
+
+    public static Structure getStructureFromFile(MultipartFile file) {
+        try {
+            return PDB_FILE_READER.getStructure(file.getInputStream());
+        } catch (IOException pdbReaderError) {
+            try {
+                return MMCIF_FILE_READER.getStructure(file.getInputStream());
+            } catch (IOException mmcifReaderError) {
+                try {
+                    return readMotifFile(file).getStructure();
+                } catch (Exception e) {
+                    throw new InvalidFileException("Could not parse given file\nPlease check the file to make sure it is a valid format: " + ProteinFileType.getValidFileTypes());
+                }
+            }
         }
     }
 
@@ -140,27 +153,14 @@ public class FileUtils {
         for (int i = 2; i < motifData.length; i++) {
             String[] residueData = motifData[i].split(" ");
             activeSiteResidues.add(Residue.builder()
-                                           .residueName(residueData[0])
-                                           .residueId(residueData[1])
-                                           .residueChainName(residueData[2])
-                                           .build());
+                    .residueName(residueData[0])
+                    .residueId(residueData[1])
+                    .residueChainName(residueData[2])
+                    .build());
         }
 
         String pdbId = motifData[0];
         String ecNumber = motifData[1];
         return MotifUtils.generateMotif(pdbId, ecNumber, ProteinUtils.queryPdb(pdbId), activeSiteResidues);
-    }
-
-    private static ResponseEntity<Resource> createResponseFile(Resource file, String fileName, ProteinFileType proteinFileType) {
-        return createResponseFile(file, fileName, proteinFileType.toString());
-    }
-
-    private static ResponseEntity<Resource> createResponseFile(Resource file, String fileName, String fileExtension) {
-        return ResponseEntity.ok()
-                .header(
-                        HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=\"" + fileName + fileExtension + "\""
-                )
-                .body(file);
     }
 }
