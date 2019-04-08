@@ -2,12 +2,11 @@ package org.moltimate.moltimatebackend.controller;
 
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.moltimate.moltimatebackend.dto.MakeMotifRequest;
+import org.moltimate.moltimatebackend.dto.Request.MakeMotifRequest;
 import org.moltimate.moltimatebackend.util.FileUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;

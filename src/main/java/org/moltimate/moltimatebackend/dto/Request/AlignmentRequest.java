@@ -1,4 +1,4 @@
-package org.moltimate.moltimatebackend.dto.ActiveSiteAlignment;
+package org.moltimate.moltimatebackend.dto.Request;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -16,13 +16,13 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
- * ActiveSiteAlignmentRequest represents the PDB ids of the proteins whose active sites will be compared
+ * AlignmentRequest represents the PDB ids of the proteins whose active sites will be compared
  * against a set of motifs in the provided ecNumber.
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ActiveSiteAlignmentRequest {
+public class AlignmentRequest {
 
     private List<String> pdbIds = new ArrayList<>();
     private List<String> options = new ArrayList<>();

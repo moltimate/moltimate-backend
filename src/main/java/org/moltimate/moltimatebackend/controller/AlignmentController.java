@@ -5,11 +5,10 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
-import org.moltimate.moltimatebackend.dto.ActiveSiteAlignment.ActiveSiteAlignmentRequest;
-import org.moltimate.moltimatebackend.dto.ActiveSiteAlignment.ActiveSiteAlignmentResponse;
-import org.moltimate.moltimatebackend.dto.ActiveSiteAlignment.AlignmentQueryResponse;
-import org.moltimate.moltimatebackend.service.AlignmentService;
+import org.moltimate.moltimatebackend.dto.Request.AlignmentRequest;
+import org.moltimate.moltimatebackend.dto.Alignment.AlignmentQueryResponse;
 import org.moltimate.moltimatebackend.exception.InvalidPdbIdException;
+import org.moltimate.moltimatebackend.service.AlignmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -29,14 +28,14 @@ public class AlignmentController {
     @Autowired
     private AlignmentService alignmentService;
 
-    @ApiOperation(value = "Active Site Alignment", response = ActiveSiteAlignmentResponse.class)
+    @ApiOperation(value = "Active Site Alignment", response = AlignmentQueryResponse.class)
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "List of active site alignments", response = ActiveSiteAlignmentResponse.class),
+            @ApiResponse(code = 200, message = "List of active site alignments", response = AlignmentQueryResponse.class),
             @ApiResponse(code = 500, message = "Internal Server Error"),
             @ApiResponse(code = 404, message = "All PDB ids invalid", response = InvalidPdbIdException.class)
     })
     @RequestMapping(value = "/activesite", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<AlignmentQueryResponse> activeSiteAlignment(ActiveSiteAlignmentRequest alignmentRequest) {
+    public ResponseEntity<AlignmentQueryResponse> activeSiteAlignment(AlignmentRequest alignmentRequest) {
         log.info("Received request to align active sites: " + alignmentRequest);
         return ResponseEntity.ok(alignmentService.alignActiveSites(alignmentRequest));
     }

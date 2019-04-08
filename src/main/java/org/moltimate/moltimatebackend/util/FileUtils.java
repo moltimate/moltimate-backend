@@ -3,7 +3,7 @@ package org.moltimate.moltimatebackend.util;
 import org.biojava.nbio.structure.Structure;
 import org.biojava.nbio.structure.io.MMCIFFileReader;
 import org.biojava.nbio.structure.io.PDBFileReader;
-import org.moltimate.moltimatebackend.dto.MakeMotifRequest;
+import org.moltimate.moltimatebackend.dto.Request.MakeMotifRequest;
 import org.moltimate.moltimatebackend.dto.MotifFile;
 import org.moltimate.moltimatebackend.exception.InvalidFileException;
 import org.moltimate.moltimatebackend.exception.MotifFileParseException;

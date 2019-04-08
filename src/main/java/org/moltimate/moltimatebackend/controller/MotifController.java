@@ -3,18 +3,13 @@ package org.moltimate.moltimatebackend.controller;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import lombok.extern.slf4j.Slf4j;
-import org.moltimate.moltimatebackend.dto.MakeMotifRequest;
 import org.moltimate.moltimatebackend.exception.InvalidMotifException;
 import org.moltimate.moltimatebackend.model.Motif;
 import org.moltimate.moltimatebackend.service.MotifService;
-import org.moltimate.moltimatebackend.util.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -54,7 +49,7 @@ public class MotifController {
     public ResponseEntity<Motif> findMotifByPdbId(
             @ApiParam(name = "pdbId", value = "PDB id of motif")
             @PathVariable(name = "pdbId") String pdbId) {
-        Motif motif = motifService.queryByPdbId(pdbId.toLowerCase());
+        Motif motif = motifService.queryByPdbId(pdbId);
         if (motif != null) {
             return ResponseEntity.ok(motif);
         }

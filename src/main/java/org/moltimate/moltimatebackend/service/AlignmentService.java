@@ -5,11 +5,11 @@ import org.biojava.nbio.structure.Atom;
 import org.biojava.nbio.structure.Group;
 import org.biojava.nbio.structure.Structure;
 import org.biojava.nbio.structure.geometry.SuperPositionSVD;
-import org.moltimate.moltimatebackend.dto.ActiveSiteAlignment.ActiveSiteAlignmentRequest;
-import org.moltimate.moltimatebackend.dto.ActiveSiteAlignment.AlignmentQueryResponse;
-import org.moltimate.moltimatebackend.dto.ActiveSiteAlignment.QueryResponseData;
+import org.moltimate.moltimatebackend.dto.Alignment.AlignmentQueryResponse;
+import org.moltimate.moltimatebackend.dto.Alignment.QueryResponseData;
 import org.moltimate.moltimatebackend.dto.MotifFile;
 import org.moltimate.moltimatebackend.dto.PdbQueryResponse;
+import org.moltimate.moltimatebackend.dto.Request.AlignmentRequest;
 import org.moltimate.moltimatebackend.model.Alignment;
 import org.moltimate.moltimatebackend.model.Motif;
 import org.moltimate.moltimatebackend.model.Residue;
@@ -44,29 +44,25 @@ public class AlignmentService {
     private MotifService motifService;
 
     /**
-     * Executes the ActiveSiteAlignmentRequest on protein active sites.
+     * Executes the AlignmentRequest on protein active sites.
      *
      * @param alignmentRequest The alignment request JSON mapped to an object
-     * @return ActiveSiteAlignmentResponse which contains all alignments and their relevant data
+     * @return AlignmentQueryResponse which contains all alignments and their relevant data
      */
     @Cacheable
-    public AlignmentQueryResponse alignActiveSites(ActiveSiteAlignmentRequest alignmentRequest) {
+    public AlignmentQueryResponse alignActiveSites(AlignmentRequest alignmentRequest) {
         PdbQueryResponse pdbResponse = alignmentRequest.callPdbForResponse();
         List<Structure> sourceStructures = pdbResponse.getStructures();
         List<MotifFile> customMotifFileList = alignmentRequest.extractCustomMotifFileList();
         String motifEcNumberFilter = alignmentRequest.getEcNumber();
         double precision = alignmentRequest.getPrecisionFactor();
 
-//        HashMap<String, List<Alignment>> results = new HashMap<>();
-//        pdbResponse.getFoundPdbIds().forEach(pdbId -> results.put(pdbId, new ArrayList<>()));
-
-        AlignmentQueryResponse response = new AlignmentQueryResponse();
-
         int pageNumber = 0;
         Page<Motif> motifs = motifService.queryByEcNumber(motifEcNumberFilter, pageNumber);
-
         log.info(String.format("Aligning active sites of %d PDB entries with %d motifs & %d custom motifs.",
                 sourceStructures.size(), motifs.getTotalElements(), customMotifFileList.size()));
+
+        AlignmentQueryResponse response = new AlignmentQueryResponse();
 
         // Align structures with motifs from the database
         while (motifs.hasContent()) {
@@ -99,10 +95,9 @@ public class AlignmentService {
                 response.addQueryResponseData(queryResponseData);
             }
         }
-
-//        for (String key : results.keySet()) {
-//            log.info(String.format("Found %d results for %s", results.get(key).size(), key));
-//        }
+        for (QueryResponseData responseData : response.getEntries()){
+            log.info(String.format("Found %d results for %s", responseData.getAlignments().size(), responseData.getQueryPdbId()));
+        }
 
         if (pdbResponse.getFailedPdbIds().size() > 0) {
             log.error(String.format("Could not find PDB structures for the following ids: %s", pdbResponse.getFailedPdbIds()));

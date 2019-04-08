@@ -1,4 +1,4 @@
-package org.moltimate.moltimatebackend.dto.ActiveSiteAlignment;
+package org.moltimate.moltimatebackend.dto.Alignment;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -57,16 +57,8 @@ public class QueryResponseData {
         this.alignments.add(new SuccessfulAlignment(motif, alignment));
     }
 
-    public void addAllSuccessfulEntry(List<SuccessfulAlignment> list) {
-        this.alignments.addAll(list);
-    }
-
     public void addFailedEntry(String motifPdbId, String motifEcNumber) {
         this.failedAlignments.add(new FailedAlignment(motifPdbId, motifEcNumber));
-    }
-
-    public void addAllFailedEntry(List<FailedAlignment> list) {
-        this.failedAlignments.addAll(list);
     }
 
     public boolean similar(QueryResponseData other) {
@@ -82,8 +74,8 @@ public class QueryResponseData {
 
     public void merge(QueryResponseData other) {
         if (this.similar(other)) {
-            this.addAllSuccessfulEntry(other.getAlignments());
-            this.addAllFailedEntry(other.getFailedAlignments());
+            this.alignments.addAll(other.getAlignments());
+            this.failedAlignments.addAll(other.getFailedAlignments());
         }
     }
 }

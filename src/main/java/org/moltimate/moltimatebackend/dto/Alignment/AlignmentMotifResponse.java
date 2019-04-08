@@ -1,4 +1,4 @@
-package org.moltimate.moltimatebackend.dto.MotifTesting;
+package org.moltimate.moltimatebackend.dto.Alignment;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,7 +18,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class MotifTestResponse {
+public class AlignmentMotifResponse {
 
     private String motifPdbId;
     private String motifEcNumber;
@@ -28,7 +28,7 @@ public class MotifTestResponse {
     List<FailedAlignment> failedAlignments; // Alignments that did not find a match
     List<String> failedPdbIds; // PDB ids that failed to be processed
 
-    public MotifTestResponse(Motif motif) {
+    public AlignmentMotifResponse(Motif motif) {
         this.motifPdbId = motif.getPdbId();
         this.motifEcNumber = motif.getEcNumber();
         this.activeSiteResidues = motif.getActiveSiteResidues();

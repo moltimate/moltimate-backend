@@ -77,7 +77,7 @@ public class MotifService {
      * @return The matching motif
      */
     public Motif queryByPdbId(String pdbId) {
-        return motifRepository.findByPdbId(pdbId);
+        return motifRepository.findByPdbIdIgnoreCase(pdbId);
     }
 
     /**
