@@ -1,10 +1,8 @@
-package org.moltimate.moltimatebackend.dto.ActiveSiteAlignment;
+package org.moltimate.moltimatebackend.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.moltimate.moltimatebackend.dto.MotifFile;
-import org.moltimate.moltimatebackend.dto.PdbQueryResponse;
 import org.moltimate.moltimatebackend.model.Motif;
 import org.moltimate.moltimatebackend.util.FileUtils;
 import org.moltimate.moltimatebackend.util.ProteinUtils;
