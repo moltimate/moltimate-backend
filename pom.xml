@@ -188,7 +188,7 @@
             </dependencies>
         </profile>
 
-        <!-- Production Profile (connects to GCP Cloud SQL) -->
+        <!-- Production Profile (connects to GCP Cloud SQL & uses Google's jetty) -->
         <profile>
             <id>prod</id>
             <properties>
