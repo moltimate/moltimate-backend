@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.moltimate.moltimatebackend.dto.ActiveSiteAlignment.ActiveSiteAlignmentRequest;
 import org.moltimate.moltimatebackend.dto.ActiveSiteAlignment.ActiveSiteAlignmentResponse;
+import org.moltimate.moltimatebackend.dto.ActiveSiteAlignment.AlignmentQueryResponse;
 import org.moltimate.moltimatebackend.service.AlignmentService;
 import org.moltimate.moltimatebackend.exception.InvalidPdbIdException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +36,7 @@ public class AlignmentController {
             @ApiResponse(code = 404, message = "All PDB ids invalid", response = InvalidPdbIdException.class)
     })
     @RequestMapping(value = "/activesite", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ActiveSiteAlignmentResponse> activeSiteAlignment(ActiveSiteAlignmentRequest alignmentRequest) {
+    public ResponseEntity<AlignmentQueryResponse> activeSiteAlignment(ActiveSiteAlignmentRequest alignmentRequest) {
         log.info("Received request to align active sites: " + alignmentRequest);
         return ResponseEntity.ok(alignmentService.alignActiveSites(alignmentRequest));
     }

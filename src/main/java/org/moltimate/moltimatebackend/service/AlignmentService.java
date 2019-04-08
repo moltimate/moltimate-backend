@@ -6,7 +6,8 @@ import org.biojava.nbio.structure.Group;
 import org.biojava.nbio.structure.Structure;
 import org.biojava.nbio.structure.geometry.SuperPositionSVD;
 import org.moltimate.moltimatebackend.dto.ActiveSiteAlignment.ActiveSiteAlignmentRequest;
-import org.moltimate.moltimatebackend.dto.ActiveSiteAlignment.ActiveSiteAlignmentResponse;
+import org.moltimate.moltimatebackend.dto.ActiveSiteAlignment.AlignmentQueryResponse;
+import org.moltimate.moltimatebackend.dto.ActiveSiteAlignment.QueryResponseData;
 import org.moltimate.moltimatebackend.dto.MotifFile;
 import org.moltimate.moltimatebackend.dto.PdbQueryResponse;
 import org.moltimate.moltimatebackend.model.Alignment;
@@ -28,7 +29,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -50,15 +50,17 @@ public class AlignmentService {
      * @return ActiveSiteAlignmentResponse which contains all alignments and their relevant data
      */
     @Cacheable
-    public ActiveSiteAlignmentResponse alignActiveSites(ActiveSiteAlignmentRequest alignmentRequest) {
+    public AlignmentQueryResponse alignActiveSites(ActiveSiteAlignmentRequest alignmentRequest) {
         PdbQueryResponse pdbResponse = alignmentRequest.callPdbForResponse();
         List<Structure> sourceStructures = pdbResponse.getStructures();
         List<MotifFile> customMotifFileList = alignmentRequest.extractCustomMotifFileList();
         String motifEcNumberFilter = alignmentRequest.getEcNumber();
         double precision = alignmentRequest.getPrecisionFactor();
 
-        HashMap<String, List<Alignment>> results = new HashMap<>();
-        pdbResponse.getFoundPdbIds().forEach(pdbId -> results.put(pdbId, new ArrayList<>()));
+//        HashMap<String, List<Alignment>> results = new HashMap<>();
+//        pdbResponse.getFoundPdbIds().forEach(pdbId -> results.put(pdbId, new ArrayList<>()));
+
+        AlignmentQueryResponse response = new AlignmentQueryResponse();
 
         int pageNumber = 0;
         Page<Motif> motifs = motifService.queryByEcNumber(motifEcNumberFilter, pageNumber);
@@ -69,11 +71,14 @@ public class AlignmentService {
         // Align structures with motifs from the database
         while (motifs.hasContent()) {
             for (Structure structure : sourceStructures) {
-                results.get(structure.getPDBCode())
-                        .addAll(motifs.stream().parallel()
-                                .map(motif -> alignActiveSites(structure, motif, ProteinUtils.queryPdb(motif.getPdbId()), precision))
-                                .filter(Objects::nonNull)
-                                .collect(Collectors.toList()));
+                QueryResponseData queryResponseData = new QueryResponseData(structure);
+                motifs.stream().parallel().forEach(motif -> {
+                    Alignment alignment = alignActiveSites(structure, motif, ProteinUtils.queryPdb(motif.getPdbId()), precision);
+                    if (alignment != null) {
+                        queryResponseData.addSuccessfulEntry(motif, alignment);
+                    }
+                });
+                response.addQueryResponseData(queryResponseData);
             }
             pageNumber++;
             motifs = motifService.queryByEcNumber(motifEcNumberFilter, pageNumber);
@@ -82,22 +87,28 @@ public class AlignmentService {
         // Align structures with custom uploaded motifs
         if (customMotifFileList.size() > 0) {
             for (Structure structure : sourceStructures) {
-                results.get(structure.getPDBCode())
-                        .addAll(customMotifFileList.stream().parallel()
-                                .map(motifFile -> alignActiveSites(structure, motifFile.getMotif(), motifFile.getStructure(), precision))
-                                .filter(Objects::nonNull)
-                                .collect(Collectors.toList()));
+                QueryResponseData queryResponseData = new QueryResponseData(structure);
+                customMotifFileList.stream().parallel().forEach(motifFile -> {
+                    Alignment alignment = alignActiveSites(structure, motifFile.getMotif(), motifFile.getStructure(), precision);
+                    if (alignment != null) {
+                        queryResponseData.addSuccessfulEntry(motifFile.getMotif(), alignment);
+                    } else {
+                        queryResponseData.addFailedEntry(motifFile.getMotif().getPdbId(), motifFile.getMotif().getEcNumber());
+                    }
+                });
+                response.addQueryResponseData(queryResponseData);
             }
         }
 
-        for (String key : results.keySet()) {
-            log.info(String.format("Found %d results for %s", results.get(key).size(), key));
-        }
+//        for (String key : results.keySet()) {
+//            log.info(String.format("Found %d results for %s", results.get(key).size(), key));
+//        }
 
         if (pdbResponse.getFailedPdbIds().size() > 0) {
             log.error(String.format("Could not find PDB structures for the following ids: %s", pdbResponse.getFailedPdbIds()));
+            response.addFailedPdbIds(pdbResponse.getFailedPdbIds());
         }
-        return new ActiveSiteAlignmentResponse(results, pdbResponse.getFailedPdbIds());
+        return response;
     }
 
     /**
