@@ -2,8 +2,8 @@ package org.moltimate.moltimatebackend.controller;
 
 import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
-import org.moltimate.moltimatebackend.dto.ActiveSiteAlignmentResponse;
-import org.moltimate.moltimatebackend.dto.MotifTestRequest;
+import org.moltimate.moltimatebackend.dto.ActiveSiteAlignment.ActiveSiteAlignmentResponse;
+import org.moltimate.moltimatebackend.dto.MotifTesting.MotifTestRequest;
 import org.moltimate.moltimatebackend.service.MotifTestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
