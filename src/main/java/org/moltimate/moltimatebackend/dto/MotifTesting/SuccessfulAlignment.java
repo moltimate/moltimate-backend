@@ -18,7 +18,7 @@ public class SuccessfulAlignment {
     private List<SuccessfulAlignmentData> entries;
 
     @Data
-    public class SuccessfulAlignmentData {
+    private class SuccessfulAlignmentData {
         private String queryPdbId;
         private String queryEcNumber;
         private double rmsd;
