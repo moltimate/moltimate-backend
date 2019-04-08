@@ -50,7 +50,7 @@ public class MotifService {
      * @param motif New Motif to save
      * @return A newly generated Motif
      */
-    public Motif saveMotif(Motif motif) {
+    private Motif saveMotif(Motif motif) {
         motif.getSelectionQueries()
                 .values()
                 .forEach(residueQuerySetRepository::save);
@@ -61,7 +61,6 @@ public class MotifService {
      * Batch saves a list of new Motif to the database.
      *
      * @param motifs New Motif to save
-     * @return A newly generated Motif
      */
     public void saveMotifs(List<Motif> motifs) {
         log.info("Saving " + motifs.size() + " motifs with IDs " + motifs.stream()
@@ -88,7 +87,7 @@ public class MotifService {
     /**
      * @return List of all Motifs in the database
      */
-    public Page<Motif> findAll(int pageNumber) {
+    private Page<Motif> findAll(int pageNumber) {
         return motifRepository.findAll(PageRequest.of(pageNumber, MOTIF_BATCH_SIZE));
     }
 
@@ -109,6 +108,7 @@ public class MotifService {
      * Delete all motifs and their residue query sets
      */
     public void deleteAllAndFlush() {
+        // TODO: figure out why this breaks
 //        motifRepository.deleteAll();
 //        motifRepository.flush();
 //        residueQuerySetRepository.deleteAll();

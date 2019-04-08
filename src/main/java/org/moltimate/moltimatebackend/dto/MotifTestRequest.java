@@ -4,12 +4,15 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.biojava.nbio.structure.Structure;
+import org.moltimate.moltimatebackend.exception.InvalidPdbIdException;
+import org.moltimate.moltimatebackend.model.Residue;
 import org.moltimate.moltimatebackend.util.FileUtils;
 import org.moltimate.moltimatebackend.util.ProteinUtils;
-import org.moltimate.moltimatebackend.exception.InvalidPdbIdException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -20,16 +23,32 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class MotifTestRequest {
     public enum Type {
-        SELF,
-        LIST,
-        HOMOLOGUE,
-        RANDOM
+
+        SELF("self"),
+        LIST("list"),
+        HOMOLOG("homolog"),
+        RANDOM("random");
+
+        private final String name;
+
+        Type(final String name) {
+            this.name = name;
+        }
+
+        public static Type fromName(String name) {
+            for (Type t : values()) {
+                if (t.name.equalsIgnoreCase(name)) {
+                    return t;
+                }
+            }
+            throw new IllegalArgumentException("Unknown enum type " + name + ", Allowed values are " + Arrays.toString(values()));
+        }
     }
 
     // Motif Attributes
     private String pdbId;
     private String ecNumber;
-    private List<String> activeSiteResidues = new ArrayList<>();
+    private List<String> activeSiteResidues;
     private MultipartFile customMotifStructure;
 
     // Testing Attributes
@@ -48,6 +67,13 @@ public class MotifTestRequest {
             throw new InvalidPdbIdException(pdbId);
         }
         return FileUtils.getStructureFromFile(customMotifStructure);
+    }
+
+    public Type getType() {
+        if (this.type == null) {
+            return Type.SELF;
+        }
+        return this.type;
     }
 
     public int getPrecisionFactor() {
@@ -73,5 +99,22 @@ public class MotifTestRequest {
                 .map(FileUtils::getStructureFromFile)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
+    }
+
+    public List<Residue> parseResidueEntries() {
+        List<Residue> residueList = new ArrayList<>();
+        for (String residueEntry : this.activeSiteResidues) {
+            for (String residueAttr : residueEntry.split(",")) {
+                String[] res = residueAttr.split(" ");
+                Residue residue = Residue.builder()
+                        .residueName(res[0])
+                        .residueChainName(res[1])
+                        .residueId(res[2])
+                        .build();
+                residueList.add(residue);
+            }
+        }
+        residueList.sort(Comparator.comparingInt(r -> Integer.parseInt(r.getResidueId())));
+        return residueList;
     }
 }

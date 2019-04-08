@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class StructureUtils {
 
@@ -22,7 +21,7 @@ public class StructureUtils {
      * With precision factor, we make a similar vector and multiply the previous norm
      * by the norm of the new precision factor vector
      */
-    private static double distanceErrorMargin = 2d;
+    private static final double distanceErrorMargin = 2d;
 
     /**
      * Get Residue from a structure
@@ -102,19 +101,11 @@ public class StructureUtils {
      */
     private static List<Atom> getAtomByType(Structure structure, String atomType) {
         ArrayList<Atom> atoms = new ArrayList<>();
-        structure.getChains()
-                .forEach(chain ->
-                        chain.getAtomGroups(GroupType.AMINOACID)
-                                .forEach(group ->
-                                        atoms.addAll(
-                                                group.getAtoms()
-                                                        .stream()
-                                                        .filter(atom -> atom
-                                                                .getName()
-                                                                .equals(atomType))
-                                                        .collect(
-                                                                Collectors
-                                                                        .toList()))));
+        for (Chain chain : structure.getChains()) {
+            for (Group group : chain.getAtomGroups(GroupType.AMINOACID)) {
+                atoms.addAll(getAtomByType(group, atomType));
+            }
+        }
         return atoms;
     }
 
@@ -125,12 +116,15 @@ public class StructureUtils {
      * @param atomType: type of atom to search for in structure
      * @return a list of atoms in the structure matching the specified type
      */
-    public static List<Atom> getAtomByType(Group residue, String atomType) {
-        return residue.getAtoms()
-                .stream()
-                .filter(atom -> atom.getName()
-                        .equals(atomType))
-                .collect(Collectors.toList());
+    private static List<Atom> getAtomByType(Group residue, String atomType) {
+        List<Atom> list = new ArrayList<>();
+        for (Atom atom : residue.getAtoms()) {
+            if (atom.getName()
+                    .equals(atomType)) {
+                list.add(atom);
+            }
+        }
+        return list;
     }
 
     /**
@@ -142,7 +136,9 @@ public class StructureUtils {
      */
     private static Map<Group, double[]> residueToLocationMap(List<Group> residues) {
         HashMap<Group, double[]> locationMap = new HashMap<>();
-        residues.forEach(residue -> locationMap.put(residue, getResidueLocation(residue)));
+        for (Group residue : residues) {
+            locationMap.put(residue, getResidueLocation(residue));
+        }
         return locationMap;
     }
 
@@ -175,30 +171,31 @@ public class StructureUtils {
         List<Group> residue2List = getResiduesByType(structure, residue2Name);
         List<Atom> atom1List = new ArrayList<>();
         List<Atom> atom2List = new ArrayList<>();
-        residue1List.forEach(residue -> atom1List.addAll(getAtomByType(residue, atom1Name)));
-        residue2List.forEach(residue -> atom2List.addAll(getAtomByType(residue, atom2Name)));
+        for (Group group : residue1List) {
+            atom1List.addAll(getAtomByType(group, atom1Name));
+        }
+        for (Group residue : residue2List) {
+            atom2List.addAll(getAtomByType(residue, atom2Name));
+        }
 
-        atom1List.forEach(atom1 ->
-                atom2List.forEach(atom2 -> {
-                    double _rmsd = rmsd(atom1, atom2);
-                    double _errorMargin = l2Norm(new double[]{distanceErrorMargin, distanceErrorMargin, distanceErrorMargin});
-                    double _precisionMod = l2Norm(new double[]{precision, precision, precision});
-                    if (atom1.getGroup() != atom2.getGroup()
-                            && (_rmsd < distance * precision)
-                            && (Math.abs(_rmsd - (distance * precision)) < (_errorMargin * _precisionMod))
-                    ) {
-                        results.add(atom1);
-                    }
-                })
-        );
+        for (Atom atom1 : atom1List) {
+            for (Atom atom2 : atom2List) {
+                double _rmsd = rmsd(atom1, atom2);
+                double _errorMargin = l2Norm(new double[]{distanceErrorMargin, distanceErrorMargin, distanceErrorMargin});
+                double _precisionMod = l2Norm(new double[]{precision, precision, precision});
+                if (atom1.getGroup() != atom2.getGroup()
+                        && (_rmsd < distance * precision)
+                        && (Math.abs(_rmsd - (distance * precision)) < (_errorMargin * _precisionMod))) {
+                    results.add(atom1);
+                }
+            }
+        }
 
         return results;
     }
 
     public static String residueName(Group group) {
-        return group.getChemComp()
-                .getThree_letter_code() + " " + group.getResidueNumber()
-                .toString();
+        return group.getChemComp().getThree_letter_code() + " " + group.getResidueNumber().toString();
     }
 
     public static String ecNumber(Structure structure) {

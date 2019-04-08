@@ -23,7 +23,7 @@ public class ProteinUtils {
      * @return List of BioJava Structure objects representing each PDB ID
      */
     public static List<Structure> queryPdb(List<String> pdbIds) {
-        return pdbIds.stream()
+        return pdbIds.stream().parallel()
                 .map(ProteinUtils::queryPdbOptional)
                 .filter(Optional::isPresent)
                 .map(Optional::get)

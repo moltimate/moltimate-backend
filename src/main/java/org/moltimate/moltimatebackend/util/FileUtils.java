@@ -46,7 +46,7 @@ public class FileUtils {
 
         public static List<String> getValidFileTypes() {
             return Arrays.stream(ProteinFileType.values())
-                    .map(proteinFileType -> proteinFileType.toString())
+                    .map(ProteinFileType::toString)
                     .collect(Collectors.toList());
         }
     }

@@ -38,4 +38,9 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> invalidFile(InvalidFileException ex, WebRequest request) {
         return handleExceptionInternal(ex, ex.getMessage(), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
+
+    @ExceptionHandler(value = {MotifFileParseException.class})
+    protected ResponseEntity<Object> invalidFile(MotifFileParseException ex, WebRequest request) {
+        return handleExceptionInternal(ex, ex.getMessage(), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+    }
 }

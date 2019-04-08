@@ -7,6 +7,7 @@ import org.biojava.nbio.structure.Structure;
 import org.biojava.nbio.structure.geometry.SuperPositionSVD;
 import org.moltimate.moltimatebackend.dto.ActiveSiteAlignmentRequest;
 import org.moltimate.moltimatebackend.dto.ActiveSiteAlignmentResponse;
+import org.moltimate.moltimatebackend.dto.MotifFile;
 import org.moltimate.moltimatebackend.dto.PdbQueryResponse;
 import org.moltimate.moltimatebackend.model.Alignment;
 import org.moltimate.moltimatebackend.model.Motif;
@@ -36,7 +37,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @Slf4j
-@CacheConfig(cacheNames={"Alignments"})
+@CacheConfig(cacheNames = {"Alignments"})
 public class AlignmentService {
 
     @Autowired
@@ -52,9 +53,8 @@ public class AlignmentService {
     public ActiveSiteAlignmentResponse alignActiveSites(ActiveSiteAlignmentRequest alignmentRequest) {
         PdbQueryResponse pdbResponse = alignmentRequest.callPdbForResponse();
         List<Structure> sourceStructures = pdbResponse.getStructures();
-        Map<Motif, Structure> customMotifs = alignmentRequest.extractCustomMotifMapFromFiles();
+        List<MotifFile> customMotifFileList = alignmentRequest.extractCustomMotifFileList();
         String motifEcNumberFilter = alignmentRequest.getEcNumber();
-
         double precision = alignmentRequest.getPrecisionFactor();
 
         HashMap<String, List<Alignment>> results = new HashMap<>();
@@ -64,97 +64,68 @@ public class AlignmentService {
         Page<Motif> motifs = motifService.queryByEcNumber(motifEcNumberFilter, pageNumber);
 
         log.info(String.format("Aligning active sites of %d PDB entries with %d motifs & %d custom motifs.",
-                sourceStructures.size(), motifs.getTotalElements(), customMotifs.size()));
+                sourceStructures.size(), motifs.getTotalElements(), customMotifFileList.size()));
 
         // Align structures with motifs from the database
         while (motifs.hasContent()) {
-            motifs.stream()
-                    .parallel()
-                    .forEach(motif -> {
-                        Structure motifStructure = ProteinUtils.queryPdb(motif.getPdbId());
-                        alignActiveSiteStructureList(results, motif, motifStructure, sourceStructures, precision);
-                    });
+            for (Structure structure : sourceStructures) {
+                results.get(structure.getPDBCode())
+                        .addAll(motifs.stream().parallel()
+                                .map(motif -> alignActiveSites(structure, motif, ProteinUtils.queryPdb(motif.getPdbId()), precision))
+                                .filter(Objects::nonNull)
+                                .collect(Collectors.toList()));
+            }
             pageNumber++;
             motifs = motifService.queryByEcNumber(motifEcNumberFilter, pageNumber);
         }
 
         // Align structures with custom uploaded motifs
-        customMotifs.forEach((customMotif, customMotifStructure) -> {
-            alignActiveSiteStructureList(results, customMotif, customMotifStructure, sourceStructures, precision);
-        });
-
-        results.forEach((pdbId, alignments) -> results.replace(pdbId, alignments.stream()
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList())));
-
-        int resultsCount = 0;
-        for (String key : results.keySet()) {
-            resultsCount += results.get(key)
-                    .size();
+        if (customMotifFileList.size() > 0) {
+            for (Structure structure : sourceStructures) {
+                results.get(structure.getPDBCode())
+                        .addAll(customMotifFileList.stream().parallel()
+                                .map(motifFile -> alignActiveSites(structure, motifFile.getMotif(), motifFile.getStructure(), precision))
+                                .filter(Objects::nonNull)
+                                .collect(Collectors.toList()));
+            }
         }
 
-        log.info(String.format("Found %d results", resultsCount));
+        for (String key : results.keySet()) {
+            log.info(String.format("Found %d results for %s", results.get(key).size(), key));
+        }
+
         if (pdbResponse.getFailedPdbIds().size() > 0) {
             log.error(String.format("Could not find PDB structures for the following ids: %s", pdbResponse.getFailedPdbIds()));
         }
         return new ActiveSiteAlignmentResponse(results, pdbResponse.getFailedPdbIds());
     }
 
-    public void alignActiveSiteStructureList(HashMap<String, List<Alignment>> results, Motif motif, Structure motifStructure, List<Structure> structures, double precisionFactor) {
-        structures.stream()
-                .parallel()
-                .forEach(structure -> results.get(structure.getPDBCode())
-                        .add(alignActiveSites(
-                                structure,
-                                motif,
-                                motifStructure,
-                                precisionFactor
-                        )));
-    }
-
     /**
      * Attempt to align the active site of a motif with a structure
      *
-     * @param structure: structure to align
-     * @param motif:     motif that we search for in the structure
+     * @param queryStructure  :  structure to align
+     * @param motif           :  motif that we search for in the structure
+     * @param motifStructure  :  structure of motif for comparison
+     * @param precisionFactor :  precision factor modifier
      * @return an alignment (if one exists) or null (if none found)
      */
-    private Alignment alignActiveSites(Structure structure, Motif motif, Structure motifStructure, double precisionFactor) {
-        Map<Residue, List<Group>> residueMap = motif.runQueries(structure, precisionFactor);
+    public Alignment alignActiveSites(Structure queryStructure, Motif motif, Structure motifStructure, double precisionFactor) {
+        Map<Residue, List<Group>> residueMap = motif.runQueries(queryStructure, precisionFactor);
         List<Map<Residue, Group>> permutations = findAllPermutations(residueMap);
-        Map<Residue, Group> residueMapping = findBestPermutation(motifStructure, permutations, motif);
+        Map<Residue, Group> residueMapping = findBestPermutation(motif, motifStructure, permutations);
 
         Set<Group> found = new HashSet<>();
         List<Residue> activeSiteResidueList = new ArrayList<>();
         List<Group> alignedResidueList = new ArrayList<>();
 
-        Map<Residue, Group> alignmentMapping = new HashMap<>();
-
-        motif.getActiveSiteResidues()
-                .forEach(residue -> {
-                    Group group = residueMapping.get(residue);
-                    if (group != null) {
-                        Group matchingResidue = group;
-                        if (!found.contains(matchingResidue)) {
-                            activeSiteResidueList.add(residue);
-                            alignedResidueList.add(matchingResidue);
-                            alignmentMapping.put(residue, matchingResidue);
-                            found.add(matchingResidue);
-                        }
-                    }
-                });
-
-        ArrayList<Residue> activeSiteOutput = new ArrayList<>();
-        Set<Residue> used = new HashSet<>();
-
-        for (int i = 0; i < activeSiteResidueList.size(); i++) {
-            activeSiteOutput.add(activeSiteResidueList.get(i));
-            used.add(activeSiteResidueList.get(i));
-        }
-
-        for (Residue residue : motif.getActiveSiteResidues()) {
-            if (!used.contains(residue)) {
-                activeSiteOutput.add(residue);
+        for (Residue _residue : motif.getActiveSiteResidues()) {
+            Group group = residueMapping.get(_residue);
+            if (group != null) {
+                if (!found.contains(group)) {
+                    activeSiteResidueList.add(_residue);
+                    alignedResidueList.add(group);
+                    found.add(group);
+                }
             }
         }
 
@@ -237,9 +208,11 @@ public class AlignmentService {
         for (Group residue : residues) {
             atoms.addAll(getAtomsFromGroup(residue));
         }
-        List<Point3d> points = atoms.stream()
-                .map(Atom::getCoordsAsPoint3d)
-                .collect(Collectors.toList());
+        List<Point3d> points = new ArrayList<>();
+        for (Atom atom : atoms) {
+            Point3d coordsAsPoint3d = atom.getCoordsAsPoint3d();
+            points.add(coordsAsPoint3d);
+        }
         Point3d[] point3ds = new Point3d[points.size()];
         return points.toArray(point3ds);
     }
@@ -298,14 +271,17 @@ public class AlignmentService {
      * Finds the best permutation of a list of permutations of matches to an active site
      * of a motif
      *
-     * @param motifStructure: structure object of motif to find permutation of
+     * @param motif:          motif active site information
+     * @param motifStructure: biojava structure representing the motif
      * @param permutations:   data structure containing your permutations
-     * @param motif:          motif that the alignment permutations relate to
      * @return best fit permutation for alignment. We calculate this by checking if the permutation fits
      * the constraint we have for levenstein distance and then find the one with minimum RMSD that
      * fits this requirement.
      */
-    private Map<Residue, Group> findBestPermutation(Structure motifStructure, List<Map<Residue, Group>> permutations, Motif motif) {
+    private Map<Residue, Group> findBestPermutation(Motif motif, Structure motifStructure, List<Map<Residue, Group>> permutations) {
+        if (permutations.size() == 1) {
+            return permutations.get(0);
+        }
         double min_rmsd = Double.MAX_VALUE;
         Map<Residue, Group> best_match = new HashMap<>();
         for (Map<Residue, Group> permutation : permutations) {
@@ -317,7 +293,6 @@ public class AlignmentService {
             int distance = AlignmentUtils.levensteinDistance(alignmentString, motifResString);
 
             if (acceptableDistance(motif.getActiveSiteResidues().size(), distance)) {
-
                 double rmsd = rmsd(motifStructure, motif.getActiveSiteResidues(), alignmentSeq);
                 if (rmsd != -1 && rmsd < min_rmsd) {
                     min_rmsd = rmsd;
@@ -325,7 +300,6 @@ public class AlignmentService {
                 }
             }
         }
-
         return best_match;
     }
 
@@ -346,9 +320,9 @@ public class AlignmentService {
      * [a c e]
      */
     private <T> List<List<T>> cartesianProduct(List<List<T>> lists) {
-        List<List<T>> resultLists = new ArrayList<List<T>>();
+        List<List<T>> resultLists = new ArrayList<>();
         if (lists.size() == 0) {
-            resultLists.add(new ArrayList<T>());
+            resultLists.add(new ArrayList<>());
             return resultLists;
         } else {
             List<T> firstList = lists.get(0);

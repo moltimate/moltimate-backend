@@ -25,7 +25,7 @@ public class MotifUtils {
             res.setResidueAltLoc(Residue.getAltLocFromGroup(group));
         }
         return Motif.builder()
-                .pdbId(pdbId)
+                .pdbId(pdbId.toUpperCase())
                 .activeSiteResidues(residues)
                 .ecNumber(ecNumber)
                 .selectionQueries(generateSelectionQueries(structure, residues))
@@ -45,20 +45,22 @@ public class MotifUtils {
         Map<Residue, List<Atom>> filteredResidueAtoms = new HashMap<>();
         activeSiteResidues.forEach(residue -> {
             Group group = StructureUtils.getResidue(structure, residue.getResidueName(), residue.getResidueId());
+            assert group != null;
             List<Atom> groupAtoms = group.getAtoms();
-            Atom firstCbAtom = groupAtoms.stream()
-                    .filter(atom -> atom.getName()
-                            .equals("CB"))
-                    .findFirst()
-                    .orElse(groupAtoms.get(1));
-            if (residue.getResidueName()
-                    .equalsIgnoreCase("ALA")) {
+            Atom firstCbAtom;
+            if (residue.getResidueName().equalsIgnoreCase("ALA")) {
+                // Alanine is a special case because it does not have a Carbon Beta, CB, atom
                 firstCbAtom = groupAtoms.get(1);
+            } else {
+                firstCbAtom = groupAtoms.stream()
+                        .filter(atom -> atom.getName().equals("CB"))
+                        .findFirst()
+                        .orElse(groupAtoms.get(1));
             }
             List<Atom> filteredAtoms = groupAtoms.subList(groupAtoms.indexOf(firstCbAtom), groupAtoms.size());
+            // Exclude hydrogen atoms, from all residues
             filteredAtoms = filteredAtoms.stream()
-                    .filter(atom -> !atom.getName()
-                            .contains("H"))
+                    .filter(atom -> !atom.getName().contains("H"))
                     .collect(Collectors.toList());
             filteredResidueAtoms.put(residue, filteredAtoms);
         });
@@ -78,11 +80,11 @@ public class MotifUtils {
                                 .atomType1(atom.getName())
                                 .atomType2(compareAtom.getName())
                                 .residueName1(atom.getGroup()
-                                                      .getChemComp()
-                                                      .getThree_letter_code())
+                                        .getChemComp()
+                                        .getThree_letter_code())
                                 .residueName2(compareAtom.getGroup()
-                                                      .getChemComp()
-                                                      .getThree_letter_code())
+                                        .getChemComp()
+                                        .getThree_letter_code())
                                 .distance(StructureUtils.rmsd(atom, compareAtom) + 2)
                                 .build();
                         motifSelections.add(motifSelection);
