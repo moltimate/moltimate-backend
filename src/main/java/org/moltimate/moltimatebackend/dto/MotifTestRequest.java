@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MotifTestRequest {
+
     public enum Type {
 
         SELF("self"),

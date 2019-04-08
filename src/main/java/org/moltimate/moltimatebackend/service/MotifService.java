@@ -1,12 +1,9 @@
 package org.moltimate.moltimatebackend.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.biojava.nbio.structure.Atom;
-import org.biojava.nbio.structure.Group;
 import org.biojava.nbio.structure.Structure;
 import org.moltimate.moltimatebackend.model.ActiveSite;
 import org.moltimate.moltimatebackend.model.Motif;
-import org.moltimate.moltimatebackend.model.MotifSelection;
 import org.moltimate.moltimatebackend.model.Residue;
 import org.moltimate.moltimatebackend.model.ResidueQuerySet;
 import org.moltimate.moltimatebackend.repository.MotifRepository;
@@ -23,7 +20,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;

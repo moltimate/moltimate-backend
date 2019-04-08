@@ -24,11 +24,11 @@ public class FileController {
     @RequestMapping(
             value = "/motif",
             method = RequestMethod.POST,
-            consumes = MediaType.APPLICATION_JSON_VALUE,
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
             produces = MediaType.APPLICATION_OCTET_STREAM_VALUE
     )
-    public ResponseEntity<Resource> createMotif(@RequestBody MakeMotifRequest makeMotifRequest) {
-        log.info("Received request to make a motif: " + makeMotifRequest);
+    public ResponseEntity<Resource> createMotif(MakeMotifRequest makeMotifRequest) {
+        log.info("Received request to download a motif: " + makeMotifRequest);
         return FileUtils.createMotifFile(makeMotifRequest);
     }
 }
