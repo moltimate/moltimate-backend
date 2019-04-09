@@ -96,7 +96,7 @@ public class AlignmentService {
             }
         }
         for (QueryResponseData responseData : response.getEntries()){
-            log.info(String.format("Found %d results for %s", responseData.getAlignments().size(), responseData.getQueryPdbId()));
+            log.info(String.format("Found %d results for %s", responseData.getAlignments().size(), responseData.getPdbId()));
         }
 
         if (pdbResponse.getFailedPdbIds().size() > 0) {
