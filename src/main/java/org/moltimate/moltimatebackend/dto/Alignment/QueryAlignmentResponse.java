@@ -9,13 +9,13 @@ import java.util.List;
  * A list of Alignments and useful data around them.
  */
 @Data
-public class AlignmentQueryResponse {
+public class QueryAlignmentResponse {
 
     private List<QueryResponseData> entries;
 
     private List<String> failedPdbIds; // PDB ids that failed to be processed
 
-    public AlignmentQueryResponse() {
+    public QueryAlignmentResponse() {
         this.entries = new ArrayList<>();
         this.failedPdbIds = new ArrayList<>();
     }

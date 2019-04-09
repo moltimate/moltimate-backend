@@ -5,7 +5,7 @@ import org.biojava.nbio.structure.Atom;
 import org.biojava.nbio.structure.Group;
 import org.biojava.nbio.structure.Structure;
 import org.biojava.nbio.structure.geometry.SuperPositionSVD;
-import org.moltimate.moltimatebackend.dto.Alignment.AlignmentQueryResponse;
+import org.moltimate.moltimatebackend.dto.Alignment.QueryAlignmentResponse;
 import org.moltimate.moltimatebackend.dto.Alignment.QueryResponseData;
 import org.moltimate.moltimatebackend.dto.MotifFile;
 import org.moltimate.moltimatebackend.dto.PdbQueryResponse;
@@ -47,10 +47,10 @@ public class AlignmentService {
      * Executes the AlignmentRequest on protein active sites.
      *
      * @param alignmentRequest The alignment request JSON mapped to an object
-     * @return AlignmentQueryResponse which contains all alignments and their relevant data
+     * @return QueryAlignmentResponse which contains all alignments and their relevant data
      */
     @Cacheable
-    public AlignmentQueryResponse alignActiveSites(AlignmentRequest alignmentRequest) {
+    public QueryAlignmentResponse alignActiveSites(AlignmentRequest alignmentRequest) {
         PdbQueryResponse pdbResponse = alignmentRequest.callPdbForResponse();
         List<Structure> sourceStructures = pdbResponse.getStructures();
         List<MotifFile> customMotifFileList = alignmentRequest.extractCustomMotifFileList();
@@ -62,7 +62,7 @@ public class AlignmentService {
         log.info(String.format("Aligning active sites of %d PDB entries with %d motifs & %d custom motifs.",
                 sourceStructures.size(), motifs.getTotalElements(), customMotifFileList.size()));
 
-        AlignmentQueryResponse response = new AlignmentQueryResponse();
+        QueryAlignmentResponse response = new QueryAlignmentResponse();
 
         // Align structures with motifs from the database
         while (motifs.hasContent()) {

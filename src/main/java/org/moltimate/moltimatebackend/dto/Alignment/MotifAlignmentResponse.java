@@ -18,7 +18,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AlignmentMotifResponse {
+public class MotifAlignmentResponse {
 
     private String motifPdbId;
     private String motifEcNumber;
@@ -28,7 +28,7 @@ public class AlignmentMotifResponse {
     private List<FailedAlignment> failedAlignments; // Alignments that did not find a match
     private List<String> failedPdbIds; // PDB ids that failed to be processed
 
-    public AlignmentMotifResponse(Motif motif) {
+    public MotifAlignmentResponse(Motif motif) {
         this.motifPdbId = motif.getPdbId();
         this.motifEcNumber = motif.getEcNumber();
         this.activeSiteResidues = motif.getActiveSiteResidues();
