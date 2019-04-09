@@ -24,9 +24,9 @@ public class AlignmentMotifResponse {
     private String motifEcNumber;
     private List<Residue> activeSiteResidues;
 
-    List<SuccessfulAlignment> alignments; // Alignments that found a match
-    List<FailedAlignment> failedAlignments; // Alignments that did not find a match
-    List<String> failedPdbIds; // PDB ids that failed to be processed
+    private List<SuccessfulAlignment> alignments; // Alignments that found a match
+    private List<FailedAlignment> failedAlignments; // Alignments that did not find a match
+    private List<String> failedPdbIds; // PDB ids that failed to be processed
 
     public AlignmentMotifResponse(Motif motif) {
         this.motifPdbId = motif.getPdbId();

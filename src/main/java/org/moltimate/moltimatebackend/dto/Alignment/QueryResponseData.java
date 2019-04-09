@@ -16,8 +16,8 @@ public class QueryResponseData {
     private String queryPdbId;
     private String queryEcNumber;
 
-    List<SuccessfulAlignment> alignments;   // Alignments that found a match
-    List<FailedAlignment> failedAlignments; // Alignments that did not find a match
+    private List<SuccessfulAlignment> alignments;   // Alignments that found a match
+    private List<FailedAlignment> failedAlignments; // Alignments that did not find a match
 
     public QueryResponseData(Structure structure) {
         this.queryPdbId = structure.getPDBCode();

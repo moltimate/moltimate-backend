@@ -13,7 +13,7 @@ public class AlignmentQueryResponse {
 
     private List<QueryResponseData> entries;
 
-    List<String> failedPdbIds; // PDB ids that failed to be processed
+    private List<String> failedPdbIds; // PDB ids that failed to be processed
 
     public AlignmentQueryResponse() {
         this.entries = new ArrayList<>();
