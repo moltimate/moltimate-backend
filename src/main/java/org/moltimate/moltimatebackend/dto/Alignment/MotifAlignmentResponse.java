@@ -20,8 +20,8 @@ import java.util.List;
 @AllArgsConstructor
 public class MotifAlignmentResponse {
 
-    private String motifPdbId;
-    private String motifEcNumber;
+    private String pdbId;
+    private String ecNumber;
     private List<Residue> activeSiteResidues;
 
     private List<SuccessfulAlignment> alignments; // Alignments that found a match
@@ -29,8 +29,8 @@ public class MotifAlignmentResponse {
     private List<String> failedPdbIds; // PDB ids that failed to be processed
 
     public MotifAlignmentResponse(Motif motif) {
-        this.motifPdbId = motif.getPdbId();
-        this.motifEcNumber = motif.getEcNumber();
+        this.pdbId = motif.getPdbId();
+        this.ecNumber = motif.getEcNumber();
         this.activeSiteResidues = motif.getActiveSiteResidues();
 
         this.alignments = new ArrayList<>();
@@ -40,15 +40,15 @@ public class MotifAlignmentResponse {
 
     @Data
     private class SuccessfulAlignment {
-        private String queryPdbId;
-        private String queryEcNumber;
+        private String pdbId;
+        private String ecNumber;
         private double rmsd;
         private int levenstein;
         private List<Residue> alignedResidues;
 
         private SuccessfulAlignment(Structure queryStructure, Alignment alignment) {
-            this.queryPdbId = queryStructure.getPDBCode();
-            this.queryEcNumber = StructureUtils.ecNumber(queryStructure);
+            this.pdbId = queryStructure.getPDBCode();
+            this.ecNumber = StructureUtils.ecNumber(queryStructure);
             this.rmsd = alignment.getRmsd();
             this.levenstein = alignment.getLevenstein();
             this.alignedResidues = alignment.getAlignedResidues();
@@ -62,8 +62,8 @@ public class MotifAlignmentResponse {
     @Data
     @AllArgsConstructor
     private class FailedAlignment {
-        private String queryPdbId;
-        private String queryEcNumber;
+        private String pdbId;
+        private String ecNumber;
     }
 
     public void addFailedEntry(String queryPdbId, String queryEcNumber) {
