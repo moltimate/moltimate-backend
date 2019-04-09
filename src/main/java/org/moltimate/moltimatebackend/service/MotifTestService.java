@@ -2,20 +2,20 @@ package org.moltimate.moltimatebackend.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.biojava.nbio.structure.Structure;
-import org.moltimate.moltimatebackend.dto.ActiveSiteAlignmentResponse;
 import org.moltimate.moltimatebackend.dto.MotifFile;
-import org.moltimate.moltimatebackend.dto.MotifTestRequest;
+import org.moltimate.moltimatebackend.dto.Request.MotifTestRequest;
+import org.moltimate.moltimatebackend.dto.Alignment.MotifAlignmentResponse;
 import org.moltimate.moltimatebackend.dto.PdbQueryResponse;
 import org.moltimate.moltimatebackend.model.Alignment;
 import org.moltimate.moltimatebackend.util.MotifUtils;
 import org.moltimate.moltimatebackend.util.PdbXmlClient;
 import org.moltimate.moltimatebackend.util.ProteinUtils;
+import org.moltimate.moltimatebackend.util.StructureUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,7 +28,7 @@ public class MotifTestService {
 
     private static final int maxRandom = 50;
 
-    public ActiveSiteAlignmentResponse testMotifAlignment(MotifTestRequest motifTestRequest) {
+    public MotifAlignmentResponse testMotifAlignment(MotifTestRequest motifTestRequest) {
         Structure motifStructure = motifTestRequest.motifStructure();
         MotifFile testMotifFile = MotifFile.builder()
                 .motif(MotifUtils.generateMotif(motifTestRequest.getPdbId(),
@@ -39,28 +39,20 @@ public class MotifTestService {
                 .build();
 
         List<Structure> structureList = new ArrayList<>();
-        List<String> failedIds = new ArrayList<>();
-        HashMap<String, List<Alignment>> results = new HashMap<>();
         PdbQueryResponse pdbQueryResponse;
+        MotifAlignmentResponse motifAlignmentResponse = new MotifAlignmentResponse(testMotifFile.getMotif());
 
         switch (motifTestRequest.getType()) {
             case SELF:
                 structureList.add(motifStructure);
                 structureList.addAll(motifTestRequest.extractCustomStructuresFromFiles());
-
-                for (Structure _structure : structureList) {
-                    results.put(_structure.getPDBCode(), new ArrayList<>());
-                }
                 break;
             case LIST:
                 pdbQueryResponse = motifTestRequest.callPdbForResponse();
                 structureList.addAll(pdbQueryResponse.getStructures());
                 structureList.addAll(motifTestRequest.extractCustomStructuresFromFiles());
 
-                for (Structure _structure : structureList) {
-                    results.put(_structure.getPDBCode(), new ArrayList<>());
-                }
-                failedIds.addAll(pdbQueryResponse.getFailedPdbIds());
+                motifAlignmentResponse.addFailedPdbIds(pdbQueryResponse.getFailedPdbIds());
                 break;
             case HOMOLOG:
                 List<String> homologuePdbIds = PdbXmlClient.postEcNumberForPdbIds(testMotifFile.getMotif().getEcNumber());
@@ -69,10 +61,7 @@ public class MotifTestService {
                 structureList.addAll(pdbQueryResponse.getStructures());
                 structureList.addAll(motifTestRequest.extractCustomStructuresFromFiles());
 
-                for (Structure _structure : structureList) {
-                    results.put(_structure.getPDBCode(), new ArrayList<>());
-                }
-                failedIds.addAll(pdbQueryResponse.getFailedPdbIds());
+                motifAlignmentResponse.addFailedPdbIds(pdbQueryResponse.getFailedPdbIds());
                 break;
             case RANDOM:
                 List<String> allPdbIds = PdbXmlClient.getPdbIds();
@@ -88,10 +77,9 @@ public class MotifTestService {
                     if (optionalStructure.isPresent()) {
                         Structure testStructure = optionalStructure.get();
                         structureList.add(testStructure);
-                        results.put(testStructure.getPDBCode(), new ArrayList<>());
                         max--;
                     } else {
-                        failedIds.add(randomPdbId);
+                        motifAlignmentResponse.addFailedPdbId(randomPdbId);
                     }
                 }
                 break;
@@ -99,12 +87,15 @@ public class MotifTestService {
 
         log.info(String.format("Aligning active sites of %s with %d structures (%d custom structures).",
                 testMotifFile.getMotif().getPdbId(), structureList.size(), motifTestRequest.getCustomStructures().size()));
+
         for (Structure structure : structureList) {
             Alignment alignment = alignmentService.alignActiveSites(structure, testMotifFile.getMotif(), motifStructure, motifTestRequest.getPrecisionFactor());
             if (alignment != null) {
-                results.get(structure.getPDBCode()).add(alignment);
+                motifAlignmentResponse.addSuccessfulEntry(structure, alignment);
+            } else {
+                motifAlignmentResponse.addFailedEntry(structure.getPDBCode(), StructureUtils.ecNumber(structure));
             }
         }
-        return new ActiveSiteAlignmentResponse(results, failedIds);
+        return motifAlignmentResponse;
     }
 }

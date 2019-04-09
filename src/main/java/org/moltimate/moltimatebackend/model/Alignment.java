@@ -17,8 +17,7 @@ public class Alignment {
     private String motifPdbId;
     private List<Residue> activeSiteResidues;
     private List<Residue> alignedResidues;
-    private int minDistance;
-    private int maxDistance;
+    private int levenstein;
     private double rmsd;
     private String ecNumber;
 }

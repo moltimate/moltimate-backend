@@ -9,6 +9,6 @@ import org.moltimate.moltimatebackend.model.Motif;
 @Builder
 public class MotifFile {
 
-    Structure structure;
-    Motif motif;
+    private Structure structure;
+    private Motif motif;
 }

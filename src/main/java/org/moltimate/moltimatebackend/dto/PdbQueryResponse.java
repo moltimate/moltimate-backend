@@ -18,9 +18,9 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PdbQueryResponse {
-    List<Structure> structures = new ArrayList<>();
-    List<String> foundPdbIds = new ArrayList<>();
-    List<String> failedPdbIds = new ArrayList<>();
+    private List<Structure> structures = new ArrayList<>();
+    private List<String> foundPdbIds = new ArrayList<>();
+    private List<String> failedPdbIds = new ArrayList<>();
 
     public PdbQueryResponse generatePdbQueryResponse(List<String> pdbIds, List<Structure> structures) {
         if (structures.size() == 0 && pdbIds.size() != 0) {

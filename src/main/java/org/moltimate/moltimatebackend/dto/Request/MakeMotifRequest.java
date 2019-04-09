@@ -1,4 +1,4 @@
-package org.moltimate.moltimatebackend.dto;
+package org.moltimate.moltimatebackend.dto.Request;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,10 +15,10 @@ import java.util.List;
 @AllArgsConstructor
 public class MakeMotifRequest {
 
-    String pdbId;
-    String ecNumber;
-    List<String> activeSiteResidues;
-    MultipartFile structureFile;
+    private String pdbId;
+    private String ecNumber;
+    private List<String> activeSiteResidues;
+    private MultipartFile structureFile;
 
     public List<Residue> parseResidueEntries() {
         List<Residue> residueList = new ArrayList<>();
