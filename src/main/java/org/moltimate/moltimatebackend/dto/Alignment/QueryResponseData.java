@@ -32,7 +32,7 @@ public class QueryResponseData {
         private String motifPdbId;
         private String motifEcNumber;
         private double rmsd;
-        private int levenshtein;
+        private int levenstein;
         private List<Residue> activeSiteResidues;
         private List<Residue> alignedResidues;
 
@@ -40,7 +40,7 @@ public class QueryResponseData {
             this.motifPdbId = motif.getPdbId();
             this.motifEcNumber = motif.getEcNumber();
             this.rmsd = alignment.getRmsd();
-            this.levenshtein = alignment.getMaxDistance(); // Todo fix when alignment is modified to 1 levenshtein distance
+            this.levenstein = alignment.getLevenstein();
             this.activeSiteResidues = alignment.getActiveSiteResidues();
             this.alignedResidues = alignment.getAlignedResidues();
         }

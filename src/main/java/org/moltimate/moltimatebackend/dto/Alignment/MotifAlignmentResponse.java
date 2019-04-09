@@ -43,14 +43,14 @@ public class MotifAlignmentResponse {
         private String queryPdbId;
         private String queryEcNumber;
         private double rmsd;
-        private int levenshtein;
+        private int levenstein;
         private List<Residue> alignedResidues;
 
         private SuccessfulAlignment(Structure queryStructure, Alignment alignment) {
             this.queryPdbId = queryStructure.getPDBCode();
             this.queryEcNumber = StructureUtils.ecNumber(queryStructure);
             this.rmsd = alignment.getRmsd();
-            this.levenshtein = alignment.getMaxDistance(); // Todo fix when alignment is modified to 1 levenshtein distance
+            this.levenstein = alignment.getLevenstein();
             this.alignedResidues = alignment.getAlignedResidues();
         }
     }

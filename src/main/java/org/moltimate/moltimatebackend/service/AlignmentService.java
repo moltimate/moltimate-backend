@@ -146,8 +146,7 @@ public class AlignmentService {
             Alignment alignment = new Alignment();
             alignment.setActiveSiteResidues(activeSiteResidueList);
             alignment.setMotifPdbId(motif.getPdbId());
-            alignment.setMinDistance(distance);
-            alignment.setMaxDistance(distance);
+            alignment.setLevenstein(distance);
             alignment.setAlignedResidues(alignedResidueList.stream()
                     .map(Residue::fromGroup)
                     .collect(Collectors.toList()));
