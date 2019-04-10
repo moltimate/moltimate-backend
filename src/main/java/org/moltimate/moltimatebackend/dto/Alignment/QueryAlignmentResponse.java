@@ -22,6 +22,9 @@ public class QueryAlignmentResponse {
 
     public void addQueryResponseData(QueryResponseData newData) {
         QueryResponseData found = null;
+        if (newData.getAlignments().isEmpty() && newData.getFailedAlignments().isEmpty()) {
+            return;
+        }
         for (QueryResponseData entry : this.entries) {
             if (entry.similar(newData)) {
                 found = entry;
@@ -35,11 +38,25 @@ public class QueryAlignmentResponse {
         }
     }
 
+    public void merge(QueryAlignmentResponse other) {
+        for (QueryResponseData responseData : other.getEntries()) {
+            this.addQueryResponseData(responseData);
+        }
+    }
+
     public void addFailedPdbIds(List<String> pdbIds) {
         this.failedPdbIds.addAll(pdbIds);
     }
 
     public void addFailedPdbId(String pdbId) {
         this.failedPdbIds.add(pdbId);
+    }
+
+    public void filterEcNumber(String ecNumberPrefix) {
+        if (ecNumberPrefix != null) {
+            for (QueryResponseData entry : entries) {
+                entry.filterEcNumber(ecNumberPrefix);
+            }
+        }
     }
 }
