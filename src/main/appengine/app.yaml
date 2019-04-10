@@ -6,14 +6,14 @@ runtime_config:
 service: moltimate-backend
 resources:
     cpu: 2
-    memory_gb: 2.3
+    memory_gb: 8
 automatic_scaling:
     min_num_instances: 1
     max_num_instances: 1
 readiness_check:
-    path: "/motifs"
+    path: "/healthcheck"
 liveness_check:
-    path: "/motifs"
+    path: "/healthcheck"
 skip_files:
   - .git/objects/
   - target/

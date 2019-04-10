@@ -56,6 +56,12 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+            <version>2.7.0</version>
+        </dependency>
+
         <!-- Exclude any jul-to-slf4j -->
         <dependency>
             <groupId>org.slf4j</groupId>

@@ -10,6 +10,7 @@ import org.moltimate.moltimatebackend.util.StructureUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
 public class QueryResponseData {
@@ -76,6 +77,21 @@ public class QueryResponseData {
         if (this.similar(other)) {
             this.alignments.addAll(other.getAlignments());
             this.failedAlignments.addAll(other.getFailedAlignments());
+        }
+    }
+
+    public void filterEcNumber(String ecNumberPrefix) {
+        if (ecNumberPrefix != null) {
+            this.alignments = this.alignments.stream()
+                    .filter(successfulAlignment -> successfulAlignment
+                            .getEcNumber()
+                            .startsWith(ecNumberPrefix))
+                    .collect(Collectors.toList());
+            this.failedAlignments = this.failedAlignments.stream()
+                    .filter(failedAlignment -> failedAlignment
+                            .getEcNumber()
+                            .startsWith(ecNumberPrefix))
+                    .collect(Collectors.toList());
         }
     }
 }
