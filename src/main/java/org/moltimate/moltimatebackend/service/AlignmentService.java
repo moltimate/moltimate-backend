@@ -102,6 +102,7 @@ public class AlignmentService {
         String cacheKey = String.format("%s_%s", structure.getPDBCode(), precision);
         QueryAlignmentResponse response = cache.getIfPresent(cacheKey);
         if (response != null) {
+            log.info(String.format("Found %s returning.", cacheKey));
             return response;
         } else {
             int pageNumber = 0;
