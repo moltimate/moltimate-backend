@@ -38,7 +38,9 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class AlignmentService {
-    private Cache<String, QueryAlignmentResponse> cache = Caffeine.newBuilder().maximumSize(10_000).build();
+    private Cache<String, QueryAlignmentResponse> cache = Caffeine.newBuilder()
+            .maximumSize(10_000)
+            .build();
 
     @Autowired
     private MotifService motifService;
@@ -65,7 +67,9 @@ public class AlignmentService {
 
         // Align structures with motifs from the database
         for (Structure structure : sourceStructures) {
-            QueryAlignmentResponse structureResponse = getCacheEntry(structure, precision);
+            String cacheKey = String.format("%s_%s", structure.getPDBCode(), precision);
+            QueryAlignmentResponse structureResponse = cache.get(cacheKey,
+                    k -> generateStructureResponse(structure, precision));
             response.merge(structureResponse);
         }
         if (motifEcNumberFilter != null) {
@@ -98,34 +102,27 @@ public class AlignmentService {
         return response;
     }
 
-    private QueryAlignmentResponse getCacheEntry(Structure structure, double precision) {
-        String cacheKey = String.format("%s_%s", structure.getPDBCode(), precision);
-        QueryAlignmentResponse response = cache.getIfPresent(cacheKey);
-        if (response != null) {
-            return response;
-        } else {
-            int pageNumber = 0;
-            Page<Motif> motifs = motifService.queryByEcNumber(null, pageNumber);
-            log.info(String.format("Aligning the structure %s with %d motifs.", structure.getPDBCode(), motifs.getTotalElements()));
+    private QueryAlignmentResponse generateStructureResponse(Structure structure, double precision) {
+        int pageNumber = 0;
+        Page<Motif> motifs = motifService.queryByEcNumber(null, pageNumber);
+        log.info(String.format("Aligning the structure %s with %d motifs.", structure.getPDBCode(), motifs.getTotalElements()));
 
-            QueryAlignmentResponse alignmentResponse = new QueryAlignmentResponse();
+        QueryAlignmentResponse alignmentResponse = new QueryAlignmentResponse();
 
-            // Align structures with motifs from the database
-            while (motifs.hasContent()) {
-                QueryResponseData queryResponseData = new QueryResponseData(structure);
-                motifs.stream().parallel().forEach(motif -> {
-                    Alignment alignment = alignActiveSites(structure, motif, ProteinUtils.queryPdb(motif.getPdbId()), precision);
-                    if (alignment != null) {
-                        queryResponseData.addSuccessfulEntry(motif, alignment);
-                    }
-                });
-                alignmentResponse.addQueryResponseData(queryResponseData);
-                pageNumber++;
-                motifs = motifService.queryByEcNumber(null, pageNumber);
-            }
-            cache.put(cacheKey, alignmentResponse);
-            return alignmentResponse;
+        // Align structures with motifs from the database
+        while (motifs.hasContent()) {
+            QueryResponseData queryResponseData = new QueryResponseData(structure);
+            motifs.stream().parallel().forEach(motif -> {
+                Alignment alignment = alignActiveSites(structure, motif, ProteinUtils.queryPdb(motif.getPdbId()), precision);
+                if (alignment != null) {
+                    queryResponseData.addSuccessfulEntry(motif, alignment);
+                }
+            });
+            alignmentResponse.addQueryResponseData(queryResponseData);
+            pageNumber++;
+            motifs = motifService.queryByEcNumber(null, pageNumber);
         }
+        return alignmentResponse;
     }
 
     /**
