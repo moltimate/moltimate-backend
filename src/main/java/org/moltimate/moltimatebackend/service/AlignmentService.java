@@ -1,7 +1,5 @@
 package org.moltimate.moltimatebackend.service;
 
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.extern.slf4j.Slf4j;
 import org.biojava.nbio.structure.Atom;
 import org.biojava.nbio.structure.Group;
@@ -38,12 +36,12 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class AlignmentService {
-    private Cache<String, QueryAlignmentResponse> cache = Caffeine.newBuilder()
-            .maximumSize(10_000)
-            .build();
 
     @Autowired
     private MotifService motifService;
+
+    @Autowired
+    private CacheService cacheService;
 
     /**
      * Executes the AlignmentRequest on protein active sites.
@@ -61,15 +59,18 @@ public class AlignmentService {
         int pageNumber = 0;
         Page<Motif> motifs = motifService.queryByEcNumber(motifEcNumberFilter, pageNumber);
         log.info(String.format("Aligning active sites of %d PDB entries with %d motifs & %d custom motifs.",
-                sourceStructures.size(), motifs.getTotalElements(), customMotifFileList.size()));
+                               sourceStructures.size(), motifs.getTotalElements(), customMotifFileList.size()
+        ));
 
         QueryAlignmentResponse response = new QueryAlignmentResponse();
 
         // Align structures with motifs from the database
         for (Structure structure : sourceStructures) {
             String cacheKey = String.format("%s_%s", structure.getPDBCode(), precision);
-            QueryAlignmentResponse structureResponse = cache.get(cacheKey,
-                    k -> generateStructureResponse(structure, precision));
+            QueryAlignmentResponse structureResponse = cacheService.cache.get(
+                    cacheKey,
+                    k -> generateStructureResponse(structure, precision)
+            );
             response.merge(structureResponse);
         }
         if (motifEcNumberFilter != null) {
@@ -80,44 +81,67 @@ public class AlignmentService {
         if (customMotifFileList.size() > 0) {
             for (Structure structure : sourceStructures) {
                 QueryResponseData queryResponseData = new QueryResponseData(structure);
-                customMotifFileList.stream().parallel().forEach(motifFile -> {
-                    Alignment alignment = alignActiveSites(structure, motifFile.getMotif(), motifFile.getStructure(), precision);
-                    if (alignment != null) {
-                        queryResponseData.addSuccessfulEntry(motifFile.getMotif(), alignment);
-                    } else {
-                        queryResponseData.addFailedEntry(motifFile.getMotif().getPdbId(), motifFile.getMotif().getEcNumber());
-                    }
-                });
+                customMotifFileList.stream()
+                        .parallel()
+                        .forEach(motifFile -> {
+                            Alignment alignment = alignActiveSites(
+                                    structure, motifFile.getMotif(), motifFile.getStructure(), precision);
+                            if (alignment != null) {
+                                queryResponseData.addSuccessfulEntry(motifFile.getMotif(), alignment);
+                            } else {
+                                queryResponseData.addFailedEntry(
+                                        motifFile.getMotif()
+                                                .getPdbId(), motifFile.getMotif()
+                                                .getEcNumber());
+                            }
+                        });
                 response.addQueryResponseData(queryResponseData);
             }
         }
         for (QueryResponseData responseData : response.getEntries()) {
-            log.info(String.format("Found %d results for %s", responseData.getAlignments().size(), responseData.getPdbId()));
+            log.info(String.format("Found %d results for %s", responseData.getAlignments()
+                    .size(), responseData.getPdbId()));
         }
 
-        if (pdbResponse.getFailedPdbIds().size() > 0) {
-            log.error(String.format("Could not find PDB structures for the following ids: %s", pdbResponse.getFailedPdbIds()));
+        if (pdbResponse.getFailedPdbIds()
+                .size() > 0) {
+            log.error(String.format(
+                    "Could not find PDB structures for the following ids: %s",
+                    pdbResponse.getFailedPdbIds()
+            ));
             response.addFailedPdbIds(pdbResponse.getFailedPdbIds());
         }
         return response;
     }
 
     private QueryAlignmentResponse generateStructureResponse(Structure structure, double precision) {
+        String cacheKey = String.format("%s_%s", structure.getPDBCode(), precision);
+        QueryAlignmentResponse alignmentResponse = cacheService.findQueryAlignmentResponse(cacheKey);
+        if (alignmentResponse != null) {
+            return alignmentResponse;
+        }
+
         int pageNumber = 0;
         Page<Motif> motifs = motifService.queryByEcNumber(null, pageNumber);
-        log.info(String.format("Aligning the structure %s with %d motifs.", structure.getPDBCode(), motifs.getTotalElements()));
+        log.info(String.format("Aligning the structure %s with %d motifs.", structure.getPDBCode(),
+                               motifs.getTotalElements()
+        ));
 
-        QueryAlignmentResponse alignmentResponse = new QueryAlignmentResponse();
+        alignmentResponse = new QueryAlignmentResponse();
+        alignmentResponse.setCacheKey(cacheKey);
 
         // Align structures with motifs from the database
         while (motifs.hasContent()) {
             QueryResponseData queryResponseData = new QueryResponseData(structure);
-            motifs.stream().parallel().forEach(motif -> {
-                Alignment alignment = alignActiveSites(structure, motif, ProteinUtils.queryPdb(motif.getPdbId()), precision);
-                if (alignment != null) {
-                    queryResponseData.addSuccessfulEntry(motif, alignment);
-                }
-            });
+            motifs.stream()
+                    .parallel()
+                    .forEach(motif -> {
+                        Alignment alignment = alignActiveSites(
+                                structure, motif, ProteinUtils.queryPdb(motif.getPdbId()), precision);
+                        if (alignment != null) {
+                            queryResponseData.addSuccessfulEntry(motif, alignment);
+                        }
+                    });
             alignmentResponse.addQueryResponseData(queryResponseData);
             pageNumber++;
             motifs = motifService.queryByEcNumber(null, pageNumber);
@@ -155,7 +179,8 @@ public class AlignmentService {
         }
 
         List<Group> alignedResidueListSorted = new ArrayList<>(alignedResidueList);
-        alignedResidueListSorted.sort(Comparator.comparingInt(o -> o.getResidueNumber().getSeqNum()));
+        alignedResidueListSorted.sort(Comparator.comparingInt(o -> o.getResidueNumber()
+                .getSeqNum()));
         String alignmentString = AlignmentUtils.groupListToResString(alignedResidueListSorted);
         String motifResString = AlignmentUtils.residueListToResString(motif.getActiveSiteResidues());
 
@@ -167,8 +192,8 @@ public class AlignmentService {
             alignment.setMotifPdbId(motif.getPdbId());
             alignment.setLevenstein(distance);
             alignment.setAlignedResidues(alignedResidueList.stream()
-                    .map(Residue::fromGroup)
-                    .collect(Collectors.toList()));
+                                                 .map(Residue::fromGroup)
+                                                 .collect(Collectors.toList()));
             alignment.setRmsd(rmsd(motifStructure, motif.getActiveSiteResidues(), alignedResidueList));
             alignment.setEcNumber(motif.getEcNumber());
             return alignment;
@@ -252,19 +277,19 @@ public class AlignmentService {
         List<Atom> atoms = group.getAtoms();
         atoms = atoms.stream()
                 .filter(atom ->
-                        //Remove hydrogen atoms
-                        !atom.getName()
-                                .contains("H") &&
-                                //These ones also get in the way
+                                //Remove hydrogen atoms
                                 !atom.getName()
-                                        .startsWith("D") &&
-                                //Remove backbone atoms
-                                !atom.getName()
-                                        .equals("N") &&
-                                !atom.getName()
-                                        .equals("C") &&
-                                !atom.getName()
-                                        .equals("O"))
+                                        .contains("H") &&
+                                        //These ones also get in the way
+                                        !atom.getName()
+                                                .startsWith("D") &&
+                                        //Remove backbone atoms
+                                        !atom.getName()
+                                                .equals("N") &&
+                                        !atom.getName()
+                                                .equals("C") &&
+                                        !atom.getName()
+                                                .equals("O"))
                 .collect(Collectors.toList());
         return atoms;
     }
@@ -310,13 +335,15 @@ public class AlignmentService {
         Map<Residue, Group> best_match = new HashMap<>();
         for (Map<Residue, Group> permutation : permutations) {
             List<Group> alignmentSeq = new ArrayList<>(permutation.values());
-            alignmentSeq.sort(Comparator.comparingInt(o -> o.getResidueNumber().getSeqNum()));
+            alignmentSeq.sort(Comparator.comparingInt(o -> o.getResidueNumber()
+                    .getSeqNum()));
             String alignmentString = AlignmentUtils.groupListToResString(alignmentSeq);
             String motifResString = AlignmentUtils.residueListToResString(motif.getActiveSiteResidues());
 
             int distance = AlignmentUtils.levensteinDistance(alignmentString, motifResString);
 
-            if (acceptableDistance(motif.getActiveSiteResidues().size(), distance)) {
+            if (acceptableDistance(motif.getActiveSiteResidues()
+                                           .size(), distance)) {
                 double rmsd = rmsd(motifStructure, motif.getActiveSiteResidues(), alignmentSeq);
                 if (rmsd != -1 && rmsd < min_rmsd) {
                     min_rmsd = rmsd;

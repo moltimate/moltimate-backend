@@ -1,7 +1,15 @@
 package org.moltimate.moltimatebackend.dto.Alignment;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.Transient;
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,10 +17,19 @@ import java.util.List;
  * A list of Alignments and useful data around them.
  */
 @Data
+@Entity
+@Builder
+@AllArgsConstructor
 public class QueryAlignmentResponse {
 
+    @Id
+    private String cacheKey;
+
+    @ElementCollection
+    @NotNull
     private List<QueryResponseData> entries;
 
+    @ElementCollection
     private List<String> failedPdbIds; // PDB ids that failed to be processed
 
     public QueryAlignmentResponse() {
@@ -22,7 +39,9 @@ public class QueryAlignmentResponse {
 
     public void addQueryResponseData(QueryResponseData newData) {
         QueryResponseData found = null;
-        if (newData.getAlignments().isEmpty() && newData.getFailedAlignments().isEmpty()) {
+        if (newData.getAlignments()
+                .isEmpty() && newData.getFailedAlignments()
+                .isEmpty()) {
             return;
         }
         for (QueryResponseData entry : this.entries) {
