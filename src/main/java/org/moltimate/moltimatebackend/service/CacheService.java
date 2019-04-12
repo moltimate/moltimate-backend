@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.moltimate.moltimatebackend.dto.Alignment.QueryAlignmentResponse;
 import org.moltimate.moltimatebackend.repository.FailedAlignmentRespository;
 import org.moltimate.moltimatebackend.repository.QueryAlignmentResponseRepository;
-import org.moltimate.moltimatebackend.repository.QueryResponsetDataRepository;
+import org.moltimate.moltimatebackend.repository.QueryResponseDataRepository;
 import org.moltimate.moltimatebackend.repository.SuccessfulAlignmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,7 +21,7 @@ public class CacheService {
     private QueryAlignmentResponseRepository queryAlignmentResponseRepository;
 
     @Autowired
-    private QueryResponsetDataRepository queryResponsetDataRepository;
+    private QueryResponseDataRepository queryResponseDataRepository;
 
     @Autowired
     private SuccessfulAlignmentRepository successfulAlignmentRepository;
@@ -30,10 +30,10 @@ public class CacheService {
     private FailedAlignmentRespository failedAlignmentRespository;
 
     public Cache<String, QueryAlignmentResponse> cache = Caffeine.newBuilder()
-            .maximumSize(1)
+            .maximumSize(1000)
             .expireAfterWrite(Duration.ofDays(1))
             .removalListener((String key, QueryAlignmentResponse value, RemovalCause cause) -> {
-                System.out.printf("Key %s was removed from cache\n", key);
+                log.info("Key %s was removed from cache\n", key);
                 assert value != null;
                 saveQueryAlignmentResponse(value);
             })
@@ -46,7 +46,7 @@ public class CacheService {
                             .forEach(success -> successfulAlignmentRepository.save(success));
                     entry.getFailedAlignments()
                             .forEach(failedAlignment -> failedAlignmentRespository.save(failedAlignment));
-                    queryResponsetDataRepository.save(entry);
+                    queryResponseDataRepository.save(entry);
                 });
         queryAlignmentResponseRepository.save(queryAlignmentResponse);
     }
