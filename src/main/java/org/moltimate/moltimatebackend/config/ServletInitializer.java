@@ -1,4 +1,4 @@
-package org.moltimate.moltimatebackend;
+package org.moltimate.moltimatebackend.config;
 
 /*
  * Copyright 2017 Google Inc.
@@ -16,8 +16,13 @@ package org.moltimate.moltimatebackend;
  * limitations under the License.
  */
 
+import org.moltimate.moltimatebackend.Application;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
+
+/**
+ * This servlet initializer configuration is required for GCP deployments to work.
+ */
 
 public class ServletInitializer extends SpringBootServletInitializer {
 

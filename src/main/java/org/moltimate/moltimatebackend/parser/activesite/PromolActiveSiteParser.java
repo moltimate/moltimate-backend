@@ -1,4 +1,4 @@
-package org.moltimate.moltimatebackend.parser;
+package org.moltimate.moltimatebackend.parser.activesite;
 
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;

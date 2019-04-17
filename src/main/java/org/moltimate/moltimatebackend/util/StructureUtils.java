@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 public class StructureUtils {
 
@@ -25,7 +24,7 @@ public class StructureUtils {
      * With precision factor, we make a similar vector and multiply the previous norm
      * by the norm of the new precision factor vector
      */
-    private static final double distanceErrorMargin = 2d;
+    private static final double DISTANCE_ERROR_MARGIN = 2d;
 
     /**
      * Get Residue from a structure
@@ -182,12 +181,12 @@ public class StructureUtils {
 
         for (Atom atom1 : atom1List) {
             for (Atom atom2 : atom2List) {
-                double _rmsd = rmsd(atom1, atom2);
-                double _errorMargin = l2Norm(new double[]{distanceErrorMargin, distanceErrorMargin, distanceErrorMargin});
-                double _precisionMod = l2Norm(new double[]{precision, precision, precision});
+                double rmsd = rmsd(atom1, atom2);
+                double errorMargin = l2Norm(new double[]{DISTANCE_ERROR_MARGIN, DISTANCE_ERROR_MARGIN, DISTANCE_ERROR_MARGIN});
+                double precisionFactor = l2Norm(new double[]{precision, precision, precision});
                 if (atom1.getGroup() != atom2.getGroup()
-                    && (_rmsd < distance * precision)
-                    && (Math.abs(_rmsd - (distance * precision)) < (_errorMargin * _precisionMod))) {
+                    && (rmsd < distance * precision)
+                    && (Math.abs(rmsd - (distance * precision)) < (errorMargin * precisionFactor))) {
                     results.add(atom1);
                 }
             }

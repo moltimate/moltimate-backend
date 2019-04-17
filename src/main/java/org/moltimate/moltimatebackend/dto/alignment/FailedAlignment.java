@@ -1,4 +1,4 @@
-package org.moltimate.moltimatebackend.dto.Alignment;
+package org.moltimate.moltimatebackend.dto.alignment;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;

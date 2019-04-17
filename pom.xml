@@ -23,13 +23,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.13-beta-1</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
             <version>${spring.boot.version}</version>
@@ -103,27 +96,32 @@
             <artifactId>maven-resources-plugin</artifactId>
             <version>3.1.0</version>
         </dependency>
+
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.18.2</version>
             <scope>provided</scope>
         </dependency>
+
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <version>2.6</version>
         </dependency>
+
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>22.0</version>
         </dependency>
+
         <dependency>
             <groupId>com.opencsv</groupId>
             <artifactId>opencsv</artifactId>
             <version>4.3.2</version>
         </dependency>
+
         <dependency>
             <groupId>org.hsqldb</groupId>
             <artifactId>hsqldb</artifactId>
@@ -175,12 +173,15 @@
         <!-- Local Development (H2 database) -->
         <profile>
             <id>dev</id>
+
             <properties>
                 <activatedSpringProfile>dev</activatedSpringProfile>
             </properties>
+
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
+
             <dependencies>
                 <dependency>
                     <groupId>com.h2database</groupId>
@@ -188,6 +189,7 @@
                     <version>1.4.197</version>
                     <scope>provided</scope>
                 </dependency>
+
                 <dependency>
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-starter-jetty</artifactId>
@@ -198,15 +200,18 @@
         <!-- Production Profile (connects to GCP Cloud SQL & uses Google's jetty) -->
         <profile>
             <id>prod</id>
+
             <properties>
                 <activatedSpringProfile>prod</activatedSpringProfile>
             </properties>
+
             <dependencies>
                 <dependency>
                     <groupId>org.springframework.cloud</groupId>
                     <artifactId>spring-cloud-gcp-starter</artifactId>
                     <version>${spring.cloud.version}</version>
                 </dependency>
+
                 <dependency>
                     <groupId>org.springframework.cloud</groupId>
                     <artifactId>spring-cloud-gcp-starter-sql-mysql</artifactId>
@@ -255,6 +260,7 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>versions-maven-plugin</artifactId>
                 <version>2.4</version>
+
                 <executions>
                     <execution>
                         <phase>compile</phase>
@@ -264,6 +270,7 @@
                         </goals>
                     </execution>
                 </executions>
+
                 <configuration>
                     <excludes>
                         <exclude>javax.servlet:javax.servlet-api</exclude>

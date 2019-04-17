@@ -1,4 +1,4 @@
-package org.moltimate.moltimatebackend.parser;
+package org.moltimate.moltimatebackend.parser.activesite;
 
 import org.moltimate.moltimatebackend.model.ActiveSite;
 

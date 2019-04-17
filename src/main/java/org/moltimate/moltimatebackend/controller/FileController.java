@@ -2,7 +2,7 @@ package org.moltimate.moltimatebackend.controller;
 
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.moltimate.moltimatebackend.dto.Request.MakeMotifRequest;
+import org.moltimate.moltimatebackend.dto.request.MakeMotifRequest;
 import org.moltimate.moltimatebackend.util.FileUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
@@ -27,7 +27,7 @@ public class FileController {
             produces = MediaType.APPLICATION_OCTET_STREAM_VALUE
     )
     public ResponseEntity<Resource> createMotif(MakeMotifRequest makeMotifRequest) {
-        log.info("Received request to download a motif: " + makeMotifRequest);
+        log.info("Received request to download a motif: {}", makeMotifRequest);
         return FileUtils.createMotifFile(makeMotifRequest);
     }
 }

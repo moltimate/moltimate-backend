@@ -35,7 +35,7 @@ public class TaskController {
     }
 
     @ApiIgnore
-    @RequestMapping(value = "/updateAsync", method = RequestMethod.GET)
+    @RequestMapping(value = "/updateasync", method = RequestMethod.GET)
     private ResponseEntity asyncMethod() {
         asyncService.process();
         return ResponseEntity.ok("ok");

@@ -1,4 +1,4 @@
-package org.moltimate.moltimatebackend.dto.Alignment;
+package org.moltimate.moltimatebackend.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -43,14 +43,14 @@ public class MotifAlignmentResponse {
         private String pdbId;
         private String ecNumber;
         private double rmsd;
-        private int levenstein;
+        private int levenshtein;
         private List<Residue> alignedResidues;
 
         private SuccessfulAlignment(Structure queryStructure, Alignment alignment) {
             this.pdbId = queryStructure.getPDBCode();
             this.ecNumber = StructureUtils.ecNumber(queryStructure);
             this.rmsd = alignment.getRmsd();
-            this.levenstein = alignment.getLevenstein();
+            this.levenshtein = alignment.getLevenshtein();
             this.alignedResidues = alignment.getAlignedResidues();
         }
     }

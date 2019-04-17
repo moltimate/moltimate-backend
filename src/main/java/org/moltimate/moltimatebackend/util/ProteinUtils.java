@@ -4,9 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.biojava.nbio.structure.Structure;
 import org.biojava.nbio.structure.StructureException;
 import org.biojava.nbio.structure.StructureIO;
-import org.biojava.nbio.structure.io.MMCIFFileReader;
-import org.biojava.nbio.structure.io.PDBFileReader;
-import org.moltimate.moltimatebackend.dto.PdbQueryResponse;
+import org.moltimate.moltimatebackend.dto.response.PdbQueryResponse;
 import org.moltimate.moltimatebackend.exception.InvalidPdbIdException;
 
 import java.io.IOException;
@@ -16,9 +14,6 @@ import java.util.stream.Collectors;
 
 @Slf4j
 public class ProteinUtils {
-
-    private static final PDBFileReader PDB_FILE_READER = new PDBFileReader();
-    private static final MMCIFFileReader MMCIF_FILE_READER = new MMCIFFileReader();
 
     /**
      * @param pdbIds List of PDB ID strings
