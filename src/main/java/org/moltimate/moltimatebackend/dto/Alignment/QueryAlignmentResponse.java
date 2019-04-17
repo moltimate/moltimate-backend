@@ -1,5 +1,6 @@
 package org.moltimate.moltimatebackend.dto.Alignment;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,6 +24,7 @@ import java.util.List;
 public class QueryAlignmentResponse {
 
     @Id
+    @JsonIgnore
     private String cacheKey;
 
     @ElementCollection
