@@ -1,23 +1,46 @@
 package org.moltimate.moltimatebackend.dto.Alignment;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.biojava.nbio.structure.Structure;
 import org.moltimate.moltimatebackend.model.Alignment;
 import org.moltimate.moltimatebackend.model.Motif;
-import org.moltimate.moltimatebackend.model.Residue;
 import org.moltimate.moltimatebackend.util.StructureUtils;
 
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Data
+@Builder
+@Entity
+@NoArgsConstructor
+@AllArgsConstructor
 public class QueryResponseData {
+
+    @Id
+    @GeneratedValue
+    @JsonIgnore
+    private long id;
+
+    @NotNull
     private String pdbId;
+
+    @NotNull
     private String ecNumber;
 
+    @ElementCollection
     private List<SuccessfulAlignment> alignments;   // Alignments that found a match
+
+    @ElementCollection
     private List<FailedAlignment> failedAlignments; // Alignments that did not find a match
 
     public QueryResponseData(Structure structure) {
@@ -26,32 +49,6 @@ public class QueryResponseData {
 
         this.alignments = new ArrayList<>();
         this.failedAlignments = new ArrayList<>();
-    }
-
-    @Data
-    private class SuccessfulAlignment {
-        private String pdbId;
-        private String ecNumber;
-        private double rmsd;
-        private int levenstein;
-        private List<Residue> activeSiteResidues;
-        private List<Residue> alignedResidues;
-
-        private SuccessfulAlignment(Motif motif, Alignment alignment) {
-            this.pdbId = motif.getPdbId();
-            this.ecNumber = motif.getEcNumber();
-            this.rmsd = alignment.getRmsd();
-            this.levenstein = alignment.getLevenstein();
-            this.activeSiteResidues = alignment.getActiveSiteResidues();
-            this.alignedResidues = alignment.getAlignedResidues();
-        }
-    }
-
-    @Data
-    @AllArgsConstructor
-    private class FailedAlignment {
-        private String pdbId;
-        private String ecNumber;
     }
 
     public void addSuccessfulEntry(Motif motif, Alignment alignment) {
@@ -66,8 +63,10 @@ public class QueryResponseData {
         if (this.equals(other)) {
             return true;
         } else {
-            if (this.getPdbId().equals(other.getPdbId())) {
-                return this.getEcNumber().equals(other.getEcNumber());
+            if (this.getPdbId()
+                    .equals(other.getPdbId())) {
+                return this.getEcNumber()
+                        .equals(other.getEcNumber());
             }
         }
         return false;
