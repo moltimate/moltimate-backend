@@ -124,13 +124,19 @@ public class AlignmentService {
     }
 
     private QueryAlignmentResponse generateStructureResponse(Structure structure, double precision) {
+        String cacheKey = String.format("%s_%s", structure.getPDBCode(), precision);
+        QueryAlignmentResponse alignmentResponse = cacheService.findQueryAlignmentResponse(cacheKey);
+        if (alignmentResponse != null) {
+            return alignmentResponse;
+        }
+
         int pageNumber = 0;
         Page<Motif> motifs = motifService.queryByEcNumber(null, pageNumber);
         log.info(String.format("Aligning the structure %s with %d motifs.", structure.getPDBCode(),
                                motifs.getTotalElements()
         ));
 
-        QueryAlignmentResponse alignmentResponse = new QueryAlignmentResponse();
+        alignmentResponse = new QueryAlignmentResponse();
 
         // Align structures with motifs from the database
         while (motifs.hasContent()) {
