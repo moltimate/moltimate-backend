@@ -4,15 +4,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import org.springframework.util.SerializationUtils;
 
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,8 +40,8 @@ public class QueryAlignmentResponse {
     public void addQueryResponseData(QueryResponseData newData) {
         QueryResponseData found = null;
         if (newData.getAlignments()
-                .isEmpty() && newData.getFailedAlignments()
-                .isEmpty()) {
+            .isEmpty() && newData.getFailedAlignments()
+            .isEmpty()) {
             return;
         }
         for (QueryResponseData entry : this.entries) {
@@ -67,20 +63,6 @@ public class QueryAlignmentResponse {
         }
     }
 
-    public QueryAlignmentResponse clone() {
-        QueryAlignmentResponse clone = new QueryAlignmentResponse();
-        clone.cacheKey = this.cacheKey;
-        List<QueryResponseData> entries = new ArrayList<>();
-        for(QueryResponseData entry: this.entries){
-            entries.add(entry.clone());
-        }
-        clone.entries = entries;
-        List<String> failedIds = new ArrayList<>();
-        failedIds.addAll(this.failedPdbIds);
-        clone.failedPdbIds = failedIds;
-        return clone;
-    }
-
     public void addFailedPdbIds(List<String> pdbIds) {
         this.failedPdbIds.addAll(pdbIds);
     }
@@ -95,5 +77,19 @@ public class QueryAlignmentResponse {
                 entry.filterEcNumber(ecNumberPrefix);
             }
         }
+    }
+
+    public QueryAlignmentResponse clone() {
+        QueryAlignmentResponse clone = new QueryAlignmentResponse();
+        clone.cacheKey = this.cacheKey;
+        List<QueryResponseData> entries = new ArrayList<>();
+        for (QueryResponseData entry : this.entries) {
+            entries.add(entry.clone());
+        }
+        clone.entries = entries;
+        List<String> failedIds = new ArrayList<>();
+        failedIds.addAll(this.failedPdbIds);
+        clone.failedPdbIds = failedIds;
+        return clone;
     }
 }
