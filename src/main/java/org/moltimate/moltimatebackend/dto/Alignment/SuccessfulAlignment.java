@@ -14,6 +14,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -54,5 +55,25 @@ public class SuccessfulAlignment {
         this.levenstein = alignment.getLevenstein();
         this.activeSiteResidues = alignment.getActiveSiteResidues();
         this.alignedResidues = alignment.getAlignedResidues();
+    }
+
+    public SuccessfulAlignment clone(){
+        SuccessfulAlignment clone = new SuccessfulAlignment();
+        List<Residue> cloneActiveSiteResidues = new ArrayList<>();
+        for(Residue residue: activeSiteResidues){
+            cloneActiveSiteResidues.add(residue.clone());
+        }
+        clone.setActiveSiteResidues(cloneActiveSiteResidues);
+        List<Residue> cloneAlignedResidues = new ArrayList<>();
+        for(Residue residue: alignedResidues){
+            cloneAlignedResidues.add(residue.clone());
+        }
+        clone.setAlignedResidues(cloneAlignedResidues);
+        clone.setEcNumber(ecNumber);
+        clone.setId(id);
+        clone.setLevenstein(levenstein);
+        clone.setPdbId(pdbId);
+        clone.setRmsd(rmsd);
+        return clone;
     }
 }
