@@ -1,7 +1,5 @@
 package org.moltimate.moltimatebackend.service;
 
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.extern.slf4j.Slf4j;
 import org.biojava.nbio.structure.Atom;
 import org.biojava.nbio.structure.Group;
@@ -38,9 +36,6 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class AlignmentService {
-    private Cache<String, QueryAlignmentResponse> cache = Caffeine.newBuilder()
-            .maximumSize(10_000)
-            .build();
 
     @Autowired
     private MotifService motifService;
@@ -96,32 +91,32 @@ public class AlignmentService {
             for (Structure structure : sourceStructures) {
                 QueryResponseData queryResponseData = new QueryResponseData(structure);
                 customMotifFileList.stream()
-                        .parallel()
-                        .forEach(motifFile -> {
-                            Alignment alignment = alignActiveSites(
-                                    structure, motifFile.getMotif(), motifFile.getStructure(), precision);
-                            if (alignment != null) {
-                                queryResponseData.addSuccessfulEntry(motifFile.getMotif(), alignment);
-                            } else {
-                                queryResponseData.addFailedEntry(
-                                        motifFile.getMotif()
-                                                .getPdbId(), motifFile.getMotif()
-                                                .getEcNumber());
-                            }
-                        });
+                    .parallel()
+                    .forEach(motifFile -> {
+                        Alignment alignment = alignActiveSites(
+                            structure, motifFile.getMotif(), motifFile.getStructure(), precision);
+                        if (alignment != null) {
+                            queryResponseData.addSuccessfulEntry(motifFile.getMotif(), alignment);
+                        } else {
+                            queryResponseData.addFailedEntry(
+                                motifFile.getMotif()
+                                    .getPdbId(), motifFile.getMotif()
+                                    .getEcNumber());
+                        }
+                    });
                 response.addQueryResponseData(queryResponseData);
             }
         }
         for (QueryResponseData responseData : response.getEntries()) {
             log.info(String.format("Found %d results for %s", responseData.getAlignments()
-                    .size(), responseData.getPdbId()));
+                .size(), responseData.getPdbId()));
         }
 
         if (pdbResponse.getFailedPdbIds()
-                .size() > 0) {
+            .size() > 0) {
             log.error(String.format(
-                    "Could not find PDB structures for the following ids: %s",
-                    pdbResponse.getFailedPdbIds()
+                "Could not find PDB structures for the following ids: %s",
+                pdbResponse.getFailedPdbIds()
             ));
             response.addFailedPdbIds(pdbResponse.getFailedPdbIds());
         }
@@ -131,7 +126,9 @@ public class AlignmentService {
     private QueryAlignmentResponse generateStructureResponse(Structure structure, double precision) {
         int pageNumber = 0;
         Page<Motif> motifs = motifService.queryByEcNumber(null, pageNumber);
-        log.info(String.format("Aligning the structure %s with %d motifs.", structure.getPDBCode(), motifs.getTotalElements()));
+        log.info(String.format("Aligning the structure %s with %d motifs.", structure.getPDBCode(),
+                               motifs.getTotalElements()
+        ));
 
         QueryAlignmentResponse alignmentResponse = new QueryAlignmentResponse();
 
@@ -139,14 +136,14 @@ public class AlignmentService {
         while (motifs.hasContent()) {
             QueryResponseData queryResponseData = new QueryResponseData(structure);
             motifs.stream()
-                    .parallel()
-                    .forEach(motif -> {
-                        Alignment alignment = alignActiveSites(
-                                structure, motif, ProteinUtils.queryPdb(motif.getPdbId()), precision);
-                        if (alignment != null) {
-                            queryResponseData.addSuccessfulEntry(motif, alignment);
-                        }
-                    });
+                .parallel()
+                .forEach(motif -> {
+                    Alignment alignment = alignActiveSites(
+                        structure, motif, ProteinUtils.queryPdb(motif.getPdbId()), precision);
+                    if (alignment != null) {
+                        queryResponseData.addSuccessfulEntry(motif, alignment);
+                    }
+                });
             alignmentResponse.addQueryResponseData(queryResponseData);
             pageNumber++;
             motifs = motifService.queryByEcNumber(null, pageNumber);
@@ -185,7 +182,7 @@ public class AlignmentService {
 
         List<Group> alignedResidueListSorted = new ArrayList<>(alignedResidueList);
         alignedResidueListSorted.sort(Comparator.comparingInt(o -> o.getResidueNumber()
-                .getSeqNum()));
+            .getSeqNum()));
         String alignmentString = AlignmentUtils.groupListToResString(alignedResidueListSorted);
         String motifResString = AlignmentUtils.residueListToResString(motif.getActiveSiteResidues());
 
@@ -197,8 +194,8 @@ public class AlignmentService {
             alignment.setMotifPdbId(motif.getPdbId());
             alignment.setLevenstein(distance);
             alignment.setAlignedResidues(alignedResidueList.stream()
-                                                 .map(Residue::fromGroup)
-                                                 .collect(Collectors.toList()));
+                                             .map(Residue::fromGroup)
+                                             .collect(Collectors.toList()));
             alignment.setRmsd(rmsd(motifStructure, motif.getActiveSiteResidues(), alignedResidueList));
             alignment.setEcNumber(motif.getEcNumber());
             return alignment;
@@ -281,21 +278,21 @@ public class AlignmentService {
     private List<Atom> getAtomsFromGroup(Group group) {
         List<Atom> atoms = group.getAtoms();
         atoms = atoms.stream()
-                .filter(atom ->
-                                //Remove hydrogen atoms
-                                !atom.getName()
-                                        .contains("H") &&
-                                        //These ones also get in the way
-                                        !atom.getName()
-                                                .startsWith("D") &&
-                                        //Remove backbone atoms
-                                        !atom.getName()
-                                                .equals("N") &&
-                                        !atom.getName()
-                                                .equals("C") &&
-                                        !atom.getName()
-                                                .equals("O"))
-                .collect(Collectors.toList());
+            .filter(atom ->
+                        //Remove hydrogen atoms
+                        !atom.getName()
+                            .contains("H") &&
+                            //These ones also get in the way
+                            !atom.getName()
+                                .startsWith("D") &&
+                            //Remove backbone atoms
+                            !atom.getName()
+                                .equals("N") &&
+                            !atom.getName()
+                                .equals("C") &&
+                            !atom.getName()
+                                .equals("O"))
+            .collect(Collectors.toList());
         return atoms;
     }
 
@@ -341,14 +338,14 @@ public class AlignmentService {
         for (Map<Residue, Group> permutation : permutations) {
             List<Group> alignmentSeq = new ArrayList<>(permutation.values());
             alignmentSeq.sort(Comparator.comparingInt(o -> o.getResidueNumber()
-                    .getSeqNum()));
+                .getSeqNum()));
             String alignmentString = AlignmentUtils.groupListToResString(alignmentSeq);
             String motifResString = AlignmentUtils.residueListToResString(motif.getActiveSiteResidues());
 
             int distance = AlignmentUtils.levensteinDistance(alignmentString, motifResString);
 
             if (acceptableDistance(motif.getActiveSiteResidues()
-                                           .size(), distance)) {
+                                       .size(), distance)) {
                 double rmsd = rmsd(motifStructure, motif.getActiveSiteResidues(), alignmentSeq);
                 if (rmsd != -1 && rmsd < min_rmsd) {
                     min_rmsd = rmsd;
