@@ -36,7 +36,7 @@ public class AlignmentController {
     })
     @RequestMapping(value = "/activesite", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<QueryAlignmentResponse> activeSiteAlignment(AlignmentRequest alignmentRequest) {
-        log.info("Received request to align active sites: " + alignmentRequest);
+        log.info("Aligning active sites: " + alignmentRequest);
         return ResponseEntity.ok(alignmentService.alignActiveSites(alignmentRequest));
     }
 }

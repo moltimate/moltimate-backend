@@ -32,10 +32,6 @@ public class FailedAlignment {
     }
 
     public FailedAlignment clone(){
-        FailedAlignment clone = new FailedAlignment();
-        clone.setId(this.id);
-        clone.setPdbId(this.pdbId);
-        clone.setEcNumber(this.ecNumber);
-        return clone;
+        return new FailedAlignment(this.id, this.pdbId, this.ecNumber);
     }
 }

@@ -58,22 +58,15 @@ public class SuccessfulAlignment {
     }
 
     public SuccessfulAlignment clone(){
-        SuccessfulAlignment clone = new SuccessfulAlignment();
         List<Residue> cloneActiveSiteResidues = new ArrayList<>();
         for(Residue residue: activeSiteResidues){
             cloneActiveSiteResidues.add(residue.clone());
         }
-        clone.setActiveSiteResidues(cloneActiveSiteResidues);
         List<Residue> cloneAlignedResidues = new ArrayList<>();
         for(Residue residue: alignedResidues){
             cloneAlignedResidues.add(residue.clone());
         }
-        clone.setAlignedResidues(cloneAlignedResidues);
-        clone.setEcNumber(ecNumber);
-        clone.setId(id);
-        clone.setLevenstein(levenstein);
-        clone.setPdbId(pdbId);
-        clone.setRmsd(rmsd);
-        return clone;
+        return new SuccessfulAlignment(this.id, this.pdbId, this.ecNumber, this.rmsd, this.levenstein,
+                                       cloneActiveSiteResidues, cloneAlignedResidues);
     }
 }

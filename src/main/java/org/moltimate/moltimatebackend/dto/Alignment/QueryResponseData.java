@@ -95,20 +95,14 @@ public class QueryResponseData {
     }
 
     public QueryResponseData clone(){
-        QueryResponseData clone = new QueryResponseData();
         List<SuccessfulAlignment> cloneAlignments = new ArrayList<>();
         for(SuccessfulAlignment alignment: this.alignments){
             cloneAlignments.add(alignment.clone());
         }
-        clone.setAlignments(cloneAlignments);
-        clone.setEcNumber(ecNumber);
         List<FailedAlignment> clonedFailedAlignments = new ArrayList<>();
         for(FailedAlignment alignment: this.failedAlignments){
             clonedFailedAlignments.add(alignment.clone());
         }
-        clone.setFailedAlignments(clonedFailedAlignments);
-        clone.setId(id);
-        clone.setPdbId(pdbId);
-        return clone;
+        return new QueryResponseData(this.id, this.pdbId, this.ecNumber, cloneAlignments, clonedFailedAlignments);
     }
 }
