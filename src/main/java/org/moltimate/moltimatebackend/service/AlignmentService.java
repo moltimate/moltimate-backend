@@ -76,6 +76,7 @@ public class AlignmentService {
             response.merge(structureResponse);
         }
         if (motifEcNumberFilter != null) {
+            log.info(String.format("Filtering results of structures by EC Class \"%s\"", motifEcNumberFilter));
             response = response.clone();
             response.filterEcNumber(motifEcNumberFilter);
         }
