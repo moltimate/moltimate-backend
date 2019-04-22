@@ -2,6 +2,8 @@ package org.moltimate.moltimatebackend.util;
 
 import lombok.extern.slf4j.Slf4j;
 import org.biojava.nbio.structure.Structure;
+import org.biojava.nbio.structure.StructureException;
+import org.biojava.nbio.structure.StructureIO;
 import org.biojava.nbio.structure.io.MMCIFFileReader;
 import org.biojava.nbio.structure.io.PDBFileReader;
 import org.moltimate.moltimatebackend.dto.PdbQueryResponse;
@@ -43,13 +45,9 @@ public class ProteinUtils {
      */
     public static Structure queryPdb(String pdbId) {
         try {
-            return PDB_FILE_READER.getStructureById(pdbId);
-        } catch (IOException pdbReaderError) {
-            try {
-                return MMCIF_FILE_READER.getStructureById(pdbId);
-            } catch (IOException mmcifReaderError) {
-                throw new InvalidPdbIdException(pdbId);
-            }
+            return StructureIO.getStructure(pdbId);
+        } catch (IOException | StructureException e) {
+            throw new InvalidPdbIdException("Could not find structure with id: " + pdbId);
         }
     }
 

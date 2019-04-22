@@ -79,12 +79,9 @@ public class MotifUtils {
                         MotifSelection motifSelection = MotifSelection.builder()
                                 .atomType1(atom.getName())
                                 .atomType2(compareAtom.getName())
-                                .residueName1(atom.getGroup()
-                                        .getChemComp()
-                                        .getThree_letter_code())
+                                .residueName1(atom.getGroup().getPDBName())
                                 .residueName2(compareAtom.getGroup()
-                                        .getChemComp()
-                                        .getThree_letter_code())
+                                        .getPDBName())
                                 .distance(StructureUtils.rmsd(atom, compareAtom) + 2)
                                 .build();
                         motifSelections.add(motifSelection);

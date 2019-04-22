@@ -5,6 +5,10 @@ import org.biojava.nbio.structure.Chain;
 import org.biojava.nbio.structure.Group;
 import org.biojava.nbio.structure.GroupType;
 import org.biojava.nbio.structure.Structure;
+import org.biojava.nbio.structure.rcsb.RCSBDescription;
+import org.biojava.nbio.structure.rcsb.RCSBDescriptionFactory;
+import org.biojava.nbio.structure.rcsb.RCSBPolymer;
+import org.moltimate.moltimatebackend.constant.EcNumber;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,12 +38,11 @@ public class StructureUtils {
     public static Group getResidue(Structure structure, String residueName, String residueNumber) {
         for (Chain chain : structure.getChains()) {
             for (Group group : chain.getAtomGroups(GroupType.AMINOACID)) {
-                if (group.getChemComp()
-                        .getThree_letter_code()
-                        .equalsIgnoreCase(residueName)
+                if (group.getPDBName()
+                    .equalsIgnoreCase(residueName)
                     && group.getResidueNumber()
-                        .toString()
-                        .equals(String.valueOf(residueNumber))) {
+                    .toString()
+                    .equals(String.valueOf(residueNumber))) {
                     return group;
                 }
             }
@@ -82,9 +85,8 @@ public class StructureUtils {
         ArrayList<Group> results = new ArrayList<>();
         for (Chain chain : structure.getChains()) {
             for (Group residue : chain.getAtomGroups(GroupType.AMINOACID)) {
-                if (residue.getChemComp()
-                        .getThree_letter_code()
-                        .equals(residueName)) {
+                if (residue.getPDBName()
+                    .equals(residueName)) {
                     results.add(residue);
                 }
             }
@@ -120,7 +122,7 @@ public class StructureUtils {
         List<Atom> list = new ArrayList<>();
         for (Atom atom : residue.getAtoms()) {
             if (atom.getName()
-                    .equals(atomType)) {
+                .equals(atomType)) {
                 list.add(atom);
             }
         }
@@ -184,8 +186,8 @@ public class StructureUtils {
                 double _errorMargin = l2Norm(new double[]{distanceErrorMargin, distanceErrorMargin, distanceErrorMargin});
                 double _precisionMod = l2Norm(new double[]{precision, precision, precision});
                 if (atom1.getGroup() != atom2.getGroup()
-                        && (_rmsd < distance * precision)
-                        && (Math.abs(_rmsd - (distance * precision)) < (_errorMargin * _precisionMod))) {
+                    && (_rmsd < distance * precision)
+                    && (Math.abs(_rmsd - (distance * precision)) < (_errorMargin * _precisionMod))) {
                     results.add(atom1);
                 }
             }
@@ -195,24 +197,18 @@ public class StructureUtils {
     }
 
     public static String residueName(Group group) {
-        return group.getChemComp().getThree_letter_code() + " " + group.getResidueNumber().toString();
+        return group.getPDBName() + " " + group.getResidueNumber()
+            .toString();
     }
 
     public static String ecNumber(Structure structure) {
-        try {
-            return structure.getEntityInfos()
-                    .stream()
-                    .filter(Objects::nonNull)
-                    .findFirst()
-                    .get()
-                    .getEcNums()
-                    .stream()
-                    .filter(Objects::nonNull)
-                    .findFirst()
-                    .get();
-        } catch (Exception e) {
-            return "unknown";
+        RCSBDescription description = RCSBDescriptionFactory.get(structure.getPDBCode());
+        for(RCSBPolymer polymer: description.getPolymers()){
+            if(polymer.getEnzClass() != null){
+                return polymer.getEnzClass();
+            }
         }
+        return EcNumber.UNKNOWN;
     }
 
     private static double l2Norm(double[] w2v) {
