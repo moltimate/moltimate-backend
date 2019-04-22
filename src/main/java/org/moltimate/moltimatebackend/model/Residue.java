@@ -52,11 +52,6 @@ public class Residue {
     }
 
     public Residue clone(){
-        Residue clone = new Residue();
-        clone.setResidueName(residueName);
-        clone.setResidueChainName(residueChainName);
-        clone.setResidueAltLoc(residueAltLoc);
-        clone.setResidueId(residueId);
-        return clone;
+        return new Residue(this.residueName, this.residueChainName, this.residueId, this.residueAltLoc);
     }
 }

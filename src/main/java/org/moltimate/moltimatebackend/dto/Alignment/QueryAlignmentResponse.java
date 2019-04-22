@@ -67,10 +67,6 @@ public class QueryAlignmentResponse {
         this.failedPdbIds.addAll(pdbIds);
     }
 
-    public void addFailedPdbId(String pdbId) {
-        this.failedPdbIds.add(pdbId);
-    }
-
     public void filterEcNumber(String ecNumberPrefix) {
         if (ecNumberPrefix != null) {
             for (QueryResponseData entry : entries) {
@@ -80,16 +76,10 @@ public class QueryAlignmentResponse {
     }
 
     public QueryAlignmentResponse clone() {
-        QueryAlignmentResponse clone = new QueryAlignmentResponse();
-        clone.cacheKey = this.cacheKey;
         List<QueryResponseData> entries = new ArrayList<>();
         for (QueryResponseData entry : this.entries) {
             entries.add(entry.clone());
         }
-        clone.entries = entries;
-        List<String> failedIds = new ArrayList<>();
-        failedIds.addAll(this.failedPdbIds);
-        clone.failedPdbIds = failedIds;
-        return clone;
+        return new QueryAlignmentResponse(this.cacheKey, entries, new ArrayList<>(this.failedPdbIds));
     }
 }

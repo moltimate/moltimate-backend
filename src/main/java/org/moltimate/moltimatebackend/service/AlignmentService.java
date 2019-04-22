@@ -56,12 +56,6 @@ public class AlignmentService {
         String motifEcNumberFilter = alignmentRequest.getEcNumber();
         double precision = alignmentRequest.getPrecisionFactor();
 
-        int pageNumber = 0;
-        Page<Motif> motifs = motifService.queryByEcNumber(motifEcNumberFilter, pageNumber);
-        log.info(String.format("Aligning active sites of %d PDB entries with %d motifs & %d custom motifs.",
-                               sourceStructures.size(), motifs.getTotalElements(), customMotifFileList.size()
-        ));
-
         QueryAlignmentResponse response = new QueryAlignmentResponse();
 
         // Align structures with motifs from the database
@@ -82,6 +76,7 @@ public class AlignmentService {
             response.merge(structureResponse);
         }
         if (motifEcNumberFilter != null) {
+            log.info(String.format("Filtering results of structures by EC Class \"%s\"", motifEcNumberFilter));
             response = response.clone();
             response.filterEcNumber(motifEcNumberFilter);
         }
