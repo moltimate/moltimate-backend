@@ -47,9 +47,8 @@ public class ProteinUtils {
         try {
             return StructureIO.getStructure(pdbId);
         } catch (IOException | StructureException e) {
-            e.printStackTrace();
+            throw new InvalidPdbIdException("Could not find structure with id: " + pdbId);
         }
-        return null;
     }
 
     /**
