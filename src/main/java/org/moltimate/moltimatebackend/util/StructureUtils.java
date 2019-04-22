@@ -8,6 +8,7 @@ import org.biojava.nbio.structure.Structure;
 import org.biojava.nbio.structure.rcsb.RCSBDescription;
 import org.biojava.nbio.structure.rcsb.RCSBDescriptionFactory;
 import org.biojava.nbio.structure.rcsb.RCSBPolymer;
+import org.moltimate.moltimatebackend.constant.EcNumber;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -208,7 +209,7 @@ public class StructureUtils {
                 return polymer.getEnzClass();
             }
         }
-        return "unknown";
+        return EcNumber.UNKNOWN;
     }
 
     private static double l2Norm(double[] w2v) {

@@ -2,6 +2,7 @@ package org.moltimate.moltimatebackend.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.biojava.nbio.structure.Structure;
+import org.moltimate.moltimatebackend.constant.EcNumber;
 import org.moltimate.moltimatebackend.model.ActiveSite;
 import org.moltimate.moltimatebackend.model.Motif;
 import org.moltimate.moltimatebackend.model.Residue;
@@ -97,7 +98,7 @@ public class MotifService {
         }
         EcNumberValidator.validate(ecNumber);
         return motifRepository.findByEcNumberEqualsOrEcNumberStartingWith(
-                "unknown", ecNumber, PageRequest.of(pageNumber, MOTIF_BATCH_SIZE));
+            EcNumber.UNKNOWN, ecNumber, PageRequest.of(pageNumber, MOTIF_BATCH_SIZE));
     }
 
     /**
