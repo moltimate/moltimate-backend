@@ -7,9 +7,7 @@ import lombok.Data;
 
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.Transient;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,8 +40,8 @@ public class QueryAlignmentResponse {
     public void addQueryResponseData(QueryResponseData newData) {
         QueryResponseData found = null;
         if (newData.getAlignments()
-                .isEmpty() && newData.getFailedAlignments()
-                .isEmpty()) {
+            .isEmpty() && newData.getFailedAlignments()
+            .isEmpty()) {
             return;
         }
         for (QueryResponseData entry : this.entries) {
@@ -69,15 +67,19 @@ public class QueryAlignmentResponse {
         this.failedPdbIds.addAll(pdbIds);
     }
 
-    public void addFailedPdbId(String pdbId) {
-        this.failedPdbIds.add(pdbId);
-    }
-
     public void filterEcNumber(String ecNumberPrefix) {
         if (ecNumberPrefix != null) {
             for (QueryResponseData entry : entries) {
                 entry.filterEcNumber(ecNumberPrefix);
             }
         }
+    }
+
+    public QueryAlignmentResponse clone() {
+        List<QueryResponseData> entries = new ArrayList<>();
+        for (QueryResponseData entry : this.entries) {
+            entries.add(entry.clone());
+        }
+        return new QueryAlignmentResponse(this.cacheKey, entries, new ArrayList<>(this.failedPdbIds));
     }
 }

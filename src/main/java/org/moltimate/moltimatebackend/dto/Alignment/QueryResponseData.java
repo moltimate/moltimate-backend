@@ -93,4 +93,16 @@ public class QueryResponseData {
                     .collect(Collectors.toList());
         }
     }
+
+    public QueryResponseData clone(){
+        List<SuccessfulAlignment> cloneAlignments = new ArrayList<>();
+        for(SuccessfulAlignment alignment: this.alignments){
+            cloneAlignments.add(alignment.clone());
+        }
+        List<FailedAlignment> clonedFailedAlignments = new ArrayList<>();
+        for(FailedAlignment alignment: this.failedAlignments){
+            clonedFailedAlignments.add(alignment.clone());
+        }
+        return new QueryResponseData(this.id, this.pdbId, this.ecNumber, cloneAlignments, clonedFailedAlignments);
+    }
 }

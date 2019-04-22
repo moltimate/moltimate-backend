@@ -35,14 +35,6 @@ public class AlignmentRequest {
         return ProteinUtils.queryPdbResponse(pdbIds);
     }
 
-    public List<Motif> extractCustomMotifsFromFiles() {
-        return customMotifs.stream()
-                .map(FileUtils::readMotifFile)
-                .filter(Objects::nonNull)
-                .map(MotifFile::getMotif)
-                .collect(Collectors.toList());
-    }
-
     public List<MotifFile> extractCustomMotifFileList() {
         return customMotifs.stream()
                 .map(FileUtils::readMotifFile)

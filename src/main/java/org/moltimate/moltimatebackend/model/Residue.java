@@ -50,4 +50,8 @@ public class Residue {
         }
         return "";
     }
+
+    public Residue clone(){
+        return new Residue(this.residueName, this.residueChainName, this.residueId, this.residueAltLoc);
+    }
 }

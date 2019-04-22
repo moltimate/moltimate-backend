@@ -30,4 +30,8 @@ public class FailedAlignment {
         this.pdbId = pdbId;
         this.ecNumber = ecNumber;
     }
+
+    public FailedAlignment clone(){
+        return new FailedAlignment(this.id, this.pdbId, this.ecNumber);
+    }
 }
