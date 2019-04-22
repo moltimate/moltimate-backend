@@ -183,8 +183,7 @@ public class StructureUtils {
         for (Atom atom1 : atom1List) {
             for (Atom atom2 : atom2List) {
                 double _rmsd = rmsd(atom1, atom2);
-                double _errorMargin = l2Norm(
-                    new double[]{distanceErrorMargin, distanceErrorMargin, distanceErrorMargin});
+                double _errorMargin = l2Norm(new double[]{distanceErrorMargin, distanceErrorMargin, distanceErrorMargin});
                 double _precisionMod = l2Norm(new double[]{precision, precision, precision});
                 if (atom1.getGroup() != atom2.getGroup()
                     && (_rmsd < distance * precision)

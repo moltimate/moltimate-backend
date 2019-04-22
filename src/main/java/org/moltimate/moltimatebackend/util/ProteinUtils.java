@@ -46,13 +46,10 @@ public class ProteinUtils {
     public static Structure queryPdb(String pdbId) {
         try {
             return StructureIO.getStructure(pdbId);
-        } catch (IOException | StructureException structureException) {
-            try {
-                return MMCIF_FILE_READER.getStructureById(pdbId);
-            } catch (IOException mmcifReaderError) {
-                throw new InvalidPdbIdException(pdbId);
-            }
+        } catch (IOException | StructureException e) {
+            e.printStackTrace();
         }
+        return null;
     }
 
     /**
