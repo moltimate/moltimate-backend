@@ -1,4 +1,4 @@
-package org.moltimate.moltimatebackend.dto.Alignment;
+package org.moltimate.moltimatebackend.dto.alignment;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
@@ -38,7 +38,7 @@ public class SuccessfulAlignment {
     private double rmsd;
 
     @NotNull
-    private int levenstein;
+    private int levenshtein;
 
     @NotNull
     @ElementCollection
@@ -52,7 +52,7 @@ public class SuccessfulAlignment {
         this.pdbId = motif.getPdbId();
         this.ecNumber = motif.getEcNumber();
         this.rmsd = alignment.getRmsd();
-        this.levenstein = alignment.getLevenstein();
+        this.levenshtein = alignment.getLevenshtein();
         this.activeSiteResidues = alignment.getActiveSiteResidues();
         this.alignedResidues = alignment.getAlignedResidues();
     }
@@ -66,7 +66,7 @@ public class SuccessfulAlignment {
         for(Residue residue: alignedResidues){
             cloneAlignedResidues.add(residue.clone());
         }
-        return new SuccessfulAlignment(this.id, this.pdbId, this.ecNumber, this.rmsd, this.levenstein,
+        return new SuccessfulAlignment(this.id, this.pdbId, this.ecNumber, this.rmsd, this.levenshtein,
                                        cloneActiveSiteResidues, cloneAlignedResidues);
     }
 }

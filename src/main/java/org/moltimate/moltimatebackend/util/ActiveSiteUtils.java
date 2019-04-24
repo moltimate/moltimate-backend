@@ -1,9 +1,9 @@
 package org.moltimate.moltimatebackend.util;
 
 import org.moltimate.moltimatebackend.model.ActiveSite;
-import org.moltimate.moltimatebackend.parser.ActiveSiteParser;
-import org.moltimate.moltimatebackend.parser.CsaActiveSiteParser;
-import org.moltimate.moltimatebackend.parser.PromolActiveSiteParser;
+import org.moltimate.moltimatebackend.parser.activesite.ActiveSiteParser;
+import org.moltimate.moltimatebackend.parser.activesite.CsaActiveSiteParser;
+import org.moltimate.moltimatebackend.parser.activesite.PromolActiveSiteParser;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -1,4 +1,4 @@
-package org.moltimate.moltimatebackend.dto.Alignment;
+package org.moltimate.moltimatebackend.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.biojava.nbio.structure.Structure;
+import org.moltimate.moltimatebackend.dto.alignment.FailedAlignment;
+import org.moltimate.moltimatebackend.dto.alignment.SuccessfulAlignment;
 import org.moltimate.moltimatebackend.model.Alignment;
 import org.moltimate.moltimatebackend.model.Motif;
 import org.moltimate.moltimatebackend.util.StructureUtils;

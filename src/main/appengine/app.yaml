@@ -3,7 +3,6 @@ runtime: java
 env: flex
 runtime_config:
     jdk: openjdk8
-service: moltimate-backend
 resources:
     cpu: 2
     memory_gb: 8

@@ -60,7 +60,7 @@ public class MotifService {
      * @param motifs New Motif to save
      */
     public void saveMotifs(List<Motif> motifs) {
-        log.info("Saving " + motifs.size() + " motifs with IDs " + motifs.stream()
+        log.info("Saving {} motifs with IDs {}", motifs.size(), motifs.stream()
                 .map(Motif::getPdbId)
                 .collect(Collectors.toList()));
 
@@ -120,7 +120,7 @@ public class MotifService {
         log.info("Deleting and flushing Motif database");
 //        deleteAllAndFlush();
 
-        log.info("Saving " + activeSites.size() + " new motifs");
+        log.info("Saving {} new motifs", activeSites.size());
         AtomicInteger motifsSaved = new AtomicInteger(0);
         List<String> failedPdbIds = new ArrayList<>();
         activeSites.parallelStream()
@@ -140,8 +140,8 @@ public class MotifService {
                     }
                 });
 
-        log.info("Failed to save " + failedPdbIds.size() + " motifs to the database: " + failedPdbIds.toString());
-        log.info("Finished saving " + motifsSaved.get() + " motifs to the database");
+        log.info("Failed to save {} motifs to the database: {}", failedPdbIds.size(), failedPdbIds.toString());
+        log.info("Finished saving {} motifs to the database", motifsSaved.get());
         return motifsSaved.get();
     }
 }

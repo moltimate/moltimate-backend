@@ -4,7 +4,7 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.RemovalCause;
 import lombok.extern.slf4j.Slf4j;
-import org.moltimate.moltimatebackend.dto.Alignment.QueryAlignmentResponse;
+import org.moltimate.moltimatebackend.dto.response.QueryAlignmentResponse;
 import org.moltimate.moltimatebackend.repository.FailedAlignmentRespository;
 import org.moltimate.moltimatebackend.repository.QueryAlignmentResponseRepository;
 import org.moltimate.moltimatebackend.repository.QueryResponseDataRepository;
@@ -33,7 +33,7 @@ public class CacheService {
             .maximumSize(1000)
             .expireAfterWrite(Duration.ofDays(1))
             .removalListener((String key, QueryAlignmentResponse value, RemovalCause cause) -> {
-                log.info(String.format("Key %s was removed from cache\n", key));
+                log.info("Key {} was removed from cache", key);
                 assert value != null;
                 saveQueryAlignmentResponse(value);
             })

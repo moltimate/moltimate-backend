@@ -5,8 +5,8 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
-import org.moltimate.moltimatebackend.dto.Alignment.QueryAlignmentResponse;
-import org.moltimate.moltimatebackend.dto.Request.AlignmentRequest;
+import org.moltimate.moltimatebackend.dto.request.AlignmentRequest;
+import org.moltimate.moltimatebackend.dto.response.QueryAlignmentResponse;
 import org.moltimate.moltimatebackend.exception.InvalidPdbIdException;
 import org.moltimate.moltimatebackend.service.AlignmentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +28,7 @@ public class AlignmentController {
     @Autowired
     private AlignmentService alignmentService;
 
-    @ApiOperation(value = "Active Site Alignment", response = QueryAlignmentResponse.class)
+    @ApiOperation(value = "Active Site alignment", response = QueryAlignmentResponse.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "List of active site alignments", response = QueryAlignmentResponse.class),
             @ApiResponse(code = 500, message = "Internal Server Error"),
@@ -36,7 +36,7 @@ public class AlignmentController {
     })
     @RequestMapping(value = "/activesite", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<QueryAlignmentResponse> activeSiteAlignment(AlignmentRequest alignmentRequest) {
-        log.info("Aligning active sites: " + alignmentRequest);
+        log.info("Aligning active sites: {}", alignmentRequest);
         return ResponseEntity.ok(alignmentService.alignActiveSites(alignmentRequest));
     }
 }

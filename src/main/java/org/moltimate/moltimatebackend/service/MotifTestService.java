@@ -3,9 +3,9 @@ package org.moltimate.moltimatebackend.service;
 import lombok.extern.slf4j.Slf4j;
 import org.biojava.nbio.structure.Structure;
 import org.moltimate.moltimatebackend.dto.MotifFile;
-import org.moltimate.moltimatebackend.dto.Request.MotifTestRequest;
-import org.moltimate.moltimatebackend.dto.Alignment.MotifAlignmentResponse;
-import org.moltimate.moltimatebackend.dto.PdbQueryResponse;
+import org.moltimate.moltimatebackend.dto.request.MotifTestRequest;
+import org.moltimate.moltimatebackend.dto.response.MotifAlignmentResponse;
+import org.moltimate.moltimatebackend.dto.response.PdbQueryResponse;
 import org.moltimate.moltimatebackend.model.Alignment;
 import org.moltimate.moltimatebackend.util.MotifUtils;
 import org.moltimate.moltimatebackend.util.PdbXmlClient;
@@ -22,11 +22,11 @@ import java.util.Optional;
 @Service
 @Slf4j
 public class MotifTestService {
+    
+    private static final int MAX_RANDOM_MOTIFS = 50;
 
     @Autowired
     private AlignmentService alignmentService;
-
-    private static final int maxRandom = 50;
 
     public MotifAlignmentResponse testMotifAlignment(MotifTestRequest motifTestRequest) {
         Structure motifStructure = motifTestRequest.motifStructure();
@@ -67,17 +67,17 @@ public class MotifTestService {
                 List<String> allPdbIds = PdbXmlClient.getPdbIds();
                 Collections.shuffle(allPdbIds);
 
-                int max = motifTestRequest.getRandomCount();
-                if (max > maxRandom) {
-                    max = maxRandom;
+                int randomCount = motifTestRequest.getRandomCount();
+                if (randomCount > MAX_RANDOM_MOTIFS) {
+                    randomCount = MAX_RANDOM_MOTIFS;
                 }
-                while (max > 0) {
-                    String randomPdbId = allPdbIds.get(max - 1);
+                while (randomCount > 0) {
+                    String randomPdbId = allPdbIds.get(randomCount - 1);
                     Optional<Structure> optionalStructure = ProteinUtils.queryPdbOptional(randomPdbId);
                     if (optionalStructure.isPresent()) {
                         Structure testStructure = optionalStructure.get();
                         structureList.add(testStructure);
-                        max--;
+                        randomCount--;
                     } else {
                         motifAlignmentResponse.addFailedPdbId(randomPdbId);
                     }
@@ -85,8 +85,8 @@ public class MotifTestService {
                 break;
         }
 
-        log.info(String.format("Aligning active sites of %s with %d structures (%d custom structures).",
-                testMotifFile.getMotif().getPdbId(), structureList.size(), motifTestRequest.getCustomStructures().size()));
+        log.info("Aligning active sites of {} with {} structures ({} custom structures).",
+                testMotifFile.getMotif().getPdbId(), structureList.size(), motifTestRequest.getCustomStructures().size());
 
         for (Structure structure : structureList) {
             Alignment alignment = alignmentService.alignActiveSites(structure, testMotifFile.getMotif(), motifStructure, motifTestRequest.getPrecisionFactor());

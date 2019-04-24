@@ -1,10 +1,10 @@
-package org.moltimate.moltimatebackend.dto.Request;
+package org.moltimate.moltimatebackend.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.biojava.nbio.structure.Structure;
-import org.moltimate.moltimatebackend.dto.PdbQueryResponse;
+import org.moltimate.moltimatebackend.dto.response.PdbQueryResponse;
 import org.moltimate.moltimatebackend.exception.InvalidPdbIdException;
 import org.moltimate.moltimatebackend.model.Residue;
 import org.moltimate.moltimatebackend.util.FileUtils;
