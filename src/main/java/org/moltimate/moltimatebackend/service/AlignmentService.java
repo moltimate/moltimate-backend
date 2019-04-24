@@ -132,6 +132,7 @@ public class AlignmentService {
         ));
 
         alignmentResponse = new QueryAlignmentResponse();
+        alignmentResponse.setCacheKey(cacheKey);
 
         // Align structures with motifs from the database
         while (motifs.hasContent()) {

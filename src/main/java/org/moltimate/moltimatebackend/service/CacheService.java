@@ -30,10 +30,10 @@ public class CacheService {
     private FailedAlignmentRespository failedAlignmentRespository;
 
     public Cache<String, QueryAlignmentResponse> cache = Caffeine.newBuilder()
-            .maximumSize(1000)
+            .maximumSize(1)
             .expireAfterWrite(Duration.ofDays(1))
             .removalListener((String key, QueryAlignmentResponse value, RemovalCause cause) -> {
-                log.info("Key %s was removed from cache\n", key);
+                log.info(String.format("Key %s was removed from cache\n", key));
                 assert value != null;
                 saveQueryAlignmentResponse(value);
             })
