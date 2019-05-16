@@ -1,0 +1,9 @@
+spring:
+  datasource:
+    url: jdbc:mysql://${db:127.0.0.1:3306}/moltimate?useTimezone=true&serverTimezone=EST
+    username: springuser
+    password: ${dbPassword:ThePassword}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.MySQL55Dialect
