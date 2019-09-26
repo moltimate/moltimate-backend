@@ -24,6 +24,11 @@ public class TaskController {
     @Autowired
     private AsyncService asyncService;
 
+    protected TaskController( MotifService motifService, AsyncService asyncService ) {
+        this.motifService = motifService;
+        this.asyncService = asyncService;
+    }
+
     /**
      * Updates the motif database using the CSA and RCSB PDB
      */
