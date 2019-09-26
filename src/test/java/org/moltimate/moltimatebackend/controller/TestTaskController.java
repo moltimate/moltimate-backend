@@ -7,7 +7,6 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.moltimate.moltimatebackend.service.AsyncService;
 import org.moltimate.moltimatebackend.service.MotifService;
-import org.springframework.http.ResponseEntity;
 
 public class TestTaskController {
 

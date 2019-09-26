@@ -28,7 +28,7 @@ public class MotifController {
     @Autowired
     private MotifService motifService;
 
-    protected MotifController( MotifService service ) {
+    MotifController(MotifService service) {
         this.motifService = service;
     }
 

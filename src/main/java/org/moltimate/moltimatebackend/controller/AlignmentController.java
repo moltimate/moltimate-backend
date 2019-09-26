@@ -28,7 +28,7 @@ public class AlignmentController {
     @Autowired
     private AlignmentService alignmentService;
 
-    protected AlignmentController( AlignmentService service ) {
+    AlignmentController(AlignmentService service) {
         this.alignmentService = service;
     }
 

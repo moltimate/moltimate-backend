@@ -24,7 +24,7 @@ public class TaskController {
     @Autowired
     private AsyncService asyncService;
 
-    protected TaskController( MotifService motifService, AsyncService asyncService ) {
+    TaskController(MotifService motifService, AsyncService asyncService) {
         this.motifService = motifService;
         this.asyncService = asyncService;
     }
