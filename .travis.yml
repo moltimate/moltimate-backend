@@ -11,7 +11,13 @@ install:
 script:
 - mvn -P prod test -B
 deploy:
-  provider: gae
+- provider: gae
   project: moltimate
   keyfile: client-secret.json
   on: master
+- provider: gae
+  project: moltimate
+  version: development
+  no_promote: true
+  keyfile: client-secret.json
+  on: dev
