@@ -21,3 +21,9 @@ deploy:
   no_promote: true
   keyfile: client-secret.json
   on: dev
+- provider: gae
+  project: moltimate
+  version: deployTest
+  no_promote: true
+  keyfile: client-secret.json
+  on: MOL-10
