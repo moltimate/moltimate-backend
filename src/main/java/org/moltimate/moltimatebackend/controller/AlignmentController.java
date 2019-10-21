@@ -28,6 +28,10 @@ public class AlignmentController {
     @Autowired
     private AlignmentService alignmentService;
 
+    AlignmentController(AlignmentService service) {
+        this.alignmentService = service;
+    }
+
     @ApiOperation(value = "Active Site alignment", response = QueryAlignmentResponse.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "List of active site alignments", response = QueryAlignmentResponse.class),
