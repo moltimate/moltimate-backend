@@ -23,7 +23,7 @@ deploy:
   on: dev
 - provider: gae
   project: moltimate
-  version: deployTest
+  version: deploytest
   no_promote: true
   keyfile: client-secret.json
   on: MOL-10
