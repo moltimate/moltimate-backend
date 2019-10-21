@@ -22,6 +22,7 @@ deploy:
   keyfile: client-secret.json
   on: dev
 - provider: gae
+  skip_cleanup: true
   project: moltimate
   version: deploytest
   no_promote: true
