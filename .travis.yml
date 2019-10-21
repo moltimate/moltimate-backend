@@ -23,6 +23,7 @@ deploy:
   on: dev
 - provider: gae
   skip_cleanup: true
+  file: target/moltimate-backend-1.0.0.war
   project: moltimate
   version: deploytest
   no_promote: true
