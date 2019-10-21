@@ -28,6 +28,10 @@ public class MotifController {
     @Autowired
     private MotifService motifService;
 
+    MotifController(MotifService service) {
+        this.motifService = service;
+    }
+
     /**
      * Return all Motifs, optionally filtered by EC number
      */
