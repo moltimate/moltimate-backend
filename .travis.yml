@@ -14,19 +14,14 @@ before_deploy:
 - cp target/moltimate-backend-1.0.0.war moltimate-backend.war
 deploy:
 - provider: gae
+  skip_cleanup: true
   project: moltimate
   keyfile: client-secret.json
   on: master
 - provider: gae
+  skip_cleanup: true
   project: moltimate
   version: development
   no_promote: true
   keyfile: client-secret.json
   on: dev
-- provider: gae
-  skip_cleanup: true
-  project: moltimate
-  version: deploytest
-  no_promote: true
-  keyfile: client-secret.json
-  on: MOL-10
