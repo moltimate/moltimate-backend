@@ -15,4 +15,5 @@ liveness_check:
     path: "/healthcheck"
 skip_files:
   - .git/objects/
+  - target/
   - moltimate.mv.db
