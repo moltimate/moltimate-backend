@@ -4,20 +4,18 @@ import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 import org.moltimate.moltimatebackend.model.ActiveSite;
 import org.moltimate.moltimatebackend.model.Residue;
-import org.springframework.core.io.FileUrlResource;
+import org.springframework.core.io.ClassPathResource;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 public class PromolActiveSiteParser implements ActiveSiteParser {
 
-    // TODO: don't make web requests for this, use the local file
-    private static final String PROMOL_CSV_URL = "https://raw.githubusercontent.com/moltimate/moltimate-backend/master/src/main/resources/motifdata/promol_active_sites.csv";
+    private static final String PROMOL_CSV = "motifdata/promol_active_sites.csv";
 
     /**
      * Retrieve all active sites from the scraped Promol motifs.
@@ -26,7 +24,7 @@ public class PromolActiveSiteParser implements ActiveSiteParser {
      */
     public List<ActiveSite> parseMotifs() {
         try {
-            Reader reader = new InputStreamReader(new FileUrlResource(new URL(PROMOL_CSV_URL)).getInputStream());
+            Reader reader = new InputStreamReader(new ClassPathResource(PROMOL_CSV).getInputStream());
             CSVReader csvReader = new CSVReaderBuilder(reader).withSkipLines(1)
                     .build();
             String[] residueEntry;
