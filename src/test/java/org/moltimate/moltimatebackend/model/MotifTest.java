@@ -6,18 +6,10 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.moltimate.moltimatebackend.model.Alignment;
-import org.moltimate.moltimatebackend.model.Motif;
-import org.moltimate.moltimatebackend.model.MotifSelection;
-import org.moltimate.moltimatebackend.model.Residue;
-import org.moltimate.moltimatebackend.model.ResidueQuerySet;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.*;
 
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -37,28 +29,28 @@ public class MotifTest {
         when(selection1.getAtomType2()).thenReturn("N");
         when(selection1.getResidueName1()).thenReturn("ALA");
         when(selection1.getResidueName2()).thenReturn("L");
-        when(selection1.getDistance()).thenReturn(7.244);
+        when(selection1.getDistance()).thenReturn(2.0);
 
         MotifSelection selection2 = mock(MotifSelection.class);
         when(selection2.getAtomType1()).thenReturn("N");
         when(selection2.getAtomType2()).thenReturn("CA");
         when(selection2.getResidueName1()).thenReturn("ALA");
         when(selection2.getResidueName2()).thenReturn("L");
-        when(selection2.getDistance()).thenReturn(8.562);
+        when(selection2.getDistance()).thenReturn(2.0);
 
         MotifSelection selection3 = mock(MotifSelection.class);
         when(selection3.getAtomType1()).thenReturn("CA");
         when(selection3.getAtomType2()).thenReturn("N");
         when(selection3.getResidueName1()).thenReturn("ALA");
         when(selection3.getResidueName2()).thenReturn("L");
-        when(selection3.getDistance()).thenReturn(7.531);
+        when(selection3.getDistance()).thenReturn(2.0);
 
         MotifSelection selection4 = mock(MotifSelection.class);
         when(selection4.getAtomType1()).thenReturn("CA");
         when(selection4.getAtomType2()).thenReturn("CA");
         when(selection4.getResidueName1()).thenReturn("ALA");
         when(selection4.getResidueName2()).thenReturn("L");
-        when(selection4.getDistance()).thenReturn(8.743);
+        when(selection4.getDistance()).thenReturn(2.0);
 
         List<MotifSelection> alaSelections = new ArrayList<>();
         alaSelections.add(selection1);
@@ -78,7 +70,7 @@ public class MotifTest {
         Residue lResidue = mock(Residue.class);
         when(lResidue.getIdentifier()).thenReturn("L");
 
-        List<Residue> activeSiteResidues = new ArrayList();
+        List<Residue> activeSiteResidues = new ArrayList<>();
         activeSiteResidues.add(alaResidue);
         activeSiteResidues.add(lResidue);
 
@@ -91,15 +83,19 @@ public class MotifTest {
 
         Atom n1 = mock(Atom.class);
         when(n1.getName()).thenReturn("N");
+        when(n1.getCoords()).thenReturn(new double[]{0.0, 0.0});
 
         Atom ca1 = mock(Atom.class);
         when(ca1.getName()).thenReturn("CA");
+        when(ca1.getCoords()).thenReturn(new double[]{1.0, 0.0});
 
         Atom n2 = mock(Atom.class);
         when(n2.getName()).thenReturn("N");
+        when(n2.getCoords()).thenReturn(new double[]{0.0, 1.0});
 
         Atom ca2 = mock(Atom.class);
         when(ca2.getName()).thenReturn("CA");
+        when(ca2.getCoords()).thenReturn(new double[]{1.0, 1.0});
 
         List<Atom> atoms1 = new ArrayList<>();
         atoms1.add(n1);
@@ -112,10 +108,14 @@ public class MotifTest {
         Group groupAla = mock(Group.class);
         when(groupAla.getPDBName()).thenReturn("ALA");
         when(groupAla.getAtoms()).thenReturn(atoms1);
+        when(n1.getGroup()).thenReturn(groupAla);
+        when(ca1.getGroup()).thenReturn(groupAla);
 
         Group groupL = mock(Group.class);
         when(groupL.getPDBName()).thenReturn("L");
-        when(groupAla.getAtoms()).thenReturn(atoms2);
+        when(groupL.getAtoms()).thenReturn(atoms2);
+        when(n2.getGroup()).thenReturn(groupL);
+        when(ca2.getGroup()).thenReturn(groupL);
 
         ArrayList<Group> groupsArrayList = new ArrayList<>();
         groupsArrayList.add(groupAla);
@@ -134,8 +134,6 @@ public class MotifTest {
 
         queryResults = motif1.runQueries(protein);
 
-        System.out.println("Test-res-1: " + queryResults.toString());
-
-        Assert.assertTrue(false);
+        Assert.assertEquals( 1, queryResults.size() );
     }
 }
