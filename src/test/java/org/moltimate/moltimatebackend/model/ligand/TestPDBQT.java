@@ -3,7 +3,7 @@ package org.moltimate.moltimatebackend.model.ligand;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class TestLigand {
+public class TestPDBQT {
 
 	@Test
 	public void testParse() {
@@ -24,21 +24,21 @@ public class TestLigand {
 				"ENDBRANCH      2      3                                                         \n" +
 				"TORSDOF 3                                                                       \n";
 
-		Ligand testLigand = Ligand.createLigand(file);
-		Assert.assertEquals( "NSC7810", testLigand.getCompound() );
-		Assert.assertEquals( 3, testLigand.getTorsDOF() );
-		Assert.assertEquals( 2, testLigand.getRoot().size() );
-		Assert.assertEquals( "O2", testLigand.getRoot().get(0).getName() );
-		Assert.assertEquals( 2, testLigand.getRemarks().size() );
-		Assert.assertEquals( "1 remark 1", testLigand.getRemarks().get(0) );
-		Assert.assertEquals( 1, testLigand.getBranches().size() );
-		Assert.assertEquals( 1, testLigand.getBranches().get(0).getAtoms().size() );
-		Assert.assertEquals( 1, testLigand.getBranches().get(0).getEmbeddedBranches().size() );
-		Assert.assertEquals( 3, testLigand.getBranches().get(0).getEmbeddedBranches().get(0).getStart() );
-		Assert.assertEquals( 5, testLigand.getBranches().get(0).getEmbeddedBranches().get(0).getEnd() );
-		Assert.assertEquals( 2, testLigand.getBranches().get(0).getEmbeddedBranches().get(0).getAtoms().size() );
-		Assert.assertEquals( 2, testLigand.getBranches().get(0).getStart() );
-		Assert.assertEquals( 3, testLigand.getBranches().get(0).getEnd() );
-		Assert.assertEquals(file, testLigand.toString() );
+		PDBQT testPDBQT = PDBQT.createLigand(file);
+		Assert.assertEquals( "NSC7810", testPDBQT.getCompound() );
+		Assert.assertEquals( 3, testPDBQT.getTorsDOF() );
+		Assert.assertEquals( 2, testPDBQT.getRoot().size() );
+		Assert.assertEquals( "O2", testPDBQT.getRoot().get(0).getName() );
+		Assert.assertEquals( 2, testPDBQT.getRemarks().size() );
+		Assert.assertEquals( "1 remark 1", testPDBQT.getRemarks().get(0) );
+		Assert.assertEquals( 1, testPDBQT.getBranches().size() );
+		Assert.assertEquals( 1, testPDBQT.getBranches().get(0).getAtoms().size() );
+		Assert.assertEquals( 1, testPDBQT.getBranches().get(0).getEmbeddedBranches().size() );
+		Assert.assertEquals( 3, testPDBQT.getBranches().get(0).getEmbeddedBranches().get(0).getStart() );
+		Assert.assertEquals( 5, testPDBQT.getBranches().get(0).getEmbeddedBranches().get(0).getEnd() );
+		Assert.assertEquals( 2, testPDBQT.getBranches().get(0).getEmbeddedBranches().get(0).getAtoms().size() );
+		Assert.assertEquals( 2, testPDBQT.getBranches().get(0).getStart() );
+		Assert.assertEquals( 3, testPDBQT.getBranches().get(0).getEnd() );
+		Assert.assertEquals(file, testPDBQT.toString() );
 	}
 }

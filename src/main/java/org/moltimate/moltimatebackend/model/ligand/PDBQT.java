@@ -13,19 +13,19 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Ligand {
+public class PDBQT {
 	private String compound;
 	private List<String> remarks;
 	private List<Atom> root;
 	private List<Branch> branches;
 	private int torsDOF;
 
-	public static Ligand createLigand( String pdbqt ) {
+	public static PDBQT createLigand(String pdbqt ) {
 		String[] lines = pdbqt.split("\n");
-		Ligand ligand = new Ligand();
-		ligand.setRemarks( new ArrayList<>() );
-		ligand.setRoot( new ArrayList<>() );
-		ligand.setBranches( new ArrayList<>() );
+		PDBQT PDBQT = new PDBQT();
+		PDBQT.setRemarks( new ArrayList<>() );
+		PDBQT.setRoot( new ArrayList<>() );
+		PDBQT.setBranches( new ArrayList<>() );
 
 		boolean buildingRoot = false;
 		LinkedList<Branch> branchStack = new LinkedList<>();
@@ -34,10 +34,10 @@ public class Ligand {
 			String command = line.substring( 0, line.indexOf(" ") ).trim();
 			switch( command.trim() ){
 				case( "COMPND" ):
-					ligand.setCompound( line.substring( 6 ).trim() );
+					PDBQT.setCompound( line.substring( 6 ).trim() );
 					break;
 				case( "REMARK" ):
-					ligand.getRemarks().add( line.substring( 6 ).trim() );
+					PDBQT.getRemarks().add( line.substring( 6 ).trim() );
 					break;
 				case( "ROOT" ):
 					buildingRoot = true;
@@ -45,7 +45,7 @@ public class Ligand {
 				case( "ATOM" ):
 				case( "HETATM" ):
 					if( buildingRoot ) {
-						ligand.getRoot().add( new Atom( line ) );
+						PDBQT.getRoot().add( new Atom( line ) );
 					}
 					else {
 						branchStack.getFirst().getAtoms().add( new Atom( line ) );
@@ -63,7 +63,7 @@ public class Ligand {
 					newBranch.setEnd( Integer.parseInt( end ) );
 					if( branchStack.isEmpty() ) {
 						branchStack.push(newBranch);
-						ligand.getBranches().add( newBranch );
+						PDBQT.getBranches().add( newBranch );
 					}
 					else {
 						branchStack.getFirst().getEmbeddedBranches().add( newBranch );
@@ -74,11 +74,11 @@ public class Ligand {
 					branchStack.pop();
 					break;
 				case( "TORSDOF" ):
-					ligand.setTorsDOF( Integer.parseInt( line.substring( 7 ).trim() ) );
+					PDBQT.setTorsDOF( Integer.parseInt( line.substring( 7 ).trim() ) );
 					break;
 			}
 		}
-		return ligand;
+		return PDBQT;
 	}
 
 	public String toString() {
