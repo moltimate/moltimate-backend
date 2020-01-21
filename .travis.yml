@@ -6,6 +6,10 @@ before_install:
 - openssl aes-256-cbc -K $encrypted_a6a69c5b1756_key -iv $encrypted_a6a69c5b1756_iv
   -in secrets/secrets.tar.enc -out secrets.tar -d
 - tar xvf secrets.tar
+- gcloud auth activate-service-account --key-file client-secret.json
+- gsutil cp gs://artifacts.moltimate.appspot.com/frontend/MOL-36_patch/dist.tar.gz .
+- mkdir frontend
+- tar xvf dist.tar.gz -C ./frontend
 install:
 - mvn -P prod install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
 script:
@@ -25,3 +29,10 @@ deploy:
   no_promote: true
   keyfile: client-secret.json
   on: dev
+- provider: gae
+  skip_cleanup: true
+  project: moltimate
+  version: demo
+  no_promote: true
+  keyfile: client-secret.json
+  on: MOL-36
