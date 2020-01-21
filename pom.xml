@@ -352,7 +352,7 @@
 
         <resources>
             <resource>
-                <directory>frontend</directory>
+                <directory>src/main/resources</directory>
                 <filtering>true</filtering>
             </resource>
         </resources>

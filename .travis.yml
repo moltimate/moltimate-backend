@@ -8,8 +8,8 @@ before_install:
 - tar xvf secrets.tar
 - gcloud auth activate-service-account --key-file client-secret.json
 - gsutil cp gs://artifacts.moltimate.appspot.com/frontend/MOL-36_patch/dist.tar.gz .
-- mkdir frontend
-- tar xvf dist.tar.gz -C ./frontend
+- mkdir src/main/resources/static
+- tar xvf dist.tar.gz -C ./src/main/resources/static
 install:
 - mvn -P prod install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
 script:
