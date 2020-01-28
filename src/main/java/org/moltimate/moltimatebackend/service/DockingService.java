@@ -15,8 +15,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Objects;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -38,13 +37,13 @@ public class DockingService {
 		// Begin by converting macromolecule and ligand to pdbqt format using OpenBabel.
 
 		MultiValueMap<String, Object> openBabelParams = new LinkedMultiValueMap<>();
-		openBabelParams.add("molecule 1", new ByteArrayResource( request.getMacromolecule().getBytes() ){
+		openBabelParams.add("molecule_1", new ByteArrayResource( request.getMacromolecule().getBytes() ){
 			@Override
 			public String getFilename() {
 				return request.getMacromolecule().getOriginalFilename();
 			}
 		});
-		openBabelParams.add("molecule 2", new ByteArrayResource( request.getLigand().getBytes() ){
+		openBabelParams.add("molecule_2", new ByteArrayResource( request.getLigand().getBytes() ){
 			@Override
 			public String getFilename() {
 				return request.getLigand().getOriginalFilename();
@@ -54,23 +53,27 @@ public class DockingService {
 		HttpEntity<MultiValueMap<String, Object>> entityBabelPost = new HttpEntity<>(openBabelParams, headers);
 		String babelHash = template.postForEntity( openBabelURL, entityBabelPost, String.class ).getBody();
 
-		// Check the status of the file conversion every 5 seconds.
+		// Check the status of the file conversion every 20 seconds.
 
 		try {
 			ResponseEntity<byte[]> babelConversion =
 					template.getForEntity( openBabelURL + "?storage_hash=" + babelHash, byte[].class );
-			while( babelConversion.getStatusCode().equals(HttpStatus.NON_AUTHORITATIVE_INFORMATION) ) {
+			while( babelConversion.getStatusCode().equals(HttpStatus.MULTIPLE_CHOICES) ) {
 				try {
-					Thread.sleep( 5000 );
+					Thread.sleep( 20000 );
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
 				babelConversion = template.getForEntity( openBabelURL + "?storage_hash=" + babelHash, byte[].class );
 			}
 
+			String macroName = Objects.requireNonNull(request.getMacromolecule().getOriginalFilename())
+					.substring( 0, request.getMacromolecule().getOriginalFilename().indexOf('.') ) + ".pdbqt";
+			String ligandName = Objects.requireNonNull(request.getLigand().getOriginalFilename())
+					.substring( 0, request.getLigand().getOriginalFilename().indexOf('.') ) + ".pdbqt";
+
 			// Status is now completed.
 			byte[] babelZip = babelConversion.getBody();
-			List<MultipartFile> unzipped = new ArrayList<>();
 			if (babelZip != null) {
 				// Read zipped contents into memory
 				InputStream is = new ByteArrayInputStream(babelZip);
@@ -86,19 +89,11 @@ public class DockingService {
 					byte[] file = output.toByteArray();
 					// MockMultipartFile is normally used for testing, but is useful in this case as it allows the
 					// file to exist in memory.
-					MultipartFile unzippedFile = new InMemoryMultipartFile(entry.getName(), file);
-					unzipped.add( unzippedFile );
-				}
 
-				String macroName = request.getMacromolecule().getName();
-				String ligandName = request.getLigand().getName();
-
-				// Replace macromolecule and ligand files with converted version.
-				for( MultipartFile file: unzipped ) {
-					if( file.getName().equalsIgnoreCase( macroName ) ) {
-						request.setMacromolecule( file );
-					} else if( file.getName().equalsIgnoreCase( ligandName ) ) {
-						request.setLigand( file );
+					if( entry.getName().equalsIgnoreCase( "molecule_1" ) ) {
+						request.setMacromolecule( new InMemoryMultipartFile( macroName, file ) );
+					} else if( entry.getName().equalsIgnoreCase( "molecule_2" ) ) {
+						request.setLigand( new InMemoryMultipartFile( ligandName, file ) );
 					}
 				}
 			}
@@ -122,12 +117,12 @@ public class DockingService {
 		RestTemplate template = new RestTemplate();
 		try {
 			ResponseEntity<byte[]> dockingResult =
-					template.getForEntity(autoDockURL + "?storage_hash=" + storage_hash, byte[].class);
+					template.getForEntity(autoDockURL + "?jobId=" + storage_hash, byte[].class);
 
-			if (dockingResult.getStatusCode().equals(HttpStatus.OK)) {
-				return new InMemoryMultipartFile("job.zip", dockingResult.getBody());
-			} else {
+			if (new String(Objects.requireNonNull(dockingResult.getBody())).equalsIgnoreCase("Job still processing.")) {
 				throw new JobProcessingExeption(String.format("Job %s not completed yet", storage_hash));
+			} else {
+				return new InMemoryMultipartFile("job.zip", dockingResult.getBody());
 			}
 		} catch( HttpServerErrorException ex ) {
 			throw new DockingJobFailedException(String.format("Job %s was not completed successfully", storage_hash),
