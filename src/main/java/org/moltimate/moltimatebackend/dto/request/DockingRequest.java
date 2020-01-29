@@ -31,7 +31,7 @@ public class DockingRequest {
 				return macromolecule.getOriginalFilename();
 			}
 		});
-		map.add("ligend", new ByteArrayResource( ligand.getBytes() ){//TODO: Fix spelling when API is fixed
+		map.add("ligand", new ByteArrayResource( ligand.getBytes() ){
 			@Override
 			public String getFilename() {
 				return ligand.getOriginalFilename();
