@@ -9,9 +9,9 @@ before_install:
   -in secrets/secrets.tar.enc -out secrets.tar -d
 - tar xvf secrets.tar
 install:
-- mvn -P $PROFILE install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+- mvn -P dev install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
 script:
-- mvn -P $PROFILE test -B
+- mvn -P dev test -B
 before_deploy:
 - cp target/moltimate-backend-1.0.0.war moltimate-backend.war
 deploy:
