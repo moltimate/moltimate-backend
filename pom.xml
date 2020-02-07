@@ -277,6 +277,7 @@
                 <executions>
                     <execution>
                         <id>get-frontend</id>
+                        <phase>initialize</phase>
                         <goals>
                             <goal>wget</goal>
                         </goals>
