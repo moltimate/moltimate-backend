@@ -27,10 +27,3 @@ deploy:
   promote: false
   keyfile: client-secret.json
   on: dev
-- provider: gae
-  edge: true
-  project: moltimate
-  version: demo
-  promote: false
-  keyfile: client-secret.json
-  on: MOL-36
