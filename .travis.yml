@@ -3,7 +3,7 @@ language: java
 notifications:
   email: false
 env:
-- PROFILE=$([ "$TRAVIS_BRANCH" == "master" ] && echo "prod" || echo "dev")
+- PROFILE=$([ "$TRAVIS_BRANCH" == "master" ] && echo "prod" || echo "development")
 before_install:
 - openssl aes-256-cbc -K $encrypted_a6a69c5b1756_key -iv $encrypted_a6a69c5b1756_iv
   -in secrets/secrets.tar.enc -out secrets.tar -d
