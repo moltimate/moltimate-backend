@@ -224,7 +224,7 @@
             <id>development</id>
 
             <properties>
-                <activatedSpringProfile>development</activatedSpringProfile>
+                <activatedSpringProfile>prod</activatedSpringProfile>
                 <frontend.branch>dev</frontend.branch>
             </properties>
 
