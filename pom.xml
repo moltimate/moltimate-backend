@@ -176,6 +176,7 @@
 
             <properties>
                 <activatedSpringProfile>dev</activatedSpringProfile>
+                <frontend.branch>dev</frontend.branch>
             </properties>
 
             <activation>
@@ -202,6 +203,7 @@
 
             <properties>
                 <activatedSpringProfile>server</activatedSpringProfile>
+                <frontend.branch>master</frontend.branch>
             </properties>
 
             <dependencies>
@@ -217,12 +219,37 @@
             </dependencies>
         </profile>
 
+        <!-- Development Demo Profile (deployed, connects to GCP Cloud SQL & uses Google's jetty) -->
+        <profile>
+            <id>development</id>
+
+            <properties>
+                <activatedSpringProfile>prod</activatedSpringProfile>
+                <frontend.branch>dev</frontend.branch>
+            </properties>
+
+            <dependencies>
+                <dependency>
+                    <groupId>org.springframework.cloud</groupId>
+                    <artifactId>spring-cloud-gcp-starter</artifactId>
+                    <version>${spring.cloud.version}</version>
+                </dependency>
+
+                <dependency>
+                    <groupId>org.springframework.cloud</groupId>
+                    <artifactId>spring-cloud-gcp-starter-sql-mysql</artifactId>
+                    <version>${spring.cloud.version}</version>
+                </dependency>
+            </dependencies>
+        </profile>
+
         <!-- Production Profile (connects to GCP Cloud SQL & uses Google's jetty) -->
         <profile>
             <id>prod</id>
 
             <properties>
                 <activatedSpringProfile>prod</activatedSpringProfile>
+                <frontend.branch>master</frontend.branch>
             </properties>
 
             <dependencies>
@@ -243,6 +270,26 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>com.googlecode.maven-download-plugin</groupId>
+                <artifactId>download-maven-plugin</artifactId>
+                <version>1.5.0</version>
+                <executions>
+                    <execution>
+                        <id>get-frontend</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>wget</goal>
+                        </goals>
+                        <configuration>
+                            <url>https://storage.googleapis.com/artifacts.moltimate.appspot.com/frontend/${frontend.branch}/dist.tar.gz</url>
+                            <unpack>true</unpack>
+                            <skipCache>true</skipCache>
+                            <outputDirectory>src/main/resources/static</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
@@ -322,6 +369,13 @@
             <plugin>
                 <artifactId>maven-clean-plugin</artifactId>
                 <version>3.0.0</version>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <directory>src/main/resources/static</directory>
+                        </fileset>
+                    </filesets>
+                </configuration>
             </plugin>
 
             <plugin>
