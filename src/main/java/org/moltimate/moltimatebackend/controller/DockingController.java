@@ -55,4 +55,13 @@ public class DockingController {
 		headers.set("Content-Disposition", "attachment; filename=\"ligands.csv\"");
 		return ResponseEntity.ok().headers(headers).body(dockingService.exportLigands(request));
 	}
+
+	@ApiOperation(value = "Exports ligand docking information to a csv file")
+	@RequestMapping( value = "/exportLigands", method = RequestMethod.POST,
+			consumes = MediaType.APPLICATION_JSON_VALUE, produces = "text/csv")
+	public ResponseEntity<Resource> exportLigand(@RequestBody ExportRequest request) {
+		HttpHeaders headers = new HttpHeaders();
+		headers.set("Content-Disposition", "attachment; filename=\"ligands.csv\"");
+		return ResponseEntity.ok().headers(headers).body(dockingService.exportLigands(request));
+	}
 }

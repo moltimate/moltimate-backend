@@ -206,4 +206,26 @@ public class DockingService {
 			fos.write( bytes );
 		}
 	}
+
+	public Resource exportLigands(ExportRequest request) {
+		StringBuilder csvOutput = new StringBuilder();
+		csvOutput.append("Name,Mode Number,Binding Energy,RMSD Lower,RMSD Upper\n");
+
+		for(ExportLigand ligand : request.getLigands()) {
+			csvOutput.append("\"");
+			csvOutput.append(ligand.getName());
+			csvOutput.append("\"");
+			csvOutput.append(",");
+			csvOutput.append(ligand.getModeNumber());
+			csvOutput.append(",");
+			csvOutput.append(ligand.getBindingEnergy());
+			csvOutput.append(",");
+			csvOutput.append(ligand.getRmsdLower());
+			csvOutput.append(",");
+			csvOutput.append(ligand.getRmsdUpper());
+			csvOutput.append("\n");
+		}
+
+		return new ByteArrayResource( csvOutput.toString().getBytes() );
+	}
 }
