@@ -1,10 +1,6 @@
 package org.moltimate.moltimatebackend.controller;
 
-import org.moltimate.moltimatebackend.exception.InvalidEcNumberException;
-import org.moltimate.moltimatebackend.exception.InvalidFileException;
-import org.moltimate.moltimatebackend.exception.InvalidMotifException;
-import org.moltimate.moltimatebackend.exception.InvalidPdbIdException;
-import org.moltimate.moltimatebackend.exception.MotifFileParseException;
+import org.moltimate.moltimatebackend.exception.*;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,5 +38,10 @@ public class ControllerExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(value = {MotifFileParseException.class})
     protected ResponseEntity<Object> invalidFile(MotifFileParseException ex, WebRequest request) {
         return handleExceptionInternal(ex, ex.getMessage(), new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
+    }
+
+    @ExceptionHandler(value = {JobProcessingExeption.class})
+    protected ResponseEntity<Object> jobProcessing(JobProcessingExeption ex, WebRequest request) {
+        return handleExceptionInternal(ex, ex.getMessage(), new HttpHeaders(), HttpStatus.NON_AUTHORITATIVE_INFORMATION, request);
     }
 }
