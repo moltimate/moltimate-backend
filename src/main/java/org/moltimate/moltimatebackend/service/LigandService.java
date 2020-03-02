@@ -2,44 +2,25 @@ package org.moltimate.moltimatebackend.service;
 
 import lombok.extern.slf4j.Slf4j;
 
-import org.biojava.nbio.structure.Group;
-import org.biojava.nbio.structure.Structure;
-import org.biojava.nbio.structure.StructureIO;
-import org.biojava.nbio.structure.io.mmcif.ChemCompGroupFactory;
 import org.biojava.nbio.structure.rcsb.RCSBLigand;
 import org.biojava.nbio.structure.rcsb.RCSBLigandsFactory;
 import org.moltimate.moltimatebackend.constant.EcNumber;
 import org.moltimate.moltimatebackend.dto.request.DockingRequest;
-import org.moltimate.moltimatebackend.exception.DockingJobFailedException;
 import org.moltimate.moltimatebackend.exception.InvalidFileException;
-import org.moltimate.moltimatebackend.model.ActiveSite;
-import org.moltimate.moltimatebackend.model.Motif;
-import org.moltimate.moltimatebackend.model.Residue;
-import org.moltimate.moltimatebackend.model.ResidueQuerySet;
 import org.moltimate.moltimatebackend.repository.MotifRepository;
-import org.moltimate.moltimatebackend.repository.ResidueQuerySetRepository;
-import org.moltimate.moltimatebackend.util.ActiveSiteUtils;
 import org.moltimate.moltimatebackend.util.DockingUtils;
-import org.moltimate.moltimatebackend.util.MotifUtils;
-import org.moltimate.moltimatebackend.util.ProteinUtils;
-import org.moltimate.moltimatebackend.util.StructureUtils;
 import org.moltimate.moltimatebackend.util.DockingUtils.InMemoryMultipartFile;
 import org.moltimate.moltimatebackend.validation.EcNumberValidator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 @Service
@@ -80,7 +61,7 @@ public class LigandService {
      * Fetch the Ligand File needed for the supplied Docking Request
      * @param request
      */
-    public static InMemoryMultipartFile fetchLigand(DockingRequest request) {
+    public static MultipartFile fetchLigand(DockingRequest request) {
         if (request.getLigandID() == null) {
             throw new InvalidFileException("Unable to fetch remote Ligand File: no ligandID provided");
         }
