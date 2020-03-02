@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.moltimate.moltimatebackend.dto.request.DockingRequest;
 import org.moltimate.moltimatebackend.dto.request.ExportLigand;
 import org.moltimate.moltimatebackend.dto.request.ExportRequest;
+import org.moltimate.moltimatebackend.util.DockingUtils.InMemoryMultipartFile;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.moltimate.moltimatebackend.exception.DockingJobFailedException;
@@ -34,6 +35,10 @@ public class DockingService {
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+		if (request.getLigand() == null) {
+			request.setLigand(LigandService.fetchLigand(request));
+		}
 
 		RestTemplate template = new RestTemplate();
 
@@ -153,57 +158,6 @@ public class DockingService {
 		} catch( HttpServerErrorException ex ) {
 			throw new DockingJobFailedException(String.format("Job %s was not completed successfully", storage_hash),
 					new InMemoryMultipartFile("job.zip", ex.getResponseBodyAsByteArray()));
-		}
-	}
-
-	private static class InMemoryMultipartFile implements MultipartFile {
-		private String originalFilename;
-		private byte[] bytes;
-
-		InMemoryMultipartFile( String name, byte[] bytes ) {
-			this.originalFilename = name;
-			this.bytes = bytes;
-		}
-
-		@Override
-		public String getName() {
-			return originalFilename == null ? null : originalFilename.substring( 0, originalFilename.indexOf('.') );
-		}
-
-		@Override
-		public String getOriginalFilename() {
-			return originalFilename;
-		}
-
-		@Override
-		public String getContentType() {
-			return MediaType.MULTIPART_FORM_DATA_VALUE;
-		}
-
-		@Override
-		public boolean isEmpty() {
-			return bytes == null || bytes.length == 0;
-		}
-
-		@Override
-		public long getSize() {
-			return bytes == null ? 0 : bytes.length;
-		}
-
-		@Override
-		public byte[] getBytes() throws IOException {
-			return bytes;
-		}
-
-		@Override
-		public InputStream getInputStream() throws IOException {
-			return new ByteArrayInputStream( bytes );
-		}
-
-		@Override
-		public void transferTo(File file) throws IOException, IllegalStateException {
-			FileOutputStream fos = new FileOutputStream( file );
-			fos.write( bytes );
 		}
 	}
 }
