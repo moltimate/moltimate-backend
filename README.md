@@ -46,6 +46,12 @@ This briefly summarizes all API endpoints.
 | GET | [/motifs/{pdbid}](#get-motifs-pdbid) | Get a specific motif |
 | GET | [/motifs/debug](#get-motifs-debug) | TEMPORARY. Stores 4 hard-coded Motifs into the database |
 
+#### Ligands
+
+| HTTP Method | Endpoint | Function |
+|:------------|:---------|:---------|
+| GET | [/ligands/{ECNumber}](#get-ligands-ec) | Get ligands associated with the specified EC |
+
 <a name="api-details"></a>
 ### API Details
 
@@ -105,3 +111,16 @@ Path parameters
 <a name="get-motifs-debug"></a>
 ##### GET /motifs/debug
 ###### TEMPORARY. Stores 4 hard-coded Motifs into the database
+
+
+#### Ligands
+
+<a name="get-ligands-ec"></a>
+##### GET /ligands/{ECNumber}
+###### Get ligands associated with the specified EC
+
+Path parameters
+
+| Parameter | Type | Function |
+|:----------|:-----|:---------|
+| ECNumber | String | The EC number you want ligands associated with |

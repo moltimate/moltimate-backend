@@ -16,6 +16,7 @@ import java.io.IOException;
 public class DockingRequest {
 	private MultipartFile macromolecule;
 	private MultipartFile ligand;
+	private String ligandID;
 	private double center_x;
 	private double center_y;
 	private double center_z;
