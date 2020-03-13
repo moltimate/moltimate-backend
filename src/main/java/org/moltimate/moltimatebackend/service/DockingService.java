@@ -1,6 +1,9 @@
 package org.moltimate.moltimatebackend.service;
 
 import lombok.extern.slf4j.Slf4j;
+
+import org.biojava.nbio.structure.StructureException;
+import org.biojava.nbio.structure.StructureIO;
 import org.moltimate.moltimatebackend.dto.request.DockingRequest;
 import org.moltimate.moltimatebackend.dto.request.ExportLigand;
 import org.moltimate.moltimatebackend.dto.request.ExportRequest;
@@ -8,6 +11,7 @@ import org.moltimate.moltimatebackend.util.DockingUtils.InMemoryMultipartFile;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.moltimate.moltimatebackend.exception.DockingJobFailedException;
+import org.moltimate.moltimatebackend.exception.InvalidFileException;
 import org.moltimate.moltimatebackend.exception.JobProcessingExeption;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -37,7 +41,10 @@ public class DockingService {
 		headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
 		if (request.getLigand() == null) {
-			request.setLigand(LigandService.fetchLigand(request));
+			request.setLigand(LigandService.fetchLigand(request.getLigandID()));
+		}
+		if (request.getMacromolecule() == null) {
+			request.setMacromolecule(fetchMacromolecule(request.getMacromoleculeID()));
 		}
 
 		RestTemplate template = new RestTemplate();
@@ -158,6 +165,25 @@ public class DockingService {
 		} catch( HttpServerErrorException ex ) {
 			throw new DockingJobFailedException(String.format("Job %s was not completed successfully", storage_hash),
 					new InMemoryMultipartFile("job.zip", ex.getResponseBodyAsByteArray()));
+		}
+	}
+
+	public static MultipartFile fetchMacromolecule(String pdbID) {
+		if (pdbID == null) {
+            throw new InvalidFileException("Unable to fetch remote Macromolecule File: no pdbID provided");
+		}
+		
+		log.info("Fetching Macromolecule {} for Docking Request", pdbID);
+		
+		try {
+			return new InMemoryMultipartFile(
+				pdbID+".pdb", 
+				StructureIO.getStructure(pdbID).toPDB().getBytes()
+			);
+		} catch (StructureException e) {
+			throw new InvalidFileException("PDB ID does not correspond to a known structure");
+		} catch (IOException e) {
+			throw new InvalidFileException("Unable to fetch remote Macromolecule");
 		}
 	}
 }
