@@ -61,21 +61,21 @@ public class LigandService {
      * Fetch the Ligand File needed for the supplied Docking Request
      * @param request
      */
-    public static MultipartFile fetchLigand(DockingRequest request) {
-        if (request.getLigandID() == null) {
+    public static MultipartFile fetchLigand(String ligandID) {
+        if (ligandID == null) {
             throw new InvalidFileException("Unable to fetch remote Ligand File: no ligandID provided");
         }
 
-        log.info("Fetching Ligand {} for Docking Request", request.getLigandID());
+        log.info("Fetching Ligand {} for Docking Request", ligandID);
 
         try {
-            URL fileLocation = new URL(String.format(DockingUtils.SDF_URL, request.getLigandID()));
+            URL fileLocation = new URL(String.format(DockingUtils.SDF_URL, ligandID));
             InputStream fileStream = fileLocation.openStream();
             byte[] file = new byte[fileStream.available()];
 
             fileStream.read(file);
 
-            return new InMemoryMultipartFile(request.getLigandID()+".sdf", file);
+            return new InMemoryMultipartFile(ligandID+".sdf", file);
         }
         catch (IOException e) {
             throw new InvalidFileException("Unable to fetch remote Ligand File");
