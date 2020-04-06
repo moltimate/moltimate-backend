@@ -12,7 +12,6 @@ import org.moltimate.moltimatebackend.repository.ResidueQuerySetRepository;
 import org.moltimate.moltimatebackend.util.ActiveSiteUtils;
 import org.moltimate.moltimatebackend.util.MotifUtils;
 import org.moltimate.moltimatebackend.util.ProteinUtils;
-import org.moltimate.moltimatebackend.util.StructureUtils;
 import org.moltimate.moltimatebackend.validation.EcNumberValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -37,6 +36,9 @@ public class MotifService {
 
     @Autowired
     private MotifRepository motifRepository;
+
+    @Autowired
+    private LigandService ligandService;
 
     @Autowired
     private ResidueQuerySetRepository residueQuerySetRepository;
@@ -129,7 +131,7 @@ public class MotifService {
                     try {
                         List<Residue> residues = activeSite.getResidues();
                         Structure structure = ProteinUtils.queryPdb(pdbId);
-                        String ecNumber = StructureUtils.ecNumber(structure);
+                        String ecNumber = ligandService.getEcNumber(structure);
 
                         Motif motif = MotifUtils.generateMotif(pdbId, ecNumber, structure, residues);
                         saveMotif(motif);
