@@ -28,6 +28,9 @@ public class MotifTestService {
     @Autowired
     private AlignmentService alignmentService;
 
+    @Autowired
+    private LigandService ligandService;
+
     public MotifAlignmentResponse testMotifAlignment(MotifTestRequest motifTestRequest) {
         Structure motifStructure = motifTestRequest.motifStructure();
         MotifFile testMotifFile = MotifFile.builder()
@@ -93,7 +96,7 @@ public class MotifTestService {
             if (alignment != null) {
                 motifAlignmentResponse.addSuccessfulEntry(structure, alignment);
             } else {
-                motifAlignmentResponse.addFailedEntry(structure.getPDBCode(), StructureUtils.ecNumber(structure));
+                motifAlignmentResponse.addFailedEntry(structure.getPDBCode(), ligandService.getEcNumber(structure));
             }
         }
         return motifAlignmentResponse;
