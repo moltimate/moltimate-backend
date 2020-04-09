@@ -54,10 +54,10 @@ public class DockingService {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
-		if (request.getLigand().isEmpty()) {
+		if (request.getLigand() == null || request.getLigand().isEmpty()) {
 			request.setLigand(LigandService.fetchLigand(request.getLigandID()));
 		}
-		if (request.getMacromolecule().isEmpty()) {
+		if (request.getMacromolecule() == null || request.getMacromolecule().isEmpty()) {
 			request.setMacromolecule(fetchMacromolecule(request.getMacromoleculeID()));
 		}
 
@@ -79,6 +79,10 @@ public class DockingService {
 	}
 
 	private MultipartFile convertToPDBQT( MultipartFile molecule, boolean ligand ) throws IOException {
+		if( molecule == null ) {
+			throw new InvalidFileException("No ligand or macromolecule file supplied and no PDB ID supplied");
+		}
+
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
