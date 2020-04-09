@@ -39,9 +39,9 @@ public class DockingController {
 
 	@ApiOperation( value = "Uses supplied storage hash and pdbId to query autodock for docked ligand then passes files to openbabel to be converted and combined")
 	@RequestMapping( value = "/dockligand", method = RequestMethod.GET )
-	public ResponseEntity<Object> retrieveDocking( String storage_hash, String pdbId ) throws IOException {
+	public ResponseEntity<Object> retrieveDocking( String jobId, String pdbId ) throws IOException {
 		try {
-			return ResponseEntity.ok( dockingService.getDockingResult( storage_hash, pdbId ) );
+			return ResponseEntity.ok( dockingService.getDockingResult( jobId, pdbId ) );
 		} catch( DockingJobFailedException ex) {
 			return ResponseEntity.status(500).body(ex.getError().getBytes());
 		}
@@ -49,9 +49,9 @@ public class DockingController {
 
 	@ApiOperation( value = "Uses supplied storage hash to query openbabel for a completed job." )
 	@RequestMapping( value = "/retrievefile", method = RequestMethod.GET )
-	public ResponseEntity<Object> retrieveCombinedFile( String storage_hash ) throws IOException {
+	public ResponseEntity<Object> retrieveCombinedFile( String jobId ) throws IOException {
 		try {
-			return ResponseEntity.ok( dockingService.getBabelResult( storage_hash ).getBytes() );
+			return ResponseEntity.ok( dockingService.getBabelResult( jobId ).getBytes() );
 		} catch( DockingJobFailedException ex) {
 			return ResponseEntity.status(500).body(ex.getError().getBytes());
 		}

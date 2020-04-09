@@ -184,7 +184,7 @@ Path parameters
 
 | Parameter | Type | Function |
 |:----------|:-----|:---------|
-| storage_hash | String | ID of the AutoDock Vina job |
+| jobId | String | ID of the AutoDock Vina job |
 | pdbId | String | Id of protein for determination of active sites |
 
 ##### Returns
@@ -205,7 +205,7 @@ Path parameters
 ##### Path Parameters
 | Parameter | Type | Function |
 |:----------|:-----|:---------|
-| storage_hash | String | ID of the OpenBabel job |
+| jobId | String | ID of the OpenBabel job |
 
 ##### Returns
 ###### 200 OK - When job has completed successfully
