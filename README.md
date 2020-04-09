@@ -205,7 +205,7 @@ Path parameters
 ##### Path Parameters
 | Parameter | Type | Function |
 |:----------|:-----|:---------|
-| jobId | String | ID of the OpenBabel job |
+| babelJobId | String | ID of the OpenBabel job |
 
 ##### Returns
 ###### 200 OK - When job has completed successfully

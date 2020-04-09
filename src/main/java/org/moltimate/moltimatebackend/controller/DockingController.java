@@ -49,9 +49,9 @@ public class DockingController {
 
 	@ApiOperation( value = "Uses supplied storage hash to query openbabel for a completed job." )
 	@RequestMapping( value = "/retrievefile", method = RequestMethod.GET )
-	public ResponseEntity<Object> retrieveCombinedFile( String jobId ) throws IOException {
+	public ResponseEntity<Object> retrieveCombinedFile( String babelJobId ) throws IOException {
 		try {
-			return ResponseEntity.ok( dockingService.getBabelResult( jobId ).getBytes() );
+			return ResponseEntity.ok( dockingService.getBabelResult( babelJobId ).getBytes() );
 		} catch( DockingJobFailedException ex) {
 			return ResponseEntity.status(500).body(ex.getError().getBytes());
 		}
