@@ -20,11 +20,6 @@ public class FreeEnergyResponse {
 		String[] numbers = new String( log ).split("-----\\+------------\\+----------\\+----------\\n *")[1].split("\\n+ *| +");
 		List<Double[]> table = new ArrayList<>();
 
-		for( String s : numbers ) {
-			System.out.print("[" + s + "]");
-		}
-		System.out.println();
-
 		for( int i = 0; !numbers[i].toLowerCase().contains("writing"); i += 4 ) {
 			Double[] row = new Double[]{
 					Double.parseDouble( numbers[i] ),
