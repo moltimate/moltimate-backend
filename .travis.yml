@@ -14,6 +14,7 @@ script:
 - mvn -P $PROFILE test -B
 before_deploy:
 - cp target/moltimate-backend-1.0.0.war moltimate-backend.war
+- ./set-env-variables.sh
 deploy:
 - provider: gae
   edge: true
@@ -27,3 +28,10 @@ deploy:
   promote: false
   keyfile: client-secret.json
   on: dev
+- provider: gae
+  edge: true
+  project: moltimate
+  version: demo
+  promote: false
+  keyfile: client-secret.json
+  on: MOL-71
