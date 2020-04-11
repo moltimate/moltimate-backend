@@ -169,7 +169,7 @@ Path parameters
 
 ###### 200 OK - When job has been completed successfully
 
-| Parameter | Type | Function |
+| Field | Type | Function |
 |:----------|:-----|:---------|
 | jobId | String | ID of the AutoDock Vina job |
 | macromolecule | String | Name of macromolecule file |
@@ -192,11 +192,22 @@ Path parameters
 ###### 200 OK - When job has completed successfully
 ###### 203 - When job is still processing
 
-| Parameter | Type | Function |
+| Field | Type | Function |
 |:----------|:-----|:---------|
 | babelJobId | String | Job ID of OpenBabel file conversion |
 | dockingData | array | List of binding affinities and free energy values |
 | activeSites | array | List of active site data for protein |
+
+##### Docking Data
+###### Each entry in the docking data array is in the format [model number, affinity, rmsd upper, rmsd lower]
+
+##### Active Sites
+###### Each entry in the active sites array takes the form:
+| Field | Type | Function |
+|:----------|:-----|:---------|
+| residueId | number | Id of active site residue in protein |
+| residueChainName | String | Name of chain active site resides in |
+| residueAltLoc | String | Alternate location of active site residue |
 
 <a name="retrieve-file"></a>
 ##### GET /dock/retrievefile
