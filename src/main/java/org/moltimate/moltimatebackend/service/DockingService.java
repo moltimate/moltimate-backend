@@ -97,9 +97,9 @@ public class DockingService {
 		});
 
 		if( ligand ) {
-			openBabelParams.add("options", "");
+			openBabelParams.add("options", "-c");
 		} else {
-			openBabelParams.add("options", "-xr");
+			openBabelParams.add("options", "-xr -c");
 		}
 
 		HttpEntity<MultiValueMap<String, Object>> entityBabelPost = new HttpEntity<>(openBabelParams, headers);
@@ -225,6 +225,7 @@ public class DockingService {
 								return "Ligand.pdbqt";
 							}
 						});
+						openBabelParams.add("options", "-c");
 
 						HttpEntity<MultiValueMap<String, Object>> entityBabelPost = new HttpEntity<>(openBabelParams, headers);
 						String babelHash = template.postForEntity(openBabelURL + TOPDBCONVERSION, entityBabelPost, String.class).getBody();
@@ -290,16 +291,19 @@ public class DockingService {
 		}
 		
 		log.info("Fetching Macromolecule {} for Docking Request", pdbID);
-		
-		try {
-			return new InMemoryMultipartFile(
-				pdbID+".pdb", 
-				StructureIO.getStructure(pdbID).toPDB().getBytes()
-			);
-		} catch (StructureException e) {
+
+		RestTemplate template = new RestTemplate();
+
+		ResponseEntity<byte[]> file = template.getForEntity("https://files.rcsb.org/download/"+ pdbID + ".pdb", byte[].class);
+		if( file.getStatusCode().equals(HttpStatus.NOT_FOUND) ) {
 			throw new InvalidFileException("PDB ID does not correspond to a known structure");
-		} catch (IOException e) {
-			throw new InvalidFileException("Unable to fetch remote Macromolecule");
+		} else if( file.getStatusCode().equals(HttpStatus.OK) ) {
+			return new InMemoryMultipartFile(
+					pdbID + ".pdb",
+					file.getBody()
+			);
+		} else {
+			throw new InvalidFileException(String.format("An error occurred when fetching file from pdb. Error is %s", file.getStatusCode().getReasonPhrase()));
 		}
 	}
 
