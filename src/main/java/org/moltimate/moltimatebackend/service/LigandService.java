@@ -146,10 +146,16 @@ public class LigandService {
      * @return List of pdbIds in the EC class
      */
     public List<String> getPdbIdsFromEcClass(String ecNumber) throws IOException {
+        List<String> pdbIds = new ArrayList<>();
+
         String USER_AGENT = "Mozilla/5.0";
 
         String baseURL = "https://search.rcsb.org/rcsbsearch/v1/query?json=";
-        String jsonConverted = "{\"query\":{\"type\":\"terminal\",\"service\":\"text\",\"parameters\":{\"attribute\":\"rcsb_polymer_entity.rcsb_ec_lineage.id\",\"negation\":false,\"operator\":\"exact_match\",\"value\":\""+ecNumber+"\"},\"node_id\":0},\"return_type\":\"entry\",\"request_options\":{\"pager\":{\"start\":0,\"rows\":1000},\"scoring_strategy\":\"combined\",\"sort\":[{\"sort_by\":\"score\",\"direction\":\"desc\"}]},\"request_info\":{\"src\":\"ui\"}}";
+        String jsonConverted = "{\"query\":{\"type\":\"terminal\",\"service\":\"text\",\"parameters\":{\"attribute\":\"rcsb_polymer_entity." +
+                "rcsb_ec_lineage.id\",\"negation\":false,\"operator\":\"exact_match\",\"value\":\""+ecNumber+
+                "\"},\"node_id\":0},\"return_type\":\"entry\",\"request_" +
+                "options\":{\"pager\":{\"start\":0,\"rows\":1000},\"scoring_strategy\":\"combined\",\"sort\":[{\"sort" +
+                "_by\":\"score\",\"direction\":\"desc\"}]},\"request_info\":{\"src\":\"ui\"}}";
         try {
             jsonConverted =  URLEncoder.encode(jsonConverted, StandardCharsets.UTF_8.toString());
         } catch (UnsupportedEncodingException ex) {
@@ -167,29 +173,31 @@ public class LigandService {
         if (responseCode == HttpURLConnection.HTTP_OK) { // success
             BufferedReader in = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()));
             String inputLine;
-
             while ((inputLine = in.readLine()) != null) {
                 response.append(inputLine);
             } in.close();
-
-            // print result
-            log.info(response.toString());
         } else {
-            System.out.println("GET request not worked");
+            log.error("GET request not worked");
         }
         JSONParser parser = new JSONParser();
         JSONObject jsonObject = new JSONObject();
         try {
+            log.info("Parsing response into json object");
             jsonObject = ((JSONObject)parser.parse(response.toString()));
+            log.info("Json Object " + jsonObject.toString());
+            JSONArray results = (JSONArray) jsonObject.get("result_set");
+            log.info("Result Set: ");
+            log.info(results.toString());
+            Iterator<String> iterator = results.iterator();
+            while (iterator.hasNext()) {
+                Object pdbJson = iterator.next();
+                JSONObject pdbId = (JSONObject) pdbJson;
+                String identifier = (String)pdbId.get("identifier");
+                pdbIds.add(identifier);
+            }
         } catch (ParseException e) {
             log.error(e.getMessage());
         }
-
-        log.info(jsonObject.toJSONString());
-
-
-
-        List<String> pdbIds = new ArrayList<String>();
 
         return pdbIds;
 
