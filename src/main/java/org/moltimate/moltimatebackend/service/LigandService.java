@@ -171,7 +171,7 @@ public class LigandService {
                 response.append(inputLine);
             } in.close();
         } else {
-            log.error("GET request not worked");
+            log.error("GET request did not work");
         }
         JSONParser parser = new JSONParser();
         JSONObject jsonObject = new JSONObject();
