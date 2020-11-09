@@ -121,15 +121,33 @@ public class LigandService {
      * @throws PDBFetchException
      */
     @Retryable(maxAttempts = 2, backoff = @Backoff(5000))
-    public String getEcNumber(Structure structure) throws InvalidPdbIdException {
-        RCSBDescription description = RCSBDescriptionFactory.get(structure.getPDBCode());
-        if (description == null) {
-            throw new InvalidPdbIdException(structure.getPDBCode());
+    public String getEcNumber(Structure structure) throws InvalidPdbIdException, IOException {
+        String USER_AGENT = "Mozilla/5.0";
+        String url = "https://data.rcsb.org/rest/v1/core/polymer_entity/" + structure.getPDBCode() + "/1";
+        URL obj = new URL(url);
+        HttpURLConnection httpURLConnection = (HttpURLConnection) obj.openConnection();
+        httpURLConnection.setRequestMethod("GET");
+        httpURLConnection.setRequestProperty("User-Agent", USER_AGENT);
+        int responseCode = httpURLConnection.getResponseCode();
+        log.info("GET Response Code :: " + responseCode);
+        StringBuffer response = new StringBuffer();
+        if (responseCode == HttpURLConnection.HTTP_OK) { // success
+            BufferedReader in = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()));
+            String inputLine;
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine);
+            } in.close();
+        } else {
+            log.error("GET request did not work");
         }
-        for (RCSBPolymer polymer : description.getPolymers()) {
-            if (polymer.getEnzClass() != null) {
-                return polymer.getEnzClass();
-            }
+        JSONParser parser = new JSONParser();
+        try {
+            JSONObject jsonObject = ((JSONObject) parser.parse(response.toString()));
+            JSONObject entity = (JSONObject)jsonObject.get("rcsb_polymer_entity");
+            String ecClass = entity.get("pdbx_ec").toString();
+            return ecClass;
+        } catch (ParseException e) {
+            log.error(e.getMessage());
         }
         return EcNumber.UNKNOWN;
     }
