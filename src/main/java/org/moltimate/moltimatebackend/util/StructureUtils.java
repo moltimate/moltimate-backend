@@ -202,9 +202,11 @@ public class StructureUtils {
 
     public static String ecNumber(Structure structure) {
         RCSBDescription description = RCSBDescriptionFactory.get(structure.getPDBCode());
-        for(RCSBPolymer polymer: description.getPolymers()){
-            if(polymer.getEnzClass() != null){
-                return polymer.getEnzClass();
+        if(description != null) {
+            for(RCSBPolymer polymer: description.getPolymers()){
+                if(polymer.getEnzClass() != null){
+                    return polymer.getEnzClass();
+                }
             }
         }
         return EcNumber.UNKNOWN;

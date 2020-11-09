@@ -16,18 +16,30 @@ import org.moltimate.moltimatebackend.util.DockingUtils;
 import org.moltimate.moltimatebackend.util.DockingUtils.InMemoryMultipartFile;
 import org.moltimate.moltimatebackend.validation.EcNumberValidator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import org.json.simple.JSONObject;
+import org.json.simple.JSONArray;
+import org.json.simple.parser.ParseException;
+import org.json.simple.parser.*;
+import java.io.BufferedReader;
+
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Collections;
-import java.util.List;
+
+import java.io.InputStream;
+
+import java.util.*;
 import java.util.stream.Collectors;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.io.UnsupportedEncodingException;
+
 
 /**
  * Ligand Service provides methods for interfacing with the PDB
@@ -43,16 +55,26 @@ public class LigandService {
      * @param ecNumber EC number to find associated Ligands for
      * @return List of Ligands associated with Proteins of this EC
      */
-    public List<RCSBLigand> getByEcNumber(String ecNumber) {
+    public List<RCSBLigand> getByEcNumber(String ecNumber)  {
         if (ecNumber == null || EcNumber.UNKNOWN.equals(ecNumber)) {
             return Collections.emptyList();
         }
         EcNumberValidator.validate(ecNumber);
-        List<String> pdbIds = motifRepository
-            .findByEcNumberEqualsOrEcNumberStartingWith(
-                EcNumber.UNKNOWN, ecNumber, PageRequest.of(0, 320))
-            .map(motif -> motif.getPdbId()).getContent();
-        
+
+
+        log.info("Retrieving Ligands associated EC Class " + ecNumber);
+
+        //call method from the motifRepository to get the pdb ids of the motifs that
+        //are in the ec class or unknown
+        List<String> pdbIds = new ArrayList<>();
+        try {
+            pdbIds = getPdbIdsFromEcClass(ecNumber);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+        log.info("Found PDB Ids {}", pdbIds);
+        //remove unknown ec class pdb ids
+
         log.info("Retrieving Ligands associated with PDB IDs {}", pdbIds);
 
         List<RCSBLigand> matchingLigands = RCSBLigandsFactory.getFromPdbIds(pdbIds).stream()
@@ -110,6 +132,69 @@ public class LigandService {
             }
         }
         return EcNumber.UNKNOWN;
+    }
+
+    /**
+     * call the Protein Data bank's Search api to get the PDB Ids from the input EC Class
+     * @param ecNumber
+     * @return List of pdbIds in the EC class
+     */
+    public List<String> getPdbIdsFromEcClass(String ecNumber) throws IOException {
+        List<String> pdbIds = new ArrayList<>();
+
+        String USER_AGENT = "Mozilla/5.0";
+
+        String baseURL = "https://search.rcsb.org/rcsbsearch/v1/query?json=";
+        String jsonConverted = "{\"query\":{\"type\":\"terminal\",\"service\":\"text\",\"parameters\":{\"attribute\":\"rcsb_polymer_entity." +
+                "rcsb_ec_lineage.id\",\"negation\":false,\"operator\":\"exact_match\",\"value\":\""+ecNumber+
+                "\"},\"node_id\":0},\"return_type\":\"entry\",\"request_" +
+                "options\":{\"pager\":{\"start\":0,\"rows\":1000},\"scoring_strategy\":\"combined\",\"sort\":[{\"sort" +
+                "_by\":\"score\",\"direction\":\"desc\"}]},\"request_info\":{\"src\":\"ui\"}}";
+        try {
+            jsonConverted =  URLEncoder.encode(jsonConverted, StandardCharsets.UTF_8.toString());
+        } catch (UnsupportedEncodingException ex) {
+            log.error(ex.getMessage());
+        }
+
+        String GET_URL= baseURL + jsonConverted;
+        URL obj = new URL(GET_URL);
+        HttpURLConnection httpURLConnection = (HttpURLConnection) obj.openConnection();
+        httpURLConnection.setRequestMethod("GET");
+        httpURLConnection.setRequestProperty("User-Agent", USER_AGENT);
+        int responseCode = httpURLConnection.getResponseCode();
+        log.info("GET Response Code :: " + responseCode);
+        StringBuffer response = new StringBuffer();
+        if (responseCode == HttpURLConnection.HTTP_OK) { // success
+            BufferedReader in = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()));
+            String inputLine;
+            while ((inputLine = in.readLine()) != null) {
+                response.append(inputLine);
+            } in.close();
+        } else {
+            log.error("GET request did not work");
+        }
+        JSONParser parser = new JSONParser();
+        JSONObject jsonObject = new JSONObject();
+        try {
+            log.info("Parsing response into json object");
+            jsonObject = ((JSONObject)parser.parse(response.toString()));
+            log.info("Json Object " + jsonObject.toString());
+            JSONArray results = (JSONArray) jsonObject.get("result_set");
+            log.info("Result Set: ");
+            log.info(results.toString());
+            Iterator<String> iterator = results.iterator();
+            while (iterator.hasNext()) {
+                Object pdbJson = iterator.next();
+                JSONObject pdbId = (JSONObject) pdbJson;
+                String identifier = (String)pdbId.get("identifier");
+                pdbIds.add(identifier);
+            }
+        } catch (ParseException e) {
+            log.error(e.getMessage());
+        }
+
+        return pdbIds;
+
     }
 
 }
