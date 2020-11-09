@@ -208,22 +208,28 @@ public class StructureUtils {
             .toString();
     }
 
-    public static String ecNumber(Structure structure) throws IOException {
+    public static String ecNumber(Structure structure) {
         String USER_AGENT = "Mozilla/5.0";
         String url = "https://data.rcsb.org/rest/v1/core/polymer_entity/" + structure.getPDBCode() + "/1";
-        URL obj = new URL(url);
-        HttpURLConnection httpURLConnection = (HttpURLConnection) obj.openConnection();
-        httpURLConnection.setRequestMethod("GET");
-        httpURLConnection.setRequestProperty("User-Agent", USER_AGENT);
-        int responseCode = httpURLConnection.getResponseCode();
         StringBuffer response = new StringBuffer();
-        if (responseCode == HttpURLConnection.HTTP_OK) { // success
-            BufferedReader in = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()));
-            String inputLine;
-            while ((inputLine = in.readLine()) != null) {
-                response.append(inputLine);
-            } in.close();
-        } else {
+
+        try {
+            URL obj = new URL(url);
+            HttpURLConnection httpURLConnection = (HttpURLConnection) obj.openConnection();
+            httpURLConnection.setRequestMethod("GET");
+            httpURLConnection.setRequestProperty("User-Agent", USER_AGENT);
+            int responseCode = httpURLConnection.getResponseCode();
+            if (responseCode == HttpURLConnection.HTTP_OK) { // success
+                BufferedReader in = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()));
+                String inputLine;
+                while ((inputLine = in.readLine()) != null) {
+                    response.append(inputLine);
+                }
+                in.close();
+            } else {
+            }
+        } catch (IOException e) {
+            return EcNumber.UNKNOWN;
         }
         JSONParser parser = new JSONParser();
         try {
