@@ -21,8 +21,8 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONArray;
 import org.json.simple.parser.ParseException;
 import org.json.simple.parser.*;
-import sun.tools.jstat.ParserException;
 
+import javax.validation.constraints.Null;
 import java.io.BufferedReader;
 
 import java.io.IOException;
@@ -126,9 +126,15 @@ public class LigandService {
                 continue;
             } catch (ParseException e) {
                 continue;
+            } catch (NullPointerException e){
+                continue;
             }
         }
-        return (List<RCSBLigand>)uniqueLigands.values();
+        List<RCSBLigand> returnLigands = new ArrayList<>();
+        for(RCSBLigand lig : uniqueLigands.values()){
+            returnLigands.add(lig);
+        }
+        return returnLigands;
 
     }
 
