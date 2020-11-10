@@ -3,11 +3,7 @@ package org.moltimate.moltimatebackend.service;
 import lombok.extern.slf4j.Slf4j;
 
 import org.biojava.nbio.structure.Structure;
-import org.biojava.nbio.structure.rcsb.RCSBDescription;
-import org.biojava.nbio.structure.rcsb.RCSBDescriptionFactory;
 import org.biojava.nbio.structure.rcsb.RCSBLigand;
-import org.biojava.nbio.structure.rcsb.RCSBLigandsFactory;
-import org.biojava.nbio.structure.rcsb.RCSBPolymer;
 import org.moltimate.moltimatebackend.constant.EcNumber;
 import org.moltimate.moltimatebackend.exception.InvalidFileException;
 import org.moltimate.moltimatebackend.exception.InvalidPdbIdException;
@@ -25,6 +21,8 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONArray;
 import org.json.simple.parser.ParseException;
 import org.json.simple.parser.*;
+import sun.tools.jstat.ParserException;
+
 import java.io.BufferedReader;
 
 import java.io.IOException;
@@ -74,18 +72,64 @@ public class LigandService {
         }
         log.info("Found PDB Ids {}", pdbIds);
         //remove unknown ec class pdb ids
+        Map<String, RCSBLigand> uniqueLigands = new HashMap<>();
+
 
         log.info("Retrieving Ligands associated with PDB IDs {}", pdbIds);
+        for(String pdb : pdbIds) {
+            String url = "https://data.rcsb.org/graphql?query=%7B%0A%20%20entry(entry_id:%20%22"+ pdb +"%22)%20%7B%0A%20%20%20%20nonpolymer_entities%20%7B%0A%20%20%20%20%20%20rcsb_nonpolymer_entity_container_identifiers%20%7B%0A%20%20%20%20%20%20%20%20entry_id%0A%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20nonpolymer_comp%20%7B%0A%20%20%20%20%20%20%20%20chem_comp%20%7B%0A%20%20%20%20%20%20%20%20%20%20id%0A%20%20%20%20%20%20%20%20%20%20type%0A%20%20%20%20%20%20%20%20%20%20formula_weight%0A%20%20%20%20%20%20%20%20%20%20formula%0A%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20%20%20rcsb_chem_comp_descriptor%20%7B%0A%20%20%20%20%20%20%20%20%20%20InChI%0A%20%20%20%20%20%20%20%20%20%20InChIKey%0A%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20%20%20pdbx_chem_comp_descriptor%20%7B%0A%20%20%20%20%20%20%20%20%20%20descriptor%0A%20%20%20%20%20%20%20%20%20%20type%0A%20%20%20%20%20%20%20%20%20%20program%0A%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20%7D%0A%20%20%20%20%7D%0A%20%20%7D%0A%7D";
+            try{
+                String USER_AGENT = "Mozilla/5.0";
+                URL obj = new URL(url);
+                HttpURLConnection httpURLConnection = (HttpURLConnection) obj.openConnection();
+                httpURLConnection.setRequestMethod("GET");
+                httpURLConnection.setRequestProperty("User-Agent", USER_AGENT);
+                int responseCode = httpURLConnection.getResponseCode();
+                log.info("GET Response Code :: " + responseCode);
+                StringBuffer response = new StringBuffer();
+                if (responseCode == HttpURLConnection.HTTP_OK) { // success
+                    BufferedReader in = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()));
+                    String inputLine;
+                    while ((inputLine = in.readLine()) != null) {
+                        response.append(inputLine);
+                    } in.close();
+                } else {
+                    log.error("GET request did not work");
+                }
+                JSONParser parser = new JSONParser();
+                log.info("Ligand Response for PDB Id " + pdb);
+                log.info(response.toString());
+                JSONObject responseObj = (JSONObject)parser.parse(response.toString());
+                JSONObject data = (JSONObject) responseObj.get("data");
+                JSONObject entry = (JSONObject) data.get("entry");
+                JSONArray ligands = (JSONArray) entry.get("nonpolymer_entities");
+                Iterator<String> iterator = ligands.iterator();
+                while (iterator.hasNext()) {
+                    Object ligandParts = iterator.next();
+                    JSONObject ligandJSON = (JSONObject)ligandParts;
+                    JSONObject chem_comp = (JSONObject)((JSONObject)ligandJSON.get("nonpolymer_comp")).get("chem_comp");
+                    JSONObject descriptor = (JSONObject)((JSONObject)ligandJSON.get("nonpolymer_comp")).get("rcsb_chem_comp_descriptor");
+                    RCSBLigand ligand = new RCSBLigand();
+                    //TODO: Possibly have to add the SMILE field- not sure what smiles is.
+                    //also id is being copied over to the name
+                    ligand.setFormula(chem_comp.get("formula").toString());
+                    ligand.setId(chem_comp.get("id").toString());
+                    ligand.setInChI(descriptor.get("InChI").toString());
+                    ligand.setInChIKey(descriptor.get("InChIKey").toString());
+                    ligand.setName(ligand.getId());
+                    ligand.setType(chem_comp.get("type").toString());
+                    ligand.setWeight((Double)chem_comp.get("formula_weight"));
+                    uniqueLigands.put(ligand.getFormula(), ligand);
+                }
 
-        List<RCSBLigand> matchingLigands = RCSBLigandsFactory.getFromPdbIds(pdbIds).stream()
-            .flatMap(ligands -> ligands.getLigands().stream())
-            .collect(Collectors.groupingBy(l -> l.getName()))
-            .values()
-            .stream()
-            .flatMap(group -> group.stream().limit(1))
-            .collect(Collectors.toList());
+            } catch (IOException e) {
+                continue;
+            } catch (ParseException e) {
+                continue;
+            }
+        }
+        return (List<RCSBLigand>)uniqueLigands.values();
 
-        return matchingLigands;
     }
 
     /**
