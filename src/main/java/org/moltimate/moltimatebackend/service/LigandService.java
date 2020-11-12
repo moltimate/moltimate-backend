@@ -23,20 +23,15 @@ import org.json.simple.parser.ParseException;
 import org.json.simple.parser.*;
 
 import javax.validation.constraints.Null;
-import java.io.BufferedReader;
+import java.io.*;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-
-import java.io.InputStream;
 
 import java.util.*;
 import java.util.stream.Collectors;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.io.UnsupportedEncodingException;
 
 
 /**
@@ -151,11 +146,16 @@ public class LigandService {
 
         try {
             URL fileLocation = new URL(String.format(DockingUtils.SDF_URL, ligandID));
-            InputStream fileStream = fileLocation.openStream();
-            byte[] file = new byte[fileStream.available()];
+            BufferedReader read = new BufferedReader( new InputStreamReader(fileLocation.openStream()));
 
-            fileStream.read(file);
+            String line;
+            String entireFileString = "";
+            while((line = read.readLine()) != null){
+                entireFileString = entireFileString + line + "\n";
 
+            }
+
+            byte[] file = entireFileString.getBytes();
             return new InMemoryMultipartFile(ligandID+".sdf", file);
         }
         catch (IOException e) {
