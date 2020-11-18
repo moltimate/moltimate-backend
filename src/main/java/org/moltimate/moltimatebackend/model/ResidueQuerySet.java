@@ -15,6 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ResidueQuerySet {
+
     @Id
     @GeneratedValue
     private long id;

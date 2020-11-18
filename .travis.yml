@@ -1,17 +1,30 @@
-sudo: required
+os: linux
 language: java
 notifications:
   email: false
+env:
+- PROFILE=$([ "$TRAVIS_BRANCH" == "master" ] && echo "prod" || echo "development")
 before_install:
 - openssl aes-256-cbc -K $encrypted_a6a69c5b1756_key -iv $encrypted_a6a69c5b1756_iv
   -in secrets/secrets.tar.enc -out secrets.tar -d
 - tar xvf secrets.tar
 install:
-- mvn -P prod install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+- mvn -P $PROFILE install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
 script:
-- mvn -P prod test -B
+- mvn -P $PROFILE test -B
+before_deploy:
+- cp target/moltimate-backend-1.0.0.war moltimate-backend.war
+- ./set-env-variables.sh
 deploy:
-  provider: gae
+- provider: gae
+  edge: true
   project: moltimate
   keyfile: client-secret.json
   on: master
+- provider: gae
+  edge: true
+  project: moltimate
+  version: development
+  promote: false
+  keyfile: client-secret.json
+  on: dev

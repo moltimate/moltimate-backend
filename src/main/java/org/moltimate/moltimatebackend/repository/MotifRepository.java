@@ -7,9 +7,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface MotifRepository extends JpaRepository<Motif, String> {
 
-    Motif findByPdbId(String pdbId);
+    Motif findByPdbIdIgnoreCase(String pdbId);
 
     Page<Motif> findAll(Pageable pageable);
 
-    Page<Motif> findByEcNumberStartingWith(String ecNumber, Pageable pageable);
+    Page<Motif> findByEcNumberEqualsOrEcNumberStartingWith(String unknown, String ecNumber, Pageable pageable);
 }

@@ -11,8 +11,7 @@ public class AlignmentUtils {
 
     public static String groupListToResString(List<Group> residues) {
         StringBuilder stringBuilder = new StringBuilder();
-        residues.forEach(residue -> stringBuilder.append(AminoAcidType.getCharMapping(residue.getChemComp()
-                                                                                                   .getThree_letter_code())));
+        residues.forEach(residue -> stringBuilder.append(AminoAcidType.getCharMapping(residue.getPDBName())));
         return stringBuilder.toString();
     }
 
@@ -22,7 +21,7 @@ public class AlignmentUtils {
         return stringBuilder.toString();
     }
 
-    public static int levensteinDistance(String x, String y) {
+    public static int levenshteinDistance(String x, String y) {
         int[][] dp = new int[x.length() + 1][y.length() + 1];
 
         for (int i = 0; i <= x.length(); i++) {

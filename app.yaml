@@ -1,17 +1,20 @@
 # Used by GCP App Engine
-runtime: java8
-inbound_services:
-  - warmup
-derived_file_type:
-  - java_precompiled
-threadsafe: True
-auto_id_policy: default
-api_version: 'none'
-handlers:
-  - url: /.*
-    script: unused
-    login: optional
-    secure: optional
+runtime: java
+env: flex
+runtime_config:
+    jdk: openjdk8
+includes:
+  - env_variables.yaml
+resources:
+    cpu: 2
+    memory_gb: 8
+automatic_scaling:
+    min_num_instances: 1
+    max_num_instances: 1
+readiness_check:
+    path: "/healthcheck"
+liveness_check:
+    path: "/healthcheck"
 skip_files:
   - .git/objects/
   - target/
