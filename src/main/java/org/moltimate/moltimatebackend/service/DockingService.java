@@ -215,7 +215,7 @@ public class DockingService {
 						headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
 						MultiValueMap<String, Object> openBabelParams = new LinkedMultiValueMap<>();
-						openBabelParams.add("molecule_1", new ByteArrayResource(proteinFile) {
+						openBabelParams.add("molecule_1", new ByteArrayResource(proteinFileTemp) {
 							@Override
 							public String getFilename() {
 								return pdbId + ".pdb";
