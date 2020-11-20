@@ -96,7 +96,7 @@ public class MotifTestService {
             if (alignment != null) {
                 motifAlignmentResponse.addSuccessfulEntry(structure, alignment);
             } else {
-                motifAlignmentResponse.addFailedEntry(structure.getPDBCode(), ligandService.getEcNumber(structure));
+                motifAlignmentResponse.addFailedEntry(structure.getPDBCode(), StructureUtils.ecNumber(structure));
             }
         }
         return motifAlignmentResponse;

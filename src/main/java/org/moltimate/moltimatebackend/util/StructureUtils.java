@@ -8,8 +8,17 @@ import org.biojava.nbio.structure.Structure;
 import org.biojava.nbio.structure.rcsb.RCSBDescription;
 import org.biojava.nbio.structure.rcsb.RCSBDescriptionFactory;
 import org.biojava.nbio.structure.rcsb.RCSBPolymer;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.moltimate.moltimatebackend.constant.EcNumber;
 
+import javax.validation.constraints.Null;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -201,15 +210,38 @@ public class StructureUtils {
     }
 
     public static String ecNumber(Structure structure) {
-        RCSBDescription description = RCSBDescriptionFactory.get(structure.getPDBCode());
-        if(description != null) {
-            for(RCSBPolymer polymer: description.getPolymers()){
-                if(polymer.getEnzClass() != null){
-                    return polymer.getEnzClass();
+        String USER_AGENT = "Mozilla/5.0";
+        String url = "https://data.rcsb.org/rest/v1/core/polymer_entity/" + structure.getPDBCode() + "/1";
+        StringBuffer response = new StringBuffer();
+
+        try {
+            URL obj = new URL(url);
+            HttpURLConnection httpURLConnection = (HttpURLConnection) obj.openConnection();
+            httpURLConnection.setRequestMethod("GET");
+            httpURLConnection.setRequestProperty("User-Agent", USER_AGENT);
+            int responseCode = httpURLConnection.getResponseCode();
+            if (responseCode == HttpURLConnection.HTTP_OK) { // success
+                BufferedReader in = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()));
+                String inputLine;
+                while ((inputLine = in.readLine()) != null) {
+                    response.append(inputLine);
                 }
+                in.close();
+            } else {
             }
+        } catch (IOException e) {
+            return EcNumber.UNKNOWN;
         }
-        return EcNumber.UNKNOWN;
+        JSONParser parser = new JSONParser();
+        try {
+            JSONObject jsonObject = ((JSONObject) parser.parse(response.toString()));
+            JSONObject entity = (JSONObject)jsonObject.get("rcsb_polymer_entity");
+            String ecClass = entity.get("pdbx_ec").toString();
+            return ecClass;
+        } catch (NullPointerException | ParseException e) {
+            return EcNumber.UNKNOWN;
+        }
+
     }
 
     private static double l2Norm(double[] w2v) {
