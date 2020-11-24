@@ -13,6 +13,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.moltimate.moltimatebackend.constant.EcNumber;
 
+import javax.validation.constraints.Null;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -237,10 +238,9 @@ public class StructureUtils {
             JSONObject entity = (JSONObject)jsonObject.get("rcsb_polymer_entity");
             String ecClass = entity.get("pdbx_ec").toString();
             return ecClass;
-        } catch (ParseException e) {
-
+        } catch (NullPointerException | ParseException e) {
+            return EcNumber.UNKNOWN;
         }
-        return EcNumber.UNKNOWN;
 
     }
 

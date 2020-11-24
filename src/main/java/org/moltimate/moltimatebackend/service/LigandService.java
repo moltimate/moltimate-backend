@@ -23,6 +23,9 @@ import org.json.simple.parser.ParseException;
 import org.json.simple.parser.*;
 
 import javax.validation.constraints.Null;
+import java.io.BufferedReader;
+
+import javax.validation.constraints.Null;
 import java.io.*;
 
 import java.net.HttpURLConnection;
@@ -54,11 +57,7 @@ public class LigandService {
         }
         EcNumberValidator.validate(ecNumber);
 
-
         log.info("Retrieving Ligands associated EC Class " + ecNumber);
-
-        //call method from the motifRepository to get the pdb ids of the motifs that
-        //are in the ec class or unknown
         List<String> pdbIds = new ArrayList<>();
         try {
             pdbIds = getPdbIdsFromEcClass(ecNumber);
@@ -69,7 +68,7 @@ public class LigandService {
         //remove unknown ec class pdb ids
         Map<String, RCSBLigand> uniqueLigands = new HashMap<>();
 
-
+        Map<String, RCSBLigand> uniqueLigands = new HashMap<>();
         log.info("Retrieving Ligands associated with PDB IDs {}", pdbIds);
         for(String pdb : pdbIds) {
             String url = "https://data.rcsb.org/graphql?query=%7B%0A%20%20entry(entry_id:%20%22"+ pdb +"%22)%20%7B%0A%20%20%20%20nonpolymer_entities%20%7B%0A%20%20%20%20%20%20rcsb_nonpolymer_entity_container_identifiers%20%7B%0A%20%20%20%20%20%20%20%20entry_id%0A%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20nonpolymer_comp%20%7B%0A%20%20%20%20%20%20%20%20chem_comp%20%7B%0A%20%20%20%20%20%20%20%20%20%20id%0A%20%20%20%20%20%20%20%20%20%20type%0A%20%20%20%20%20%20%20%20%20%20formula_weight%0A%20%20%20%20%20%20%20%20%20%20formula%0A%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20%20%20rcsb_chem_comp_descriptor%20%7B%0A%20%20%20%20%20%20%20%20%20%20InChI%0A%20%20%20%20%20%20%20%20%20%20InChIKey%0A%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20%20%20pdbx_chem_comp_descriptor%20%7B%0A%20%20%20%20%20%20%20%20%20%20descriptor%0A%20%20%20%20%20%20%20%20%20%20type%0A%20%20%20%20%20%20%20%20%20%20program%0A%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20%7D%0A%20%20%20%20%7D%0A%20%20%7D%0A%7D";
@@ -208,8 +207,12 @@ public class LigandService {
      * @return List of pdbIds in the EC class
      */
     public List<String> getPdbIdsFromEcClass(String ecNumber) throws IOException {
-        List<String> pdbIds = new ArrayList<>();
 
+        List<String> pdbIds = new ArrayList<>();
+        if (ecNumber == EcNumber.UNKNOWN) {
+            log.info("EC Number not known. Enter EC number and try again");
+            return pdbIds;
+        }
         String USER_AGENT = "Mozilla/5.0";
 
         String baseURL = "https://search.rcsb.org/rcsbsearch/v1/query?json=";
