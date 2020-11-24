@@ -1,14 +1,18 @@
 package org.moltimate.moltimatebackend.dto.request;
 
 import org.biojava.nbio.structure.Structure;
-import org.mockito.Mockito;
-
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
-import org.moltimate.moltimatebackend.exception.InvalidPdbIdException;
-import org.moltimate.moltimatebackend.model.MotifTest;
+import org.mockito.Mockito;
+import org.moltimate.moltimatebackend.dto.response.PdbQueryResponse;
+import org.moltimate.moltimatebackend.model.Residue;
+import org.moltimate.moltimatebackend.util.ProteinUtils;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import static org.mockito.ArgumentMatchers.any;
 
 public class TestMotifTestRequest {
 
@@ -37,11 +41,19 @@ public class TestMotifTestRequest {
         Assert.assertEquals(1, mtr.getPrecisionFactor());
     }
     @Test
-    public void TestGetRandomCount() {
+    public void testGetRandomCount() {
         MotifTestRequest mtr = new MotifTestRequest();
         mtr.setRandomCount(10);
         Assert.assertEquals(10, mtr.getRandomCount());
         mtr.setRandomCount(-1);
         Assert.assertEquals(1, mtr.getRandomCount());
     }
+
+   @Test
+    public void testResidueList() {
+        MotifTestRequest mtr = new MotifTestRequest();
+        mtr.setActiveSiteResidues(Arrays.asList("ALA A 100", "ASN A 50"));
+        List<Residue> residues = mtr.parseResidueEntries();
+        Assert.assertEquals(2, residues.size());
+   }
 }
