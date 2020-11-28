@@ -18,10 +18,19 @@ import java.util.List;
 
 @Slf4j
 public class PdbXmlClient {
+    /**
+     * This is not using XML, due to refactoring and RCSB no longer supporting XML
+     * This is now using JSON
+     */
 
     private static final String PDB_GET_CURRENT_PDB_IDS_URL = "https://data.rcsb.org/rest/v1/holdings/current/entry_ids";
 
-    //get the pdb ids that are in the same ec class
+
+    /**
+     *     get the pdb ids that are in the ec class
+     * @param ecNumber
+     * @return list of pdb ids
+     */
     public static List<String> postEcNumberForPdbIds(String ecNumber) {
         log.info("Post EC number for PDB Ids");
         List<String> pdbIds = new ArrayList<>();
@@ -86,7 +95,6 @@ public class PdbXmlClient {
     //get all current pdb ids in the pdb
     //returns a list of all the pdb ids currently active in the pdb
     public static List<String> getPdbIds() {
-        log.info("Get Pdb Ids 48 PdbXmlClient");
         List<String> pdbResponse;
         try {
             pdbResponse = getAllCurrentPdbIds();
@@ -100,7 +108,6 @@ public class PdbXmlClient {
     //the actual call to the pdb to get all current pdb ids
     private static List<String> getAllCurrentPdbIds() throws IOException {
         List<String> pdbIds = new ArrayList<>();
-        log.info("get all current Pdb Ids 90 pdb xml client");
         String USER_AGENT = "Mozilla/5.0";
         URL url = new URL(PDB_GET_CURRENT_PDB_IDS_URL);
         HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
@@ -118,16 +125,13 @@ public class PdbXmlClient {
         } else {
             log.error("GET request did not work");
         }
-        log.info("Response " + response.toString());
         JSONParser parser = new JSONParser();
         JSONArray returnList = new JSONArray();
         try {
             returnList = ((JSONArray)parser.parse(response.toString()));
-            log.info("Return List: " + returnList.toString());
             Iterator<String> iterator = returnList.iterator();
             while (iterator.hasNext()) {
                 Object pdbJson = iterator.next();
-                //log.info("pdb JSON: " + pdbJson.toString());
                 pdbIds.add(pdbJson.toString());
             }
         } catch (ParseException | NullPointerException e) {
