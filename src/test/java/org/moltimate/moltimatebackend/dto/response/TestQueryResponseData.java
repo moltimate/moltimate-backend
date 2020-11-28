@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import org.biojava.nbio.structure.Structure;
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.moltimate.moltimatebackend.model.Alignment;
 import org.moltimate.moltimatebackend.model.Motif;
@@ -72,5 +73,39 @@ public class TestQueryResponseData {
         Assert.assertEquals(2, qrd.getAlignments().size());
         Assert.assertEquals(2, qrd.getFailedAlignments().size());
     }
+    @Test
+    public void testEcNumberFilter() {
+        Structure struct = Mockito.mock(Structure.class);
+        Mockito.when(struct.getPDBCode()).thenReturn("1a0j");
+        QueryResponseData qrd = new QueryResponseData(struct);
+        Motif motif = Mockito.mock(Motif.class);
+        Mockito.when(motif.getEcNumber()).thenReturn("2.1.4");
+        Alignment alignment = Mockito.mock(Alignment.class);
+        qrd.addSuccessfulEntry(motif,alignment);
+        qrd.addSuccessfulEntry(motif, alignment);
+        qrd.addFailedEntry("1mk4", "2.1.4.5");
+        qrd.addFailedEntry("2trq", "1.21.4.3");
+        qrd.filterEcNumber("2.1.4");
+        Assert.assertEquals(2, qrd.getAlignments().size());
+        Assert.assertEquals(1, qrd.getFailedAlignments().size());
+    }
+
+    @Test
+    public void testClone() {
+        Structure struct = Mockito.mock(Structure.class);
+        Mockito.when(struct.getPDBCode()).thenReturn("1a0j");
+        QueryResponseData qrd = new QueryResponseData(struct);
+        Motif motif = Mockito.mock(Motif.class);
+        Mockito.when(motif.getEcNumber()).thenReturn("2.1.4");
+        Alignment alignment = Mockito.mock(Alignment.class);
+        qrd.addSuccessfulEntry(motif,alignment);
+        qrd.addSuccessfulEntry(motif, alignment);
+        qrd.addFailedEntry("1mk4", "2.1.4.5");
+        qrd.addFailedEntry("2trq", "1.21.4.3");
+        QueryResponseData qrdCloned = qrd.clone();
+        Assert.assertEquals(qrdCloned, qrd);
+        Assert.assertTrue(qrd.similar(qrdCloned));
+    }
+
 }
 
