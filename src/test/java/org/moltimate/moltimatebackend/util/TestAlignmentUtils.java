@@ -14,6 +14,13 @@ import java.util.Map;
 public class TestAlignmentUtils {
 
 	@Test
+	public void testAlignmentUtilsInstance(){
+		// Included for code coverage
+		AlignmentUtils CuT = new AlignmentUtils();
+		Assert.assertNotNull(CuT);
+	}
+
+	@Test
 	public void testGroupListToResString() {
 		List<Group> groups = new ArrayList<>();
 		groups.add( makeGroup( "ALA" ) );
