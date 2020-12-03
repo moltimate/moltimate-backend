@@ -17,6 +17,7 @@ import org.moltimate.moltimatebackend.util.ActiveSiteUtils;
 import org.moltimate.moltimatebackend.util.DockingUtils.InMemoryMultipartFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.moltimate.moltimatebackend.exception.DockingJobFailedException;
 import org.moltimate.moltimatebackend.exception.InvalidFileException;
@@ -34,6 +35,7 @@ import java.io.*;
 import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 @Service
 @Slf4j
@@ -153,9 +155,45 @@ public class DockingService {
 
 
 	public Resource exportLigands(ExportRequest request) {
+
+		try{
+			//Add babelResult to ZIP
+			MultipartFile babelResult = getBabelResult(request.getBabelJobId());
+			InputStream is = babelResult.getInputStream();
+			ByteArrayOutputStream byteArrayOS = new ByteArrayOutputStream();
+			ZipOutputStream zipOS = new ZipOutputStream(byteArrayOS);
+			ZipEntry zipEntry = new ZipEntry(babelResult.getOriginalFilename());
+			zipOS.putNextEntry(zipEntry);
+
+			byte[] bytes = new byte[1024];
+			int length;
+			while((length = is.read(bytes)) >= 0){
+				zipOS.write(bytes, 0,length);
+			}
+
+			//Add docking info csv file to ZIP
+			ByteArrayResource csv = createCSV(request);
+			is = csv.getInputStream();
+			zipEntry = new ZipEntry("ligands.csv");
+			zipOS.putNextEntry(zipEntry);
+
+			bytes = new byte[1024];
+			while((length = is.read(bytes)) >= 0){
+				zipOS.write(bytes, 0, length);
+			}
+			zipOS.close();
+			return new ByteArrayResource(byteArrayOS.toByteArray());
+
+		}catch (IOException e){
+			log.info("Failed to fetch pbd file for download : jobId{" + request.getBabelJobId() + "}");
+		}
+		return null;
+	}
+
+
+	private ByteArrayResource createCSV(ExportRequest request){
 		StringBuilder csvOutput = new StringBuilder();
 		csvOutput.append("Name,Mode Number,Binding Energy,RMSD Lower,RMSD Upper\n");
-
 		for(ExportLigand ligand : request.getLigands()) {
 			csvOutput.append("\"");
 			csvOutput.append(ligand.getName());

@@ -24,7 +24,7 @@ public class TestDockingService {
 
 	@Test
 	public void testExport() {
-		ExportRequest request = new ExportRequest( new ArrayList<>() );
+		ExportRequest request = new ExportRequest( new ArrayList<>(), null, null );
 		request.getLigands().add( new ExportLigand("Name1", 10, 1, 0.1, 0.01) );
 		request.getLigands().add( new ExportLigand("Name2,", 20, 2, 0.2, 0.02) );
 		request.getLigands().add( new ExportLigand("Name3", 30, 3, 0.3, 0.03) );
