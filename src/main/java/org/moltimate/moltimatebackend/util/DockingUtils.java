@@ -14,8 +14,7 @@ import org.apache.commons.io.FileUtils;
 
 @Slf4j
 public class DockingUtils {
-	public static String SDF_URL = "https://files.rcsb.org/ligands/view/%s_ideal.sdf";
-    
+	public static String SDF_URL = "https://files.rcsb.org/ligands/download/%s_ideal.sdf";
     public static class InMemoryMultipartFile implements MultipartFile {
 		private String originalFilename;
 		private byte[] bytes;
