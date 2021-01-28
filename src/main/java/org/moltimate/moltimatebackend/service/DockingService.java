@@ -14,6 +14,7 @@ import org.moltimate.moltimatebackend.dto.response.QueryAlignmentResponse;
 import org.moltimate.moltimatebackend.model.ActiveSite;
 import org.moltimate.moltimatebackend.model.Residue;
 import org.moltimate.moltimatebackend.util.ActiveSiteUtils;
+import org.moltimate.moltimatebackend.util.DockingUtils;
 import org.moltimate.moltimatebackend.util.DockingUtils.InMemoryMultipartFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
@@ -230,6 +231,7 @@ public class DockingService {
 					byte[] logFile = null;
 					byte[] ligandFile = null;
 					byte[] proteinFile = fetchMacromolecule(pdbId).getBytes();
+					byte[] proteinFileTemp = DockingUtils.replaceAtoms( proteinFile );
 					while((entry = zipInputStream.getNextEntry()) != null) {
 						ByteArrayOutputStream output = new ByteArrayOutputStream();
 						byte[] buf = new byte[1024];
@@ -251,7 +253,7 @@ public class DockingService {
 						headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
 						MultiValueMap<String, Object> openBabelParams = new LinkedMultiValueMap<>();
-						openBabelParams.add("molecule_1", new ByteArrayResource(proteinFile) {
+						openBabelParams.add("molecule_1", new ByteArrayResource(proteinFileTemp) {
 							@Override
 							public String getFilename() {
 								return pdbId + ".pdb";
