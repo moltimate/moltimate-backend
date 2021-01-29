@@ -6,7 +6,7 @@
     <groupId>org.moltimate.backend</groupId>
     <artifactId>moltimate-backend</artifactId>
     <version>1.0.0</version>
-    <packaging>war</packaging>
+    <packaging>jar</packaging>
 
     <name>moltimate-backend</name>
     <description>A protein active site alignment application</description>
@@ -291,14 +291,6 @@
                         <exclude>javax.servlet:javax.servlet-api</exclude>
                         <exclude>com.google.guava:guava</exclude> <!-- avoid android version -->
                     </excludes>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <artifactId>maven-war-plugin</artifactId>
-                <version>3.1.0</version>
-                <configuration>
-                    <failOnMissingWebXml>false</failOnMissingWebXml>
                 </configuration>
             </plugin>
 
