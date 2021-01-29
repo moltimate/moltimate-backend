@@ -205,8 +205,9 @@
             </dependencies>
         </profile>
 
-        <!-- Production Profile (connects to GCP Cloud SQL & uses Google's jetty) -->
+        <!-- Production Profile (connects to AWS Cloud SQL) -->
         <profile>
+            <!--  TODO set so that will use env variable to determine -->
             <id>prod</id>
 
             <properties>
@@ -222,6 +223,7 @@
 
     <build>
         <plugins>
+<!--            TODO: I believe we can keep this, but will need to point it to proper location-->
 <!--            <plugin>-->
 <!--                <groupId>com.googlecode.maven-download-plugin</groupId>-->
 <!--                <artifactId>download-maven-plugin</artifactId>-->
@@ -242,6 +244,7 @@
 <!--                    </execution>-->
 <!--                </executions>-->
 <!--            </plugin>-->
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
