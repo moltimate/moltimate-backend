@@ -42,6 +42,7 @@ public class TestMotifService {
 		Mockito.when( motif1.getPdbId() ).thenReturn( "1a0j" );
 		Mockito.when( motif2.getPdbId() ).thenReturn( "1sdf" );
 
+
 		ResidueQuerySet set1 = Mockito.mock( ResidueQuerySet.class );
 		ResidueQuerySet set2 = Mockito.mock( ResidueQuerySet.class );
 
