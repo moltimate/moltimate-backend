@@ -3,3 +3,12 @@ option_settings:
   - namespace: aws:ec2:instances
     option_name: InstanceTypes
     value:  t2.medium
+#  - namespace: aws:rds:dbinstance
+#    option_name: DBAllocatedStorage
+#    value:  15
+#  - namespace: aws:rds:dbinstance
+#    option_name: DBDeletionPolicy
+#    value:  Snapshot
+#  - namespace: aws:rds:dbinstance
+#    option_name: DBEngine
+#    value:  mysql
