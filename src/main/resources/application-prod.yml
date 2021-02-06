@@ -1,3 +1,6 @@
+# TODO: change production data sources to use AWS
+# TODO: find instance-connection-name
+# TODO: initialization mode?
 spring:
   cloud:
     gcp:

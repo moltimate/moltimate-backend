@@ -1,3 +1,5 @@
+# TODO look up documentation and set to the correct values
+# TODO use jar instead of war
 os: linux
 language: java
 notifications:
