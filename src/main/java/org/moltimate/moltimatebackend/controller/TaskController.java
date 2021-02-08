@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
 
+import javax.annotation.PostConstruct;
+
 /**
  * Task REST API contains tasks which are useful and often run periodically by cron jobs
  */
@@ -34,6 +36,7 @@ public class TaskController {
      */
     @ApiIgnore // This doesn't need to be publicly listed in API documentation
     @RequestMapping(value = "/updatemotifs", method = RequestMethod.GET)
+//    @PostConstruct
     public String updateMotifs() {
         motifService.updateMotifs();
         return "complete";
