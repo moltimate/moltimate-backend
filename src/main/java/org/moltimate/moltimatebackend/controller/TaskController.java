@@ -36,7 +36,7 @@ public class TaskController {
      */
     @ApiIgnore // This doesn't need to be publicly listed in API documentation
     @RequestMapping(value = "/updatemotifs", method = RequestMethod.GET)
-//    @PostConstruct
+    @PostConstruct
     public String updateMotifs() {
         motifService.updateMotifs();
         return "complete";
