@@ -26,13 +26,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
             <version>${spring.boot.version}</version>
-<!--            &lt;!&ndash; Exclude Tomcat so that it doesn't conflict w/ Jetty server &ndash;&gt;-->
-<!--            <exclusions>-->
-<!--                <exclusion>-->
-<!--                    <groupId>org.springframework.boot</groupId>-->
-<!--                    <artifactId>spring-boot-starter-tomcat</artifactId>-->
-<!--                </exclusion>-->
-<!--            </exclusions>-->
         </dependency>
 
         <dependency>
@@ -47,11 +40,6 @@
             <artifactId>spring-aspects</artifactId>
             <version>5.2.5.RELEASE</version>
         </dependency>
-
-<!--        <dependency>-->
-<!--            <groupId>org.springframework.boot</groupId>-->
-<!--            <artifactId>spring-boot-starter-jetty</artifactId>-->
-<!--        </dependency>-->
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -146,6 +134,11 @@
         </dependency>
 
         <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.hsqldb</groupId>
             <artifactId>hsqldb</artifactId>
             <version>2.4.0</version>
@@ -200,6 +193,7 @@
 
             <properties>
                 <activatedSpringProfile>dev</activatedSpringProfile>
+                <frontend.branch>dev</frontend.branch>
             </properties>
 
             <activation>
@@ -218,23 +212,24 @@
 
         <!-- Production Profile (connects to AWS Cloud SQL) -->
         <profile>
-            <!--  TODO set so that will use env variable to determine -->
             <id>prod</id>
 
             <properties>
                 <activatedSpringProfile>prod</activatedSpringProfile>
-                <frontend.branch>master</frontend.branch>
+                <frontend.branch>prod</frontend.branch>
             </properties>
 
             <dependencies>
-                <!--  TODO add AWS RDS dependency-->
+                <dependency>
+                    <groupId>mysql</groupId>
+                    <artifactId>mysql-connector-java</artifactId>
+                </dependency>
             </dependencies>
         </profile>
     </profiles>
 
     <build>
         <plugins>
-<!--            TODO: I believe we can keep this, but will need to point it to proper location-->
             <plugin>
                 <groupId>com.googlecode.maven-download-plugin</groupId>
                 <artifactId>download-maven-plugin</artifactId>
@@ -247,7 +242,7 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
-                            <url>https://moltimate-production-artifacts.s3.us-east-2.amazonaws.com/dist.tar.gz</url>
+                            <url>https://moltimate-production-artifacts.s3.us-east-2.amazonaws.com/frontend/${frontend.branch}/dist.tar.gz</url>
                             <unpack>true</unpack>
                             <skipCache>true</skipCache>
                             <outputDirectory>src/main/resources/static</outputDirectory>
@@ -255,12 +250,6 @@
                     </execution>
                 </executions>
             </plugin>
-
-<!--            <plugin>-->
-<!--                <groupId>org.eclipse.jetty</groupId>-->
-<!--                <artifactId>jetty-maven-plugin</artifactId>-->
-<!--                <version>9.4.2.v20170220</version>-->
-<!--            </plugin>-->
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -361,6 +350,4 @@
             </resource>
         </resources>
     </build>
-
-
 </project>
