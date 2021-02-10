@@ -1,14 +1,25 @@
+## These settings are to be replicated in the aws console.
+## Currently they cause issues if ran through ebextensions
+
 option_settings:
-  # Set ec2 instances to use
+  ## Set ec2 instances to use
   - namespace: aws:ec2:instances
     option_name: InstanceTypes
     value:  t2.medium
-#  - namespace: aws:rds:dbinstance
-#    option_name: DBAllocatedStorage
-#    value:  15
-#  - namespace: aws:rds:dbinstance
-#    option_name: DBDeletionPolicy
-#    value:  Snapshot
-#  - namespace: aws:rds:dbinstance
-#    option_name: DBEngine
-#    value:  mysql
+  ## Single instance with a min and max of 1
+  - namespace: aws:elasticbeanstalk:environment
+    option_name: EnvironmentType
+    value:  SingleInstance
+  - namespace: aws:autoscaling:asg
+    option_name: MinSize
+    value:  1
+  ## Set DB config
+  - namespace: aws:rds:dbinstance
+    option_name: DBAllocatedStorage
+    value:  15
+  - namespace: aws:rds:dbinstance
+    option_name: DBDeletionPolicy
+    value:  DBDeletionPolicy
+  - namespace: aws:rds:dbinstance
+    option_name: DBEngine
+    value:  mysql
