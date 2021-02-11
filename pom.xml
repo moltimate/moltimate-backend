@@ -183,7 +183,6 @@
     <profiles>
         <!-- Local Development (H2 database) -->
         <profile>
-            <!--  TODO set so that will use env variable to determine -->
             <id>dev</id>
 
             <properties>
