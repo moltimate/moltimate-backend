@@ -153,6 +153,12 @@
             <version>2.9.2</version>
         </dependency>
 
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.21</version>
+        </dependency>
+
         <!-- Protein Function Analysis -->
         <dependency>
             <groupId>org.biojava</groupId>
@@ -217,6 +223,7 @@
                 <dependency>
                     <groupId>mysql</groupId>
                     <artifactId>mysql-connector-java</artifactId>
+                    <version>8.0.21</version>
                 </dependency>
             </dependencies>
         </profile>
