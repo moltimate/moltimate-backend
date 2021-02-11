@@ -25,18 +25,16 @@ import org.json.simple.parser.*;
 import javax.validation.constraints.Null;
 import java.io.BufferedReader;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
+import javax.validation.constraints.Null;
+import java.io.*;
+
 import java.net.HttpURLConnection;
 import java.net.URL;
-
-import java.io.InputStream;
 
 import java.util.*;
 import java.util.stream.Collectors;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.io.UnsupportedEncodingException;
 
 
 /**
@@ -67,8 +65,9 @@ public class LigandService {
             log.error(e.getMessage());
         }
         log.info("Found PDB Ids {}", pdbIds);
-
+        //remove unknown ec class pdb ids
         Map<String, RCSBLigand> uniqueLigands = new HashMap<>();
+
         log.info("Retrieving Ligands associated with PDB IDs {}", pdbIds);
         for(String pdb : pdbIds) {
             String url = "https://data.rcsb.org/graphql?query=%7B%0A%20%20entry(entry_id:%20%22"+ pdb +"%22)%20%7B%0A%20%20%20%20nonpolymer_entities%20%7B%0A%20%20%20%20%20%20rcsb_nonpolymer_entity_container_identifiers%20%7B%0A%20%20%20%20%20%20%20%20entry_id%0A%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20nonpolymer_comp%20%7B%0A%20%20%20%20%20%20%20%20chem_comp%20%7B%0A%20%20%20%20%20%20%20%20%20%20id%0A%20%20%20%20%20%20%20%20%20%20type%0A%20%20%20%20%20%20%20%20%20%20formula_weight%0A%20%20%20%20%20%20%20%20%20%20formula%0A%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20%20%20rcsb_chem_comp_descriptor%20%7B%0A%20%20%20%20%20%20%20%20%20%20InChI%0A%20%20%20%20%20%20%20%20%20%20InChIKey%0A%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20%20%20pdbx_chem_comp_descriptor%20%7B%0A%20%20%20%20%20%20%20%20%20%20descriptor%0A%20%20%20%20%20%20%20%20%20%20type%0A%20%20%20%20%20%20%20%20%20%20program%0A%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20%7D%0A%20%20%20%20%7D%0A%20%20%7D%0A%7D";
@@ -91,6 +90,8 @@ public class LigandService {
                     log.error("GET request did not work");
                 }
                 JSONParser parser = new JSONParser();
+                log.info("Ligand Response for PDB Id " + pdb);
+                log.info(response.toString());
                 JSONObject responseObj = (JSONObject)parser.parse(response.toString());
                 JSONObject data = (JSONObject) responseObj.get("data");
                 JSONObject entry = (JSONObject) data.get("entry");
@@ -102,6 +103,8 @@ public class LigandService {
                     JSONObject chem_comp = (JSONObject)((JSONObject)ligandJSON.get("nonpolymer_comp")).get("chem_comp");
                     JSONObject descriptor = (JSONObject)((JSONObject)ligandJSON.get("nonpolymer_comp")).get("rcsb_chem_comp_descriptor");
                     RCSBLigand ligand = new RCSBLigand();
+                    //TODO: Possibly have to add the SMILE field- not sure what smiles is.
+                    //also id is being copied over to the name
                     ligand.setFormula(chem_comp.get("formula").toString());
                     ligand.setId(chem_comp.get("id").toString());
                     ligand.setInChI(descriptor.get("InChI").toString());
@@ -121,7 +124,7 @@ public class LigandService {
             }
         }
         List<RCSBLigand> returnLigands = new ArrayList<>();
-        for(RCSBLigand lig : uniqueLigands.values()) {
+        for(RCSBLigand lig : uniqueLigands.values()){
             returnLigands.add(lig);
         }
         return returnLigands;
@@ -141,11 +144,16 @@ public class LigandService {
 
         try {
             URL fileLocation = new URL(String.format(DockingUtils.SDF_URL, ligandID));
-            InputStream fileStream = fileLocation.openStream();
-            byte[] file = new byte[fileStream.available()];
+            BufferedReader read = new BufferedReader( new InputStreamReader(fileLocation.openStream()));
 
-            fileStream.read(file);
+            String line;
+            String entireFileString = "";
+            while((line = read.readLine()) != null){
+                entireFileString = entireFileString + line + "\n";
 
+            }
+
+            byte[] file = entireFileString.getBytes();
             return new InMemoryMultipartFile(ligandID+".sdf", file);
         }
         catch (IOException e) {
