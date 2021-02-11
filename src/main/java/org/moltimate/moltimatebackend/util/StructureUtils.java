@@ -5,15 +5,12 @@ import org.biojava.nbio.structure.Chain;
 import org.biojava.nbio.structure.Group;
 import org.biojava.nbio.structure.GroupType;
 import org.biojava.nbio.structure.Structure;
-import org.biojava.nbio.structure.rcsb.RCSBDescription;
-import org.biojava.nbio.structure.rcsb.RCSBDescriptionFactory;
-import org.biojava.nbio.structure.rcsb.RCSBPolymer;
+
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.moltimate.moltimatebackend.constant.EcNumber;
 
-import javax.validation.constraints.Null;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;

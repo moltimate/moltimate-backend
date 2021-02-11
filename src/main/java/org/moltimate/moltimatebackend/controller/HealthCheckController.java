@@ -16,6 +16,8 @@ package org.moltimate.moltimatebackend.controller;
  */
 
 
+import org.moltimate.moltimatebackend.dto.response.QueryAlignmentResponse;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -23,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class HealthCheckController {
 
     @GetMapping("/healthcheck")
-    public String health() {
-        return "Welcome to Moltimate!";
+    public ResponseEntity<String> health() {
+        return ResponseEntity.ok("Health OK");
     }
 }

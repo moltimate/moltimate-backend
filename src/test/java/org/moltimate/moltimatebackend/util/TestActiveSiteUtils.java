@@ -9,6 +9,12 @@ import java.util.List;
 public class TestActiveSiteUtils {
 
 	@Test
+	public void testActiveSiteUtilsInstance(){
+		ActiveSiteUtils CuT = new ActiveSiteUtils();
+		Assert.assertNotNull(CuT);
+	}
+
+	@Test
 	public void testGetActiveSites() {
 		List<ActiveSite> testSites = ActiveSiteUtils.getActiveSites();
 		Assert.assertNotNull( testSites );

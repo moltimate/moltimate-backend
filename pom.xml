@@ -6,7 +6,7 @@
     <groupId>org.moltimate.backend</groupId>
     <artifactId>moltimate-backend</artifactId>
     <version>1.0.0</version>
-    <packaging>war</packaging>
+    <packaging>jar</packaging>
 
     <name>moltimate-backend</name>
     <description>A protein active site alignment application</description>
@@ -26,13 +26,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
             <version>${spring.boot.version}</version>
-            <!-- Exclude Tomcat so that it doesn't conflict w/ Jetty server -->
-            <exclusions>
-                <exclusion>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-tomcat</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <dependency>
@@ -208,79 +201,22 @@
                     <version>1.4.197</version>
                     <scope>provided</scope>
                 </dependency>
-
-                <dependency>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-jetty</artifactId>
-                </dependency>
             </dependencies>
         </profile>
 
+        <!-- Production Profile (connects to AWS Cloud SQL) -->
         <profile>
-            <id>server</id>
+            <id>prod</id>
 
             <properties>
-                <activatedSpringProfile>server</activatedSpringProfile>
-                <frontend.branch>master</frontend.branch>
+                <activatedSpringProfile>prod</activatedSpringProfile>
+                <frontend.branch>prod</frontend.branch>
             </properties>
 
             <dependencies>
                 <dependency>
                     <groupId>mysql</groupId>
                     <artifactId>mysql-connector-java</artifactId>
-                </dependency>
-
-                <dependency>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-jetty</artifactId>
-                </dependency>
-            </dependencies>
-        </profile>
-
-        <!-- Development Demo Profile (deployed, connects to GCP Cloud SQL & uses Google's jetty) -->
-        <profile>
-            <id>development</id>
-
-            <properties>
-                <activatedSpringProfile>prod</activatedSpringProfile>
-                <frontend.branch>dev</frontend.branch>
-            </properties>
-
-            <dependencies>
-                <dependency>
-                    <groupId>org.springframework.cloud</groupId>
-                    <artifactId>spring-cloud-gcp-starter</artifactId>
-                    <version>${spring.cloud.version}</version>
-                </dependency>
-
-                <dependency>
-                    <groupId>org.springframework.cloud</groupId>
-                    <artifactId>spring-cloud-gcp-starter-sql-mysql</artifactId>
-                    <version>${spring.cloud.version}</version>
-                </dependency>
-            </dependencies>
-        </profile>
-
-        <!-- Production Profile (connects to GCP Cloud SQL & uses Google's jetty) -->
-        <profile>
-            <id>prod</id>
-
-            <properties>
-                <activatedSpringProfile>prod</activatedSpringProfile>
-                <frontend.branch>master</frontend.branch>
-            </properties>
-
-            <dependencies>
-                <dependency>
-                    <groupId>org.springframework.cloud</groupId>
-                    <artifactId>spring-cloud-gcp-starter</artifactId>
-                    <version>${spring.cloud.version}</version>
-                </dependency>
-
-                <dependency>
-                    <groupId>org.springframework.cloud</groupId>
-                    <artifactId>spring-cloud-gcp-starter-sql-mysql</artifactId>
-                    <version>${spring.cloud.version}</version>
                 </dependency>
             </dependencies>
         </profile>
@@ -300,7 +236,7 @@
                             <goal>wget</goal>
                         </goals>
                         <configuration>
-                            <url>https://storage.googleapis.com/artifacts.moltimate.appspot.com/frontend/${frontend.branch}/dist.tar.gz</url>
+                            <url>https://moltimate-production-artifacts.s3.us-east-2.amazonaws.com/frontend/${frontend.branch}/dist.tar.gz</url>
                             <unpack>true</unpack>
                             <skipCache>true</skipCache>
                             <outputDirectory>src/main/resources/static</outputDirectory>
@@ -308,6 +244,7 @@
                     </execution>
                 </executions>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
@@ -335,14 +272,6 @@
             </plugin>
 
             <plugin>
-                <groupId>com.google.cloud.tools</groupId>
-                <artifactId>appengine-maven-plugin</artifactId>
-                <version>1.3.1</version>
-                <configuration>
-                </configuration>
-            </plugin>
-
-            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>versions-maven-plugin</artifactId>
                 <version>2.4</version>
@@ -362,20 +291,6 @@
                         <exclude>javax.servlet:javax.servlet-api</exclude>
                         <exclude>com.google.guava:guava</exclude> <!-- avoid android version -->
                     </excludes>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-maven-plugin</artifactId>
-                <version>9.4.2.v20170220</version>
-            </plugin>
-
-            <plugin>
-                <artifactId>maven-war-plugin</artifactId>
-                <version>3.1.0</version>
-                <configuration>
-                    <failOnMissingWebXml>false</failOnMissingWebXml>
                 </configuration>
             </plugin>
 
@@ -429,6 +344,4 @@
             </resource>
         </resources>
     </build>
-
-
 </project>

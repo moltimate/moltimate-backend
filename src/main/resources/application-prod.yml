@@ -1,13 +1,12 @@
+# TODO: change production data sources to use AWS
+# TODO: find instance-connection-name
+# TODO: initialization mode?
 spring:
-  cloud:
-    gcp:
-      project-id: moltimate
-      sql:
-        database-name: moltimate
-        instance-connection-name: moltimate:us-east4:backend-db-sql
   datasource:
-    continue-on-error: true
-    initialization-mode: always
+    url: jdbc:mysql://${RDS_HOSTNAME}:${RDS_PORT}/${RDS_DB_NAME}
+    username: ${RDS_USERNAME}
+    password: ${RDS_PASSWORD}
+    driver-class-name: com.mysql.jdbc.Driver
   jpa:
     hibernate:
       ddl-auto: update
