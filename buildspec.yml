@@ -3,10 +3,8 @@ version: 0.2
 phases:
   build:
     commands:
+       - mvn test
        - mvn install -DskipTests=true -B -V
-  post_build:
-    commands:
-       mvn test
 artifacts:
   files:
      - target/moltimate-backend-1.0.0.jar
