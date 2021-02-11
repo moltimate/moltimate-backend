@@ -37,10 +37,8 @@ public class Residue {
 
     public static Residue fromGroup(Group residue) {
         return Residue.builder()
-                .residueName(residue.getChemComp()
-                                     .getThree_letter_code())
-                .residueId(residue.getResidueNumber()
-                                   .toString())
+                .residueName(residue.getPDBName())
+                .residueId(residue.getResidueNumber().toString())
                 .residueChainName(residue.getResidueNumber().getChainName())
                 .residueAltLoc(getAltLocFromGroup(residue))
                 .build();
@@ -51,5 +49,9 @@ public class Residue {
             return residue.getAtoms().get(1).getAltLoc().toString();
         }
         return "";
+    }
+
+    public Residue clone(){
+        return new Residue(this.residueName, this.residueChainName, this.residueId, this.residueAltLoc);
     }
 }

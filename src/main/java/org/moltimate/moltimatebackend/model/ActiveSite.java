@@ -1,7 +1,9 @@
 package org.moltimate.moltimatebackend.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
@@ -10,7 +12,10 @@ import java.util.List;
  */
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ActiveSite {
-    String pdbId;
-    List<Residue> residues;
+
+    private String pdbId;
+    private List<Residue> residues;
 }

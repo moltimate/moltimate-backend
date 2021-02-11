@@ -1,19 +1,28 @@
 package org.moltimate.moltimatebackend.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.biojava.nbio.structure.Structure;
+import org.moltimate.moltimatebackend.constant.EcNumber;
+import org.moltimate.moltimatebackend.model.ActiveSite;
 import org.moltimate.moltimatebackend.model.Motif;
+import org.moltimate.moltimatebackend.model.Residue;
 import org.moltimate.moltimatebackend.model.ResidueQuerySet;
 import org.moltimate.moltimatebackend.repository.MotifRepository;
 import org.moltimate.moltimatebackend.repository.ResidueQuerySetRepository;
+import org.moltimate.moltimatebackend.util.ActiveSiteUtils;
+import org.moltimate.moltimatebackend.util.MotifUtils;
+import org.moltimate.moltimatebackend.util.ProteinUtils;
 import org.moltimate.moltimatebackend.validation.EcNumberValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
@@ -29,6 +38,9 @@ public class MotifService {
     private MotifRepository motifRepository;
 
     @Autowired
+    private LigandService ligandService;
+
+    @Autowired
     private ResidueQuerySetRepository residueQuerySetRepository;
 
     /**
@@ -37,7 +49,7 @@ public class MotifService {
      * @param motif New Motif to save
      * @return A newly generated Motif
      */
-    public Motif saveMotif(Motif motif) {
+    private Motif saveMotif(Motif motif) {
         motif.getSelectionQueries()
                 .values()
                 .forEach(residueQuerySetRepository::save);
@@ -48,10 +60,9 @@ public class MotifService {
      * Batch saves a list of new Motif to the database.
      *
      * @param motifs New Motif to save
-     * @return A newly generated Motif
      */
     public void saveMotifs(List<Motif> motifs) {
-        log.info("Saving " + motifs.size() + " motifs with IDs " + motifs.stream()
+        log.info("Saving {} motifs with IDs {}", motifs.size(), motifs.stream()
                 .map(Motif::getPdbId)
                 .collect(Collectors.toList()));
 
@@ -69,13 +80,13 @@ public class MotifService {
      * @return The matching motif
      */
     public Motif queryByPdbId(String pdbId) {
-        return motifRepository.findByPdbId(pdbId);
+        return motifRepository.findByPdbIdIgnoreCase(pdbId);
     }
 
     /**
      * @return List of all Motifs in the database
      */
-    public Page<Motif> findAll(int pageNumber) {
+    private Page<Motif> findAll(int pageNumber) {
         return motifRepository.findAll(PageRequest.of(pageNumber, MOTIF_BATCH_SIZE));
     }
 
@@ -88,16 +99,51 @@ public class MotifService {
             return findAll(pageNumber);
         }
         EcNumberValidator.validate(ecNumber);
-        return motifRepository.findByEcNumberStartingWith(ecNumber, PageRequest.of(pageNumber, MOTIF_BATCH_SIZE));
+        return motifRepository.findByEcNumberEqualsOrEcNumberStartingWith(
+            EcNumber.UNKNOWN, ecNumber, PageRequest.of(pageNumber, MOTIF_BATCH_SIZE));
     }
 
     /**
      * Delete all motifs and their residue query sets
      */
     public void deleteAllAndFlush() {
-        motifRepository.deleteAll();
-        motifRepository.flush();
-        residueQuerySetRepository.deleteAll();
-        residueQuerySetRepository.flush();
+        // TODO: figure out why this breaks
+//        motifRepository.deleteAll();
+//        motifRepository.flush();
+//        residueQuerySetRepository.deleteAll();
+//        residueQuerySetRepository.flush();
+    }
+
+    // TODO: Pessimistic lock the motifs table until update is finished
+    public Integer updateMotifs() {
+        log.info("Updating Motif database");
+        List<ActiveSite> activeSites = ActiveSiteUtils.getActiveSites();
+
+        log.info("Deleting and flushing Motif database");
+//        deleteAllAndFlush();
+
+        log.info("Saving {} new motifs", activeSites.size());
+        AtomicInteger motifsSaved = new AtomicInteger(0);
+        List<String> failedPdbIds = new ArrayList<>();
+        activeSites.parallelStream()
+                .forEach(activeSite -> {
+                    String pdbId = activeSite.getPdbId();
+                    try {
+                        List<Residue> residues = activeSite.getResidues();
+                        Structure structure = ProteinUtils.queryPdb(pdbId);
+                        String ecNumber = ligandService.getEcNumber(structure);
+
+                        Motif motif = MotifUtils.generateMotif(pdbId, ecNumber, structure, residues);
+                        saveMotif(motif);
+                        motifsSaved.incrementAndGet();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        failedPdbIds.add(pdbId);
+                    }
+                });
+
+        log.info("Failed to save {} motifs to the database: {}", failedPdbIds.size(), failedPdbIds.toString());
+        log.info("Finished saving {} motifs to the database", motifsSaved.get());
+        return motifsSaved.get();
     }
 }

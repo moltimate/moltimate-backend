@@ -5,3 +5,10 @@ target
 *.iml
 *.db
 *.tar
+*.prefs
+*.project
+*.classpath
+*.factorypath
+settings.json
+launch.json
+src/main/resources/static/*
