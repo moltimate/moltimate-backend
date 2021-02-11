@@ -183,7 +183,6 @@
     <profiles>
         <!-- Local Development (H2 database) -->
         <profile>
-            <!--  TODO set so that will use env variable to determine -->
             <id>dev</id>
 
             <properties>
@@ -207,43 +206,44 @@
 
         <!-- Production Profile (connects to AWS Cloud SQL) -->
         <profile>
-            <!--  TODO set so that will use env variable to determine -->
             <id>prod</id>
 
             <properties>
                 <activatedSpringProfile>prod</activatedSpringProfile>
-                <frontend.branch>master</frontend.branch>
+                <frontend.branch>prod</frontend.branch>
             </properties>
 
             <dependencies>
-                <!--  TODO add AWS RDS dependency-->
+                <dependency>
+                    <groupId>mysql</groupId>
+                    <artifactId>mysql-connector-java</artifactId>
+                </dependency>
             </dependencies>
         </profile>
     </profiles>
 
     <build>
         <plugins>
-<!--            TODO: I believe we can keep this, but will need to point it to proper location-->
-<!--            <plugin>-->
-<!--                <groupId>com.googlecode.maven-download-plugin</groupId>-->
-<!--                <artifactId>download-maven-plugin</artifactId>-->
-<!--                <version>1.5.0</version>-->
-<!--                <executions>-->
-<!--                    <execution>-->
-<!--                        <id>get-frontend</id>-->
-<!--                        <phase>initialize</phase>-->
-<!--                        <goals>-->
-<!--                            <goal>wget</goal>-->
-<!--                        </goals>-->
-<!--                        <configuration>-->
-<!--                            <url>https://storage.googleapis.com/artifacts.moltimate.appspot.com/frontend/${frontend.branch}/dist.tar.gz</url>-->
-<!--                            <unpack>true</unpack>-->
-<!--                            <skipCache>true</skipCache>-->
-<!--                            <outputDirectory>src/main/resources/static</outputDirectory>-->
-<!--                        </configuration>-->
-<!--                    </execution>-->
-<!--                </executions>-->
-<!--            </plugin>-->
+            <plugin>
+                <groupId>com.googlecode.maven-download-plugin</groupId>
+                <artifactId>download-maven-plugin</artifactId>
+                <version>1.5.0</version>
+                <executions>
+                    <execution>
+                        <id>get-frontend</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>wget</goal>
+                        </goals>
+                        <configuration>
+                            <url>https://moltimate-production-artifacts.s3.us-east-2.amazonaws.com/frontend/${frontend.branch}/dist.tar.gz</url>
+                            <unpack>true</unpack>
+                            <skipCache>true</skipCache>
+                            <outputDirectory>src/main/resources/static</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -344,6 +344,4 @@
             </resource>
         </resources>
     </build>
-
-
 </project>
