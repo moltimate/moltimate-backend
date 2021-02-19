@@ -5,7 +5,7 @@ phases:
     commands:
        - mvn test
        - mvn install -DskipTests=true -B -V
-       - mv target/*.jar moltimate-backend-1.0.0.jar
+       - mv target/*.war moltimate-backend-1.0.0.war
 artifacts:
   files:
      - moltimate-backend-1.0.0.jar
