@@ -8,4 +8,6 @@ phases:
        - mv target/*.war moltimate-backend-1.0.0.war
 artifacts:
   files:
-     - moltimate-backend-1.0.0.war
+     - moltimate-backend-1.0.0.jar
+     - .ebextensions
+     - .platform
