@@ -6,7 +6,8 @@ phases:
        - mvn test
        - mvn install -DskipTests=true -B -V
        - mv target/*.jar moltimate-backend-1.0.0.jar
-       - zip moltimate-backend-source moltimate-backend-1.0.0.jar .ebextensions .platform
 artifacts:
   files:
-     - moltimate-backend-source.zip
+     - moltimate-backend-1.0.0.jar
+     - .ebextensions
+     - .platform
