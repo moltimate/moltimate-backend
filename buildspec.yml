@@ -3,9 +3,11 @@ version: 0.2
 phases:
   build:
     commands:
-       - mvn test
-       - mvn install -DskipTests=true -B -V
-       - mv target/*.jar moltimate-backend-1.0.0.jar
+      - mvn test
+      - mvn install -DskipTests=true -B -V
+      - mv target/*.jar moltimate-backend-1.0.0.jar
 artifacts:
   files:
-     - moltimate-backend-1.0.0.jar
+    - moltimate-backend-1.0.0.jar
+    - .ebextensions/*
+    - .platform/**/*
