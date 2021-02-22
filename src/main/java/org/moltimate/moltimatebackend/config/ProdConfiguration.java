@@ -12,8 +12,12 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Profile("prod")
 public class ProdConfiguration implements WebMvcConfigurer {
 
+<<<<<<< HEAD
 //    TODO: SET THIS TO USE ENV VARIABLE + GET NEW DOMAIN.
     private static final String ALLOWED_ORIGIN = "https://moltimate.appspot.com";
+=======
+    private static final String ALLOWED_ORIGIN = "http://moltimate.us-east-1.elasticbeanstalk.com";
+>>>>>>> dev
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
