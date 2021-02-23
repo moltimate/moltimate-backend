@@ -16,7 +16,6 @@ package org.moltimate.moltimatebackend.controller;
  */
 
 
-import org.moltimate.moltimatebackend.dto.response.QueryAlignmentResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;

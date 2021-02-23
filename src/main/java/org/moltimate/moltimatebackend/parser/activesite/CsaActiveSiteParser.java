@@ -2,6 +2,7 @@ package org.moltimate.moltimatebackend.parser.activesite;
 
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
+import com.opencsv.exceptions.CsvValidationException;
 import org.moltimate.moltimatebackend.model.ActiveSite;
 import org.moltimate.moltimatebackend.model.Residue;
 import org.springframework.core.io.ClassPathResource;
@@ -35,7 +36,7 @@ public class CsaActiveSiteParser implements ActiveSiteParser {
             }
 
             return activeSites;
-        } catch (IOException e) {
+        } catch (IOException | CsvValidationException e) {
             return Collections.emptyList();
         }
     }
@@ -43,7 +44,7 @@ public class CsaActiveSiteParser implements ActiveSiteParser {
     /**
      * Reads the next protein's active site residues from the Catalytic Site Atlas curated data file.
      */
-    private static ActiveSite readNextCsaActiveSite(CSVReader csvReader) throws IOException {
+    private static ActiveSite readNextCsaActiveSite(CSVReader csvReader) throws IOException, CsvValidationException {
         List<Residue> activeSiteResidues = new ArrayList<>();
 
         String[] residueEntry;
