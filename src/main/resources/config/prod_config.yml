@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-# set ELB
-# Set Instances
-# Set source for front-end
-=======
+
 ## These settings are to be replicated in the aws console.
 ## Currently they cause issues if ran through ebextensions
 
@@ -28,4 +24,3 @@ option_settings:
   - namespace: aws:rds:dbinstance
     option_name: DBEngine
     value:  mysql
->>>>>>> dev
