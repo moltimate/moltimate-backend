@@ -2,6 +2,8 @@ package org.moltimate.moltimatebackend.service;
 
 import lombok.extern.slf4j.Slf4j;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.LineIterator;
 import org.biojava.nbio.structure.*;
 import org.moltimate.moltimatebackend.dto.alignment.SuccessfulAlignment;
 import org.moltimate.moltimatebackend.dto.request.AlignmentRequest;
@@ -166,10 +168,35 @@ public class DockingService {
 			ZipEntry zipEntry = new ZipEntry(babelResult.getOriginalFilename());
 			zipOS.putNextEntry(zipEntry);
 
+			String content = new String(babelResult.getBytes());
+			String[] lines = content.split("\n");
+			ArrayList<String> updatedLines = new ArrayList<String>();
+
+			Boolean deleting = false;
+			int numberConfigs = request.getSelectedConfigs().size();
+			int currentConfig = 0;
+			for(int i = 0; i < lines.length; i++){
+				if(i != 0) {
+					if (lines[i].contains("MODEL") && !deleting) {
+						if (!request.getSelectedConfigs().get(currentConfig)) {
+							deleting = true;
+						}
+					}
+					if(!deleting){
+						updatedLines.add(lines[i]);
+					}
+					if(lines[i].contains("ENDMDL")){
+						currentConfig++;
+					}
+				}
+			}
+
 			byte[] bytes = new byte[1024];
 			int length;
-			while((length = is.read(bytes)) >= 0){
-				zipOS.write(bytes, 0,length);
+			for(String line : updatedLines){
+				line = line.toUpperCase();
+				line = line.concat("\r");
+				zipOS.write(line.getBytes(), 0, line.getBytes().length);
 			}
 
 			//Add docking info csv file to ZIP
