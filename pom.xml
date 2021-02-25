@@ -34,7 +34,7 @@
             <version>${spring.boot.version}</version>
             <scope>provided</scope>
         </dependency>
-        
+
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-aspects</artifactId>
@@ -153,12 +153,6 @@
             <version>2.9.2</version>
         </dependency>
 
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.21</version>
-        </dependency>
-
         <!-- Protein Function Analysis -->
         <dependency>
             <groupId>org.biojava</groupId>
@@ -213,65 +207,14 @@
 
         <!-- Production Profile (connects to AWS Cloud SQL) -->
         <profile>
-<<<<<<< HEAD
             <!--  TODO set so that will use env variable to determine -->
-            <id>prod</id>
-=======
             <id>prod</id>
 
             <properties>
                 <activatedSpringProfile>prod</activatedSpringProfile>
-                <frontend.branch>prod</frontend.branch>
+                <frontend.branch>master</frontend.branch>
             </properties>
 
-            <dependencies>
-                <dependency>
-                    <groupId>mysql</groupId>
-                    <artifactId>mysql-connector-java</artifactId>
-                    <version>8.0.21</version>
-                </dependency>
-            </dependencies>
-        </profile>
-    </profiles>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>com.googlecode.maven-download-plugin</groupId>
-                <artifactId>download-maven-plugin</artifactId>
-                <version>1.5.0</version>
-                <executions>
-                    <execution>
-                        <id>get-frontend</id>
-                        <phase>initialize</phase>
-                        <goals>
-                            <goal>wget</goal>
-                        </goals>
-                        <configuration>
-                            <url>https://moltimate-artifacts.s3.us-east-1.amazonaws.com/frontend/${frontend.branch}/dist.tar.gz</url>
-                            <unpack>true</unpack>
-                            <skipCache>true</skipCache>
-                            <outputDirectory>src/main/resources/static</outputDirectory>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
->>>>>>> dev
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <version>3.0.0-M3</version>
-                <executions>
-                    <execution>
-                        <configuration>
-                            <skipITs>true</skipITs>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-<<<<<<< HEAD
             <dependencies>
                 <!--  TODO add AWS RDS dependency-->
             </dependencies>
@@ -280,83 +223,27 @@
 
     <build>
         <plugins>
-<!--            TODO: I believe we can keep this, but will need to point it to proper location-->
-<!--            <plugin>-->
-<!--                <groupId>com.googlecode.maven-download-plugin</groupId>-->
-<!--                <artifactId>download-maven-plugin</artifactId>-->
-<!--                <version>1.5.0</version>-->
-<!--                <executions>-->
-<!--                    <execution>-->
-<!--                        <id>get-frontend</id>-->
-<!--                        <phase>initialize</phase>-->
-<!--                        <goals>-->
-<!--                            <goal>wget</goal>-->
-<!--                        </goals>-->
-<!--                        <configuration>-->
-<!--                            <url>https://storage.googleapis.com/artifacts.moltimate.appspot.com/frontend/${frontend.branch}/dist.tar.gz</url>-->
-<!--                            <unpack>true</unpack>-->
-<!--                            <skipCache>true</skipCache>-->
-<!--                            <outputDirectory>src/main/resources/static</outputDirectory>-->
-<!--                        </configuration>-->
-<!--                    </execution>-->
-<!--                </executions>-->
-<!--            </plugin>-->
-=======
-            <plugin>
-                <groupId>com.googlecode.maven-download-plugin</groupId>
-                <artifactId>download-maven-plugin</artifactId>
-                <version>1.5.0</version>
-                <executions>
-                    <execution>
-                        <id>get-frontend</id>
-                        <phase>initialize</phase>
-                        <goals>
-                            <goal>wget</goal>
-                        </goals>
-                        <configuration>
-                            <url>https://moltimate-artifacts.s3.us-east-1.amazonaws.com/frontend/${frontend.branch}/dist.tar.gz</url>
-                            <unpack>true</unpack>
-                            <skipCache>true</skipCache>
-                            <outputDirectory>src/main/resources/static</outputDirectory>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <version>3.0.0-M3</version>
-                <executions>
-                    <execution>
-                        <configuration>
-                            <skipITs>true</skipITs>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>com.googlecode.maven-download-plugin</groupId>
-                <artifactId>download-maven-plugin</artifactId>
-                <version>1.5.0</version>
-                <executions>
-                    <execution>
-                        <id>get-frontend</id>
-                        <phase>initialize</phase>
-                        <goals>
-                            <goal>wget</goal>
-                        </goals>
-                        <configuration>
-                            <url>https://moltimate-artifacts.s3.us-east-1.amazonaws.com/frontend/${frontend.branch}/dist.tar.gz</url>
-                            <unpack>true</unpack>
-                            <skipCache>true</skipCache>
-                            <outputDirectory>src/main/resources/static</outputDirectory>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
->>>>>>> dev
+            <!--            TODO: I believe we can keep this, but will need to point it to proper location-->
+            <!--            <plugin>-->
+            <!--                <groupId>com.googlecode.maven-download-plugin</groupId>-->
+            <!--                <artifactId>download-maven-plugin</artifactId>-->
+            <!--                <version>1.5.0</version>-->
+            <!--                <executions>-->
+            <!--                    <execution>-->
+            <!--                        <id>get-frontend</id>-->
+            <!--                        <phase>initialize</phase>-->
+            <!--                        <goals>-->
+            <!--                            <goal>wget</goal>-->
+            <!--                        </goals>-->
+            <!--                        <configuration>-->
+            <!--                            <url>https://storage.googleapis.com/artifacts.moltimate.appspot.com/frontend/${frontend.branch}/dist.tar.gz</url>-->
+            <!--                            <unpack>true</unpack>-->
+            <!--                            <skipCache>true</skipCache>-->
+            <!--                            <outputDirectory>src/main/resources/static</outputDirectory>-->
+            <!--                        </configuration>-->
+            <!--                    </execution>-->
+            <!--                </executions>-->
+            <!--            </plugin>-->
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -457,4 +344,6 @@
             </resource>
         </resources>
     </build>
+
+
 </project>
