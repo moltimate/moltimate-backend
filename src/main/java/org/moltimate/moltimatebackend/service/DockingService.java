@@ -2,6 +2,8 @@ package org.moltimate.moltimatebackend.service;
 
 import lombok.extern.slf4j.Slf4j;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.LineIterator;
 import org.biojava.nbio.structure.*;
 import org.moltimate.moltimatebackend.dto.alignment.SuccessfulAlignment;
 import org.moltimate.moltimatebackend.dto.request.AlignmentRequest;
@@ -17,6 +19,7 @@ import org.moltimate.moltimatebackend.util.ActiveSiteUtils;
 import org.moltimate.moltimatebackend.util.DockingUtils;
 import org.moltimate.moltimatebackend.util.DockingUtils.InMemoryMultipartFile;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.moltimate.moltimatebackend.exception.DockingJobFailedException;
@@ -35,6 +38,7 @@ import java.io.*;
 import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 @Service
 @Slf4j
@@ -154,9 +158,70 @@ public class DockingService {
 
 
 	public Resource exportLigands(ExportRequest request) {
+
+		try{
+			//Add babelResult to ZIP
+			MultipartFile babelResult = getBabelResult(request.getBabelJobId());
+			InputStream is = babelResult.getInputStream();
+			ByteArrayOutputStream byteArrayOS = new ByteArrayOutputStream();
+			ZipOutputStream zipOS = new ZipOutputStream(byteArrayOS);
+			ZipEntry zipEntry = new ZipEntry(babelResult.getOriginalFilename());
+			zipOS.putNextEntry(zipEntry);
+
+			String content = new String(babelResult.getBytes());
+			String[] lines = content.split("\n");
+			ArrayList<String> updatedLines = new ArrayList<String>();
+
+			Boolean deleting = false;
+			int numberConfigs = request.getSelectedConfigs().size();
+			int currentConfig = 0;
+			for(int i = 0; i < lines.length; i++){
+				if(i != 0) {
+					if (lines[i].contains("MODEL") && !deleting) {
+						if (!request.getSelectedConfigs().get(currentConfig)) {
+							deleting = true;
+						}
+					}
+					if(!deleting){
+						updatedLines.add(lines[i]);
+					}
+					if(lines[i].contains("ENDMDL")){
+						currentConfig++;
+					}
+				}
+			}
+
+			byte[] bytes = new byte[1024];
+			int length;
+			for(String line : updatedLines){
+				line = line.toUpperCase();
+				line = line.concat("\r");
+				zipOS.write(line.getBytes(), 0, line.getBytes().length);
+			}
+
+			//Add docking info csv file to ZIP
+			ByteArrayResource csv = createCSV(request);
+			is = csv.getInputStream();
+			zipEntry = new ZipEntry("ligands.csv");
+			zipOS.putNextEntry(zipEntry);
+
+			bytes = new byte[1024];
+			while((length = is.read(bytes)) >= 0){
+				zipOS.write(bytes, 0, length);
+			}
+			zipOS.close();
+			return new ByteArrayResource(byteArrayOS.toByteArray());
+
+		}catch (IOException e){
+			log.info("Failed to fetch pbd file for download : jobId{" + request.getBabelJobId() + "}");
+		}
+		return null;
+	}
+
+
+	private ByteArrayResource createCSV(ExportRequest request){
 		StringBuilder csvOutput = new StringBuilder();
 		csvOutput.append("Name,Mode Number,Binding Energy,RMSD Lower,RMSD Upper\n");
-
 		for(ExportLigand ligand : request.getLigands()) {
 			csvOutput.append("\"");
 			csvOutput.append(ligand.getName());
