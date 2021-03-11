@@ -1,5 +1,5 @@
 ## These settings are to be replicated in the aws console.
-## Currently they cause issues if ran through ebextensions
+## Currently there is a bug with running a single instance setup through ebextensions
 
 option_settings:
   ## Set ec2 instances to use
