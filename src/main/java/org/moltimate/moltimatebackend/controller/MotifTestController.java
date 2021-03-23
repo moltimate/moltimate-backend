@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import org.moltimate.moltimatebackend.exception.MotifTestFailedException;
+import java.io.IOException;
 
 import java.beans.PropertyEditorSupport;
 
@@ -31,9 +33,13 @@ public class MotifTestController {
 
 
     @RequestMapping(value = "/motif", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<MotifAlignmentResponse> testMotif(MotifTestRequest motifTestRequest) {
+    public ResponseEntity<Object> testMotif(MotifTestRequest motifTestRequest) throws IOException{
         log.info("Received request to test motif: {}", motifTestRequest);
-        return ResponseEntity.ok(motifTestService.testMotifAlignment(motifTestRequest));
+        try {
+            return ResponseEntity.ok(motifTestService.testMotifAlignment(motifTestRequest));
+        }catch(MotifTestFailedException ex){
+            return ResponseEntity.status(500).body(ex.getMessage());
+        }
     }
 
     /**
