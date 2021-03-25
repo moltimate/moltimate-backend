@@ -4,7 +4,6 @@ import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.moltimate.moltimatebackend.dto.request.MotifTestRequest;
 import org.moltimate.moltimatebackend.dto.response.MotifAlignmentResponse;
-import org.moltimate.moltimatebackend.service.AlignmentService;
 import org.moltimate.moltimatebackend.service.MotifTestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
