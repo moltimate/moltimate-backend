@@ -130,10 +130,10 @@ public class FileUtils {
     public static Structure getStructureFromFile(MultipartFile file) {
         try {
             return PDB_FILE_READER.getStructure(file.getInputStream());
-        } catch (IOException pdbReaderError) {
+        } catch (Exception pdbError) {
             try {
                 return MMCIF_FILE_READER.getStructure(file.getInputStream());
-            } catch (IOException mmcifReaderError) {
+            } catch (Exception mmcifReaderError) {
                 try {
                     return readMotifFile(file).getStructure();
                 } catch (Exception e) {
