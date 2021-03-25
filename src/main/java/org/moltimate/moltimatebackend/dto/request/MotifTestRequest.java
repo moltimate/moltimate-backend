@@ -93,7 +93,7 @@ public class MotifTestRequest {
     }
 
     public PdbQueryResponse callPdbForResponse() {
-        return ProteinUtils.queryPdbResponse(testPdbIds);
+        return ProteinUtils.queryPdbResponse(testPdbIds, new ArrayList<>());
     }
 
     public List<Structure> extractCustomStructuresFromFiles() {
