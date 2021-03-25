@@ -10,6 +10,7 @@ import org.moltimate.moltimatebackend.model.Residue;
 import org.moltimate.moltimatebackend.util.FileUtils;
 import org.moltimate.moltimatebackend.util.ProteinUtils;
 import org.springframework.web.multipart.MultipartFile;
+import org.moltimate.moltimatebackend.exception.MotifTestFailedException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -105,18 +106,22 @@ public class MotifTestRequest {
 
     public List<Residue> parseResidueEntries() {
         List<Residue> residueList = new ArrayList<>();
-        for (String residueEntry : this.activeSiteResidues) {
-            for (String residueAttr : residueEntry.split(",")) {
-                String[] res = residueAttr.split(" ");
-                Residue residue = Residue.builder()
-                        .residueName(res[0])
-                        .residueChainName(res[1])
-                        .residueId(res[2])
-                        .build();
-                residueList.add(residue);
+        if(this.activeSiteResidues == null){
+            throw new MotifTestFailedException("Missing Active Site Residues");
+        }else {
+            for (String residueEntry : this.activeSiteResidues) {
+                for (String residueAttr : residueEntry.split(",")) {
+                    String[] res = residueAttr.split(" ");
+                    Residue residue = Residue.builder()
+                            .residueName(res[0])
+                            .residueChainName(res[1])
+                            .residueId(res[2])
+                            .build();
+                    residueList.add(residue);
+                }
             }
+            residueList.sort(Comparator.comparingInt(r -> Integer.parseInt(r.getResidueId())));
+            return residueList;
         }
-        residueList.sort(Comparator.comparingInt(r -> Integer.parseInt(r.getResidueId())));
-        return residueList;
     }
 }
