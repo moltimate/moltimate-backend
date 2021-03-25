@@ -27,9 +27,12 @@ public class ProteinUtils {
                 .collect(Collectors.toList());
     }
 
-    public static PdbQueryResponse queryPdbResponse(List<String> pdbIds) {
-        if (pdbIds.size() > 0) {
-            return new PdbQueryResponse().generatePdbQueryResponse(pdbIds, queryPdb(pdbIds));
+    public static PdbQueryResponse queryPdbResponse(List<String> pdbIds, List<MultipartFile> proteinFiles) {
+        if (pdbIds.size() > 0 || proteinFiles.size() > 0) {
+            List<Structure> structList = queryPdb(pdbIds);
+
+            structList.addAll(FileUtils.getProteinsFromFiles(proteinFiles));
+            return new PdbQueryResponse().generatePdbQueryResponse(pdbIds, structList);
         }
         return new PdbQueryResponse();
     }
