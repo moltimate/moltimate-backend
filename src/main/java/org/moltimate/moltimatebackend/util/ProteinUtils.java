@@ -6,6 +6,7 @@ import org.biojava.nbio.structure.StructureException;
 import org.biojava.nbio.structure.StructureIO;
 import org.moltimate.moltimatebackend.dto.response.PdbQueryResponse;
 import org.moltimate.moltimatebackend.exception.InvalidPdbIdException;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;

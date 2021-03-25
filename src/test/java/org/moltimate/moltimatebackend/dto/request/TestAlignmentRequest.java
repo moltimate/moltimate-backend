@@ -31,7 +31,7 @@ public class TestAlignmentRequest {
 		ArrayList list = new ArrayList<String>();
 		CuT.setPdbIds( list );
 		PdbQueryResponse response = new PdbQueryResponse();
-		Mockito.when( ProteinUtils.queryPdbResponse(list) ).thenReturn( null );
+		Mockito.when( ProteinUtils.queryPdbResponse(list, list) ).thenReturn( null );
 
 		Assert.assertEquals(response, CuT.callPdbForResponse());
 	}
