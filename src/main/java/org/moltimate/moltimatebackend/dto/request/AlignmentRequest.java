@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 public class AlignmentRequest {
 
     private List<String> pdbIds = new ArrayList<>();
+    private List<MultipartFile> proteinFiles = new ArrayList<>();
     private List<String> options = new ArrayList<>();
     private List<String> filters = new ArrayList<>();
     private List<MultipartFile> customMotifs = new ArrayList<>();
@@ -31,7 +32,7 @@ public class AlignmentRequest {
     private double precisionFactor;
 
     public PdbQueryResponse callPdbForResponse() {
-        return ProteinUtils.queryPdbResponse(pdbIds);
+        return ProteinUtils.queryPdbResponse(pdbIds, proteinFiles);
     }
 
     public List<MotifFile> extractCustomMotifFileList() {
