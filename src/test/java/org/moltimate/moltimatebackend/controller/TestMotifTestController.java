@@ -12,6 +12,7 @@ import org.moltimate.moltimatebackend.model.Residue;
 import org.moltimate.moltimatebackend.service.MotifTestService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import java.io.IOException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +37,7 @@ public class TestMotifTestController {
     }
 
     @Test
-    public void testOKStatus() {
+    public void testOKStatus() throws IOException {
         Motif motif1 = Mockito.mock( Motif.class );
         Mockito.when( motif1.getPdbId() ).thenReturn( "1a0j" );
         Mockito.when(motif1.getEcNumber()).thenReturn("3.4.21.4");
@@ -48,7 +49,7 @@ public class TestMotifTestController {
         MotifAlignmentResponse motifAlignment = Mockito.mock(MotifAlignmentResponse.class);
         Mockito.when(service.testMotifAlignment(any())).thenReturn(motifAlignment);
 
-        ResponseEntity<MotifAlignmentResponse> response = controller.testMotif( new MotifTestRequest());
+        ResponseEntity<Object> response = controller.testMotif( new MotifTestRequest());
         Assert.assertEquals( HttpStatus.OK, response.getStatusCode() );
     }
 
