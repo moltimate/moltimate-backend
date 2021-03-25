@@ -99,6 +99,16 @@ public class FileUtils {
                 .body(file);
     }
 
+    public static List<Structure> getProteinsFromFiles(List<MultipartFile> proteinFiles) {
+        List<Structure> structList = new ArrayList<>();
+
+        for(MultipartFile file: proteinFiles) {
+            structList.add(getStructureFromFile(file));
+        }
+
+        return structList;
+    }
+
     /**
      * File Parsing
      */
