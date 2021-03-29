@@ -326,7 +326,6 @@ public class DockingService {
 							new ArrayList<>(),
 							new ArrayList<>(),
 							new ArrayList<>(),
-							new ArrayList<>(),
 							null,
 							1.0
 					)
