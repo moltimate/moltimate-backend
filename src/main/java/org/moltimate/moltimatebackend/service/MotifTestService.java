@@ -13,6 +13,8 @@ import org.moltimate.moltimatebackend.util.ProteinUtils;
 import org.moltimate.moltimatebackend.util.StructureUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.moltimate.moltimatebackend.exception.MotifTestFailedException;
+import java.io.IOException;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,7 +33,12 @@ public class MotifTestService {
     @Autowired
     private LigandService ligandService;
 
-    public MotifAlignmentResponse testMotifAlignment(MotifTestRequest motifTestRequest) {
+    public MotifAlignmentResponse testMotifAlignment(MotifTestRequest motifTestRequest) throws IOException {
+        if(motifTestRequest.getPdbId() == null){
+            throw new MotifTestFailedException("Missing PBD Id");
+        }else if(motifTestRequest.getEcNumber() == null){
+            throw new MotifTestFailedException("Missing EC Class");
+        }
         Structure motifStructure = motifTestRequest.motifStructure();
         MotifFile testMotifFile = MotifFile.builder()
                 .motif(MotifUtils.generateMotif(motifTestRequest.getPdbId(),
@@ -59,7 +66,7 @@ public class MotifTestService {
                 break;
             case HOMOLOG:
                 List<String> homologuePdbIds = PdbXmlClient.postEcNumberForPdbIds(testMotifFile.getMotif().getEcNumber());
-                pdbQueryResponse = ProteinUtils.queryPdbResponse(homologuePdbIds);
+                pdbQueryResponse = ProteinUtils.queryPdbResponse(homologuePdbIds, new ArrayList<>());
 
                 structureList.addAll(pdbQueryResponse.getStructures());
                 structureList.addAll(motifTestRequest.extractCustomStructuresFromFiles());
