@@ -59,7 +59,7 @@ public class MotifTestService {
                 break;
             case HOMOLOG:
                 List<String> homologuePdbIds = PdbXmlClient.postEcNumberForPdbIds(testMotifFile.getMotif().getEcNumber());
-                pdbQueryResponse = ProteinUtils.queryPdbResponse(homologuePdbIds);
+                pdbQueryResponse = ProteinUtils.queryPdbResponse(homologuePdbIds, new ArrayList<>());
 
                 structureList.addAll(pdbQueryResponse.getStructures());
                 structureList.addAll(motifTestRequest.extractCustomStructuresFromFiles());
