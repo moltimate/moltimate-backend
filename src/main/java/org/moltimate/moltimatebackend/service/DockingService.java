@@ -258,7 +258,7 @@ public class DockingService {
 					byte[] logFile = null;
 					byte[] ligandFile = null;
 					byte[] proteinFile = fetchMacromolecule(pdbId).getBytes();
-					byte[] proteinFileTemp = DockingUtils.replaceAtoms( proteinFile );
+//					byte[] proteinFileTemp = DockingUtils.replaceAtoms( proteinFile );
 					while((entry = zipInputStream.getNextEntry()) != null) {
 						ByteArrayOutputStream output = new ByteArrayOutputStream();
 						byte[] buf = new byte[1024];
@@ -280,7 +280,7 @@ public class DockingService {
 						headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
 						MultiValueMap<String, Object> openBabelParams = new LinkedMultiValueMap<>();
-						openBabelParams.add("molecule_1", new ByteArrayResource(proteinFileTemp) {
+						openBabelParams.add("molecule_1", new ByteArrayResource(proteinFile) {
 							@Override
 							public String getFilename() {
 								return pdbId + ".pdb";
@@ -356,7 +356,7 @@ public class DockingService {
 		if (pdbID == null) {
             throw new InvalidFileException("Unable to fetch remote Macromolecule File: no pdbID provided");
 		}
-		
+
 		log.info("Fetching Macromolecule {} for Docking Request", pdbID);
 
 		RestTemplate template = new RestTemplate();
@@ -388,6 +388,7 @@ public class DockingService {
 			QueryAlignmentResponse align = alignmentService.alignActiveSites(
 					new AlignmentRequest(
 							Collections.singletonList(pdbId),
+							new ArrayList<>(),
 							new ArrayList<>(),
 							new ArrayList<>(),
 							new ArrayList<>(),

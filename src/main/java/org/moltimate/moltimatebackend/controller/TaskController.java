@@ -10,8 +10,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
 
-import javax.annotation.PostConstruct;
-
 /**
  * Task REST API contains tasks which are useful and often run periodically by cron jobs
  */
@@ -43,7 +41,7 @@ public class TaskController {
 
     @ApiIgnore
     @RequestMapping(value = "/updateasync", method = RequestMethod.GET)
-    private ResponseEntity asyncMethod() {
+    private ResponseEntity<String> asyncMethod() {
         asyncService.process();
         return ResponseEntity.ok("ok");
     }
