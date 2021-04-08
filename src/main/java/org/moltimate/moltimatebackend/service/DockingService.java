@@ -109,12 +109,14 @@ public class DockingService {
 
 		HttpEntity<MultiValueMap<String, Object>> entityBabelPost = new HttpEntity<>(openBabelParams, headers);
 		String babelHash = template.postForEntity( openBabelURL + TOPDBQTCONVERSION, entityBabelPost, String.class ).getBody();
-
+		System.out.println("babelHash -> " + babelHash);
 		// Check the status of the file conversion every 20 seconds.
 
 		try {
+			System.out.println("HELLO");
 			ResponseEntity<byte[]> babelConversion =
 					template.getForEntity( openBabelURL + "?storage_hash=" + babelHash, byte[].class );
+			System.out.println("FRIEND");
 			while( babelConversion.getStatusCode().equals(HttpStatus.MULTIPLE_CHOICES) ) {
 				try {
 					Thread.sleep( 20000 );
@@ -161,6 +163,7 @@ public class DockingService {
 
 		try{
 			//Add babelResult to ZIP
+			log.info(request.getBabelJobId());
 			MultipartFile babelResult = getBabelResult(request.getBabelJobId());
 			InputStream is = babelResult.getInputStream();
 			ByteArrayOutputStream byteArrayOS = new ByteArrayOutputStream();
@@ -175,20 +178,23 @@ public class DockingService {
 			Boolean deleting = false;
 			int numberConfigs = request.getSelectedConfigs().size();
 			int currentConfig = 0;
+			System.out.println(request.getSelectedConfigs());
 			for(int i = 0; i < lines.length; i++){
-				if(i != 0) {
-					if (lines[i].contains("MODEL") && !deleting) {
-						if (!request.getSelectedConfigs().get(currentConfig)) {
-							deleting = true;
-						}
-					}
-					if(!deleting){
-						updatedLines.add(lines[i]);
-					}
-					if(lines[i].contains("ENDMDL")){
-						currentConfig++;
-					}
-				}
+//				if(i != 0) {
+//					if (lines[i].contains("MODEL        ") && !deleting && !lines[i].contains("REMARK")) {
+//						System.out.println(lines[i]);
+//						if (!request.getSelectedConfigs().get(currentConfig)) {
+//							deleting = true;
+//						}
+//					}
+//					if(!deleting){
+//						updatedLines.add(lines[i]);
+//					}
+//					if(lines[i].contains("ENDMDL")){
+//						currentConfig++;
+//					}
+//				}
+				updatedLines.add(lines[i]);
 			}
 
 			byte[] bytes = new byte[1024];
@@ -356,7 +362,7 @@ public class DockingService {
 		if (pdbID == null) {
             throw new InvalidFileException("Unable to fetch remote Macromolecule File: no pdbID provided");
 		}
-
+		System.out.println("HOW");
 		log.info("Fetching Macromolecule {} for Docking Request", pdbID);
 
 		RestTemplate template = new RestTemplate();
@@ -365,11 +371,13 @@ public class DockingService {
 		if( file.getStatusCode().equals(HttpStatus.NOT_FOUND) ) {
 			throw new InvalidFileException("PDB ID does not correspond to a known structure");
 		} else if( file.getStatusCode().equals(HttpStatus.OK) ) {
+			System.out.println("ARE");
 			return new InMemoryMultipartFile(
 					pdbID + ".pdb",
 					file.getBody()
 			);
 		} else {
+			System.out.println("YOU");
 			throw new InvalidFileException(String.format("An error occurred when fetching file from pdb. Error is %s", file.getStatusCode().getReasonPhrase()));
 		}
 	}

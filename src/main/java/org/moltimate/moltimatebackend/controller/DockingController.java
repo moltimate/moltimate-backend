@@ -51,6 +51,7 @@ public class DockingController {
 	@RequestMapping( value = "/retrievefile", method = RequestMethod.GET )
 	public ResponseEntity<Object> retrieveCombinedFile( String babelJobId ) throws IOException {
 		try {
+			System.out.println(babelJobId);
 			return ResponseEntity.ok( dockingService.getBabelResult( babelJobId ).getBytes() );
 		} catch( DockingJobFailedException ex) {
 			return ResponseEntity.status(500).body(ex.getError().getBytes());
