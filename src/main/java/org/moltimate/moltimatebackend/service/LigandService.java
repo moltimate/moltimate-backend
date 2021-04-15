@@ -22,17 +22,14 @@ import org.json.simple.JSONArray;
 import org.json.simple.parser.ParseException;
 import org.json.simple.parser.*;
 
-import javax.validation.constraints.Null;
+import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
 
-import javax.validation.constraints.Null;
 import java.io.*;
 
-import java.net.HttpURLConnection;
 import java.net.URL;
 
 import java.util.*;
-import java.util.stream.Collectors;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
@@ -74,14 +71,14 @@ public class LigandService {
             try{
                 String USER_AGENT = "Mozilla/5.0";
                 URL obj = new URL(url);
-                HttpURLConnection httpURLConnection = (HttpURLConnection) obj.openConnection();
-                httpURLConnection.setRequestMethod("GET");
-                httpURLConnection.setRequestProperty("User-Agent", USER_AGENT);
-                int responseCode = httpURLConnection.getResponseCode();
+                HttpsURLConnection httpsURLConnection = (HttpsURLConnection) obj.openConnection();
+                httpsURLConnection.setRequestMethod("GET");
+                httpsURLConnection.setRequestProperty("User-Agent", USER_AGENT);
+                int responseCode = httpsURLConnection.getResponseCode();
                 log.info("GET Response Code :: " + responseCode);
                 StringBuffer response = new StringBuffer();
-                if (responseCode == HttpURLConnection.HTTP_OK) { // success
-                    BufferedReader in = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()));
+                if (responseCode == HttpsURLConnection.HTTP_OK) { // success
+                    BufferedReader in = new BufferedReader(new InputStreamReader(httpsURLConnection.getInputStream()));
                     String inputLine;
                     while ((inputLine = in.readLine()) != null) {
                         response.append(inputLine);
@@ -91,7 +88,6 @@ public class LigandService {
                 }
                 JSONParser parser = new JSONParser();
                 log.info("Ligand Response for PDB Id " + pdb);
-                log.info(response.toString());
                 JSONObject responseObj = (JSONObject)parser.parse(response.toString());
                 JSONObject data = (JSONObject) responseObj.get("data");
                 JSONObject entry = (JSONObject) data.get("entry");
@@ -103,7 +99,6 @@ public class LigandService {
                     JSONObject chem_comp = (JSONObject)((JSONObject)ligandJSON.get("nonpolymer_comp")).get("chem_comp");
                     JSONObject descriptor = (JSONObject)((JSONObject)ligandJSON.get("nonpolymer_comp")).get("rcsb_chem_comp_descriptor");
                     RCSBLigand ligand = new RCSBLigand();
-                    //TODO: Possibly have to add the SMILE field- not sure what smiles is.
                     //also id is being copied over to the name
                     ligand.setFormula(chem_comp.get("formula").toString());
                     ligand.setId(chem_comp.get("id").toString());
@@ -173,14 +168,14 @@ public class LigandService {
         String USER_AGENT = "Mozilla/5.0";
         String url = "https://data.rcsb.org/rest/v1/core/polymer_entity/" + structure.getPDBCode() + "/1";
         URL obj = new URL(url);
-        HttpURLConnection httpURLConnection = (HttpURLConnection) obj.openConnection();
-        httpURLConnection.setRequestMethod("GET");
-        httpURLConnection.setRequestProperty("User-Agent", USER_AGENT);
-        int responseCode = httpURLConnection.getResponseCode();
+        HttpsURLConnection httpsURLConnection = (HttpsURLConnection) obj.openConnection();
+        httpsURLConnection.setRequestMethod("GET");
+        httpsURLConnection.setRequestProperty("User-Agent", USER_AGENT);
+        int responseCode = httpsURLConnection.getResponseCode();
         log.info("GET Response Code :: " + responseCode);
         StringBuffer response = new StringBuffer();
-        if (responseCode == HttpURLConnection.HTTP_OK) { // success
-            BufferedReader in = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()));
+        if (responseCode == HttpsURLConnection.HTTP_OK) { // success
+            BufferedReader in = new BufferedReader(new InputStreamReader(httpsURLConnection.getInputStream()));
             String inputLine;
             while ((inputLine = in.readLine()) != null) {
                 response.append(inputLine);
@@ -228,14 +223,14 @@ public class LigandService {
 
         String GET_URL= baseURL + jsonConverted;
         URL obj = new URL(GET_URL);
-        HttpURLConnection httpURLConnection = (HttpURLConnection) obj.openConnection();
-        httpURLConnection.setRequestMethod("GET");
-        httpURLConnection.setRequestProperty("User-Agent", USER_AGENT);
-        int responseCode = httpURLConnection.getResponseCode();
+        HttpsURLConnection httpsURLConnection = (HttpsURLConnection) obj.openConnection();
+        httpsURLConnection.setRequestMethod("GET");
+        httpsURLConnection.setRequestProperty("User-Agent", USER_AGENT);
+        int responseCode = httpsURLConnection.getResponseCode();
         log.info("GET Response Code :: " + responseCode);
         StringBuffer response = new StringBuffer();
-        if (responseCode == HttpURLConnection.HTTP_OK) { // success
-            BufferedReader in = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()));
+        if (responseCode == HttpsURLConnection.HTTP_OK) { // success
+            BufferedReader in = new BufferedReader(new InputStreamReader(httpsURLConnection.getInputStream()));
             String inputLine;
             while ((inputLine = in.readLine()) != null) {
                 response.append(inputLine);

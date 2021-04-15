@@ -6,6 +6,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import javax.net.ssl.HttpsURLConnection;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -51,12 +52,12 @@ public class PdbXmlClient {
         StringBuffer response = new StringBuffer();
         try {
             URL obj = new URL(baseURL + jsonConverted);
-            HttpURLConnection httpURLConnection = (HttpURLConnection) obj.openConnection();
-            httpURLConnection.setRequestMethod("GET");
-            httpURLConnection.setRequestProperty("User-Agent", USER_AGENT);
-            int responseCode = httpURLConnection.getResponseCode();
-            if (responseCode == HttpURLConnection.HTTP_OK) { // success
-                BufferedReader in = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()));
+            HttpsURLConnection httpsURLConnection = (HttpsURLConnection) obj.openConnection();
+            httpsURLConnection.setRequestMethod("GET");
+            httpsURLConnection.setRequestProperty("User-Agent", USER_AGENT);
+            int responseCode = httpsURLConnection.getResponseCode();
+            if (responseCode == HttpsURLConnection.HTTP_OK) { // success
+                BufferedReader in = new BufferedReader(new InputStreamReader(httpsURLConnection.getInputStream()));
                 String inputLine;
                 while ((inputLine = in.readLine()) != null) {
                     response.append(inputLine);
@@ -110,14 +111,14 @@ public class PdbXmlClient {
         List<String> pdbIds = new ArrayList<>();
         String USER_AGENT = "Mozilla/5.0";
         URL url = new URL(PDB_GET_CURRENT_PDB_IDS_URL);
-        HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
-        httpURLConnection.setRequestMethod("GET");
-        httpURLConnection.setRequestProperty("User-Agent", USER_AGENT);
-        int responseCode = httpURLConnection.getResponseCode();
+        HttpsURLConnection httpsURLConnection = (HttpsURLConnection) url.openConnection();
+        httpsURLConnection.setRequestMethod("GET");
+        httpsURLConnection.setRequestProperty("User-Agent", USER_AGENT);
+        int responseCode = httpsURLConnection.getResponseCode();
         StringBuffer response = new StringBuffer();
 
-        if (responseCode == HttpURLConnection.HTTP_OK) { // success
-            BufferedReader in = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()));
+        if (responseCode == HttpsURLConnection.HTTP_OK) { // success
+            BufferedReader in = new BufferedReader(new InputStreamReader(httpsURLConnection.getInputStream()));
             String inputLine;
             while ((inputLine = in.readLine()) != null) {
                 response.append(inputLine);
