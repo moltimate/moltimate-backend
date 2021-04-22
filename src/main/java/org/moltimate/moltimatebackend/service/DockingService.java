@@ -173,20 +173,35 @@ public class DockingService {
 			ArrayList<String> updatedLines = new ArrayList<String>();
 
 			Boolean deleting = false;
+			Boolean baseProtien = true;
+			Boolean downloadAll = request.getSelectedConfigs().get(0);
+
 			int numberConfigs = request.getSelectedConfigs().size();
-			int currentConfig = 0;
+			int currentConfig = 1;
 			for(int i = 0; i < lines.length; i++){
-				if(i != 0) {
-					if (lines[i].contains("MODEL") && !deleting) {
-						if (!request.getSelectedConfigs().get(currentConfig)) {
-							deleting = true;
+				if(downloadAll){
+					updatedLines.add(lines[i]);
+				}else{
+					if(lines[i].length() > 13){
+						if(lines[i].substring(0,12).contains("MODEL       ")) {
+							if(!baseProtien) {
+								if (!request.getSelectedConfigs().get(currentConfig)) {
+									deleting = true;
+								} else {
+									deleting = false;
+								}
+							}
 						}
 					}
 					if(!deleting){
 						updatedLines.add(lines[i]);
 					}
 					if(lines[i].contains("ENDMDL")){
-						currentConfig++;
+						if(baseProtien){
+							baseProtien = false;
+						}else{
+							currentConfig++;
+						}
 					}
 				}
 			}
@@ -258,7 +273,7 @@ public class DockingService {
 					byte[] logFile = null;
 					byte[] ligandFile = null;
 					byte[] proteinFile = fetchMacromolecule(pdbId).getBytes();
-					byte[] proteinFileTemp = DockingUtils.replaceAtoms( proteinFile );
+//					byte[] proteinFileTemp = DockingUtils.replaceAtoms( proteinFile );
 					while((entry = zipInputStream.getNextEntry()) != null) {
 						ByteArrayOutputStream output = new ByteArrayOutputStream();
 						byte[] buf = new byte[1024];
@@ -280,7 +295,7 @@ public class DockingService {
 						headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
 						MultiValueMap<String, Object> openBabelParams = new LinkedMultiValueMap<>();
-						openBabelParams.add("molecule_1", new ByteArrayResource(proteinFileTemp) {
+						openBabelParams.add("molecule_1", new ByteArrayResource(proteinFile) {
 							@Override
 							public String getFilename() {
 								return pdbId + ".pdb";
@@ -388,6 +403,7 @@ public class DockingService {
 			QueryAlignmentResponse align = alignmentService.alignActiveSites(
 					new AlignmentRequest(
 							Collections.singletonList(pdbId),
+							new ArrayList<>(),
 							new ArrayList<>(),
 							new ArrayList<>(),
 							new ArrayList<>(),
