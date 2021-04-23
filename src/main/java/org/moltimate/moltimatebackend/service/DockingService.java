@@ -234,7 +234,7 @@ public class DockingService {
 	}
 
 
-	private ByteArrayResource createCSV(ExportRequest request){
+	public ByteArrayResource createCSV(ExportRequest request){
 		StringBuilder csvOutput = new StringBuilder();
 		csvOutput.append("Name,Mode Number,Binding Energy,RMSD Lower,RMSD Upper\n");
 		for(ExportLigand ligand : request.getLigands()) {

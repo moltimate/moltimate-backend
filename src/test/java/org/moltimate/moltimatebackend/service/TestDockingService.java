@@ -29,7 +29,7 @@ public class TestDockingService {
 		request.getLigands().add( new ExportLigand("Name2,", 20, 2, 0.2, 0.02) );
 		request.getLigands().add( new ExportLigand("Name3", 30, 3, 0.3, 0.03) );
 
-		Resource exported = dockingService.exportLigands(request);
+		Resource exported = dockingService.createCSV(request);
 		String csv = new String(((ByteArrayResource)exported).getByteArray());
 		Assert.assertEquals("Name,Mode Number,Binding Energy,RMSD Lower,RMSD Upper\n" +
 				"\"Name1\",1.0,10.0,0.01,0.1\n" +
