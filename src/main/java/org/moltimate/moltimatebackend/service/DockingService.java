@@ -2,6 +2,8 @@ package org.moltimate.moltimatebackend.service;
 
 import lombok.extern.slf4j.Slf4j;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.LineIterator;
 import org.biojava.nbio.structure.*;
 import org.moltimate.moltimatebackend.dto.alignment.SuccessfulAlignment;
 import org.moltimate.moltimatebackend.dto.request.AlignmentRequest;
@@ -17,6 +19,7 @@ import org.moltimate.moltimatebackend.util.ActiveSiteUtils;
 import org.moltimate.moltimatebackend.util.DockingUtils;
 import org.moltimate.moltimatebackend.util.DockingUtils.InMemoryMultipartFile;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.moltimate.moltimatebackend.exception.DockingJobFailedException;
@@ -35,6 +38,7 @@ import java.io.*;
 import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 @Service
 @Slf4j
@@ -154,9 +158,91 @@ public class DockingService {
 
 
 	public Resource exportLigands(ExportRequest request) {
+
+		try{
+			//Add babelResult to ZIP
+			MultipartFile babelResult = getBabelResult(request.getBabelJobId());
+			InputStream is = babelResult.getInputStream();
+			ByteArrayOutputStream byteArrayOS = new ByteArrayOutputStream();
+			ZipOutputStream zipOS = new ZipOutputStream(byteArrayOS);
+			ZipEntry zipEntry = new ZipEntry(babelResult.getOriginalFilename());
+			zipOS.putNextEntry(zipEntry);
+
+			String content = new String(babelResult.getBytes());
+			String[] lines = content.split("\n");
+			ArrayList<String> updatedLines = separatePDBFile(lines, request.getSelectedConfigs());
+
+
+
+			byte[] bytes = new byte[1024];
+			int length;
+			for(String line : updatedLines){
+				line = line.toUpperCase();
+				line = line.concat("\r");
+				zipOS.write(line.getBytes(), 0, line.getBytes().length);
+			}
+
+			//Add docking info csv file to ZIP
+			ByteArrayResource csv = createCSV(request);
+			is = csv.getInputStream();
+			zipEntry = new ZipEntry("ligands.csv");
+			zipOS.putNextEntry(zipEntry);
+
+			bytes = new byte[1024];
+			while((length = is.read(bytes)) >= 0){
+				zipOS.write(bytes, 0, length);
+			}
+			zipOS.close();
+			return new ByteArrayResource(byteArrayOS.toByteArray());
+
+		}catch (IOException e){
+			log.info("Failed to fetch pbd file for download : jobId{" + request.getBabelJobId() + "}");
+		}
+		return null;
+	}
+
+	public ArrayList<String> separatePDBFile(String[] pdbFile, List<Boolean> selectedConfigs){
+		ArrayList<String> updatedLines = new ArrayList<String>();
+		Boolean deleting = false;
+		Boolean baseProtien = true;
+		Boolean downloadAll = selectedConfigs.get(0);
+
+		int numberConfigs = selectedConfigs.size();
+		int currentConfig = 1;
+		for(int i = 0; i < pdbFile.length; i++){
+			if(downloadAll){
+				updatedLines.add(pdbFile[i]);
+			}else{
+				if(pdbFile[i].length() > 13){
+					if(pdbFile[i].substring(0,12).contains("MODEL       ")) {
+						if(!baseProtien) {
+							if (!selectedConfigs.get(currentConfig)) {
+								deleting = true;
+							} else {
+								deleting = false;
+							}
+						}
+					}
+				}
+				if(!deleting){
+					updatedLines.add(pdbFile[i]);
+				}
+				if(pdbFile[i].contains("ENDMDL")){
+					if(baseProtien){
+						baseProtien = false;
+					}else{
+						currentConfig++;
+					}
+				}
+			}
+		}
+		return updatedLines;
+	}
+
+
+	public ByteArrayResource createCSV(ExportRequest request){
 		StringBuilder csvOutput = new StringBuilder();
 		csvOutput.append("Name,Mode Number,Binding Energy,RMSD Lower,RMSD Upper\n");
-
 		for(ExportLigand ligand : request.getLigands()) {
 			csvOutput.append("\"");
 			csvOutput.append(ligand.getName());
@@ -291,7 +377,7 @@ public class DockingService {
 		if (pdbID == null) {
             throw new InvalidFileException("Unable to fetch remote Macromolecule File: no pdbID provided");
 		}
-
+		
 		log.info("Fetching Macromolecule {} for Docking Request", pdbID);
 
 		RestTemplate template = new RestTemplate();

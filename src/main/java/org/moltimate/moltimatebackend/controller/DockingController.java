@@ -51,6 +51,7 @@ public class DockingController {
 	@RequestMapping( value = "/retrievefile", method = RequestMethod.GET )
 	public ResponseEntity<Object> retrieveCombinedFile( String babelJobId ) throws IOException {
 		try {
+			System.out.println(babelJobId);
 			return ResponseEntity.ok( dockingService.getBabelResult( babelJobId ).getBytes() );
 		} catch( DockingJobFailedException ex) {
 			return ResponseEntity.status(500).body(ex.getError().getBytes());
@@ -59,10 +60,10 @@ public class DockingController {
 
 	@ApiOperation(value = "Exports ligand docking information to a csv file")
 	@RequestMapping( value = "/exportLigands", method = RequestMethod.POST,
-			consumes = MediaType.APPLICATION_JSON_VALUE, produces = "text/csv")
+			consumes = MediaType.APPLICATION_JSON_VALUE, produces = "application/zip")
 	public ResponseEntity<Resource> exportLigand(@RequestBody ExportRequest request) {
 		HttpHeaders headers = new HttpHeaders();
-		headers.set("Content-Disposition", "attachment; filename=\"ligands.csv\"");
+		headers.set("Content-Disposition", "attachment; filename=\"moltimate.zip\"");
 		return ResponseEntity.ok().headers(headers).body(dockingService.exportLigands(request));
 	}
 }
