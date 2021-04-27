@@ -170,41 +170,9 @@ public class DockingService {
 
 			String content = new String(babelResult.getBytes());
 			String[] lines = content.split("\n");
-			ArrayList<String> updatedLines = new ArrayList<String>();
+			ArrayList<String> updatedLines = separatePDBFile(lines, request.getSelectedConfigs());
 
-			Boolean deleting = false;
-			Boolean baseProtien = true;
-			Boolean downloadAll = request.getSelectedConfigs().get(0);
 
-			int numberConfigs = request.getSelectedConfigs().size();
-			int currentConfig = 1;
-			for(int i = 0; i < lines.length; i++){
-				if(downloadAll){
-					updatedLines.add(lines[i]);
-				}else{
-					if(lines[i].length() > 13){
-						if(lines[i].substring(0,12).contains("MODEL       ")) {
-							if(!baseProtien) {
-								if (!request.getSelectedConfigs().get(currentConfig)) {
-									deleting = true;
-								} else {
-									deleting = false;
-								}
-							}
-						}
-					}
-					if(!deleting){
-						updatedLines.add(lines[i]);
-					}
-					if(lines[i].contains("ENDMDL")){
-						if(baseProtien){
-							baseProtien = false;
-						}else{
-							currentConfig++;
-						}
-					}
-				}
-			}
 
 			byte[] bytes = new byte[1024];
 			int length;
@@ -231,6 +199,44 @@ public class DockingService {
 			log.info("Failed to fetch pbd file for download : jobId{" + request.getBabelJobId() + "}");
 		}
 		return null;
+	}
+
+	public ArrayList<String> separatePDBFile(String[] pdbFile, List<Boolean> selectedConfigs){
+		ArrayList<String> updatedLines = new ArrayList<String>();
+		Boolean deleting = false;
+		Boolean baseProtien = true;
+		Boolean downloadAll = selectedConfigs.get(0);
+
+		int numberConfigs = selectedConfigs.size();
+		int currentConfig = 1;
+		for(int i = 0; i < pdbFile.length; i++){
+			if(downloadAll){
+				updatedLines.add(pdbFile[i]);
+			}else{
+				if(pdbFile[i].length() > 13){
+					if(pdbFile[i].substring(0,12).contains("MODEL       ")) {
+						if(!baseProtien) {
+							if (!selectedConfigs.get(currentConfig)) {
+								deleting = true;
+							} else {
+								deleting = false;
+							}
+						}
+					}
+				}
+				if(!deleting){
+					updatedLines.add(pdbFile[i]);
+				}
+				if(pdbFile[i].contains("ENDMDL")){
+					if(baseProtien){
+						baseProtien = false;
+					}else{
+						currentConfig++;
+					}
+				}
+			}
+		}
+		return updatedLines;
 	}
 
 
